@@ -104,7 +104,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserMetricRepository, UserMetricRepository>();
-
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 builder.Services.AddOpenApi();
 

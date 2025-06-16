@@ -10,6 +10,7 @@ namespace Blog.SetUnitOfWork
     {
         IUserRepository UserRepository { get; }
         IUserMetricRepository UserMetricRepository { get; }
+        ICategoryRepository CategoryRepository { get; }
         Task Commit();
     }
 }

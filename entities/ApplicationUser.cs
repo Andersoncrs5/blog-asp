@@ -14,5 +14,12 @@ namespace Blog.entities
 
         [JsonIgnore]
         public virtual UserMetricEntity? UserMetric { get; set; }
+
+        [JsonIgnore]
+        public virtual ICollection<CategoryEntity>? Categories { get; set; }
+
+        [JsonIgnore]
+        public virtual ICollection<PostEntity>? Posts { get; set; }
+
     }
 }
