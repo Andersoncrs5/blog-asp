@@ -16,6 +16,7 @@ namespace Blog.Context
 
         public DbSet<UserMetricEntity> UserMetrics { get; set; }
         public DbSet<CategoryEntity> CategoryEntities { get; set; }
+        public DbSet<PostEntity> PostEntities { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

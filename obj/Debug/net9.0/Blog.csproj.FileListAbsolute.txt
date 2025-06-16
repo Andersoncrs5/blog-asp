@@ -142,3 +142,4 @@
 /home/anderson/Desktop/c#/asp_core/api/projects/Blog/obj/Debug/net9.0/Blog.pdb
 /home/anderson/Desktop/c#/asp_core/api/projects/Blog/obj/Debug/net9.0/Blog.genruntimeconfig.cache
 /home/anderson/Desktop/c#/asp_core/api/projects/Blog/obj/Debug/net9.0/ref/Blog.dll
+/home/anderson/Desktop/c#/asp_core/api/projects/Blog/obj/Debug/net9.0/Blog.sourcelink.json

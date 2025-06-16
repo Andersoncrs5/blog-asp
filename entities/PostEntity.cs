@@ -26,7 +26,8 @@ namespace Blog.entities
 
         [Required] public string ApplicationUserId { get; set; } = string.Empty;
 
-        [Required] public string categoryId { get; set; } = string.Empty;
+        [Required] public long categoryId { get; set; }
+        [Required] public long ReadTimes { get; set; } = 0;
 
         [Timestamp]
         public byte[] RowVersion { get; set; } = Array.Empty<byte>();

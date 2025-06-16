@@ -13,6 +13,8 @@ namespace Blog.DTOs.Category
         [StringLength(maximumLength:150, MinimumLength = 4)]
         public string Name { get; set; } = string.Empty;
 
+        
+
         public CategoryEntity toCategoryEntity() 
         {
             return new CategoryEntity{
