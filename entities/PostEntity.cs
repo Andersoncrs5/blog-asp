@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Blog.entities
@@ -34,5 +35,11 @@ namespace Blog.entities
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
+
+        public virtual PostMetricEntity? PostMetricEntity { get; set; }
+
+        [JsonIgnore]
+        public virtual ICollection<FavoritePostEntity>? FavoritePosts { get; set; }
+
     }
 }

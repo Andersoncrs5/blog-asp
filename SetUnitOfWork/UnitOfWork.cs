@@ -17,18 +17,24 @@ namespace Blog.SetUnitOfWork
         private IUserRepository _userRepository;
         private IUserMetricRepository _userMetricRepository;
         private ICategoryRepository _categoryRepository;
+        private IPostRepository _postRepository;
+        private IPostMetricRepository _postMetricRepository;
 
         public UnitOfWork(
             AppDbContext context,
             UserManager<ApplicationUser> userManager, 
             IUserMetricRepository userMetricRepository, 
-            ICategoryRepository categoryRepository
+            ICategoryRepository categoryRepository,
+            IPostRepository postRepository,
+            IPostMetricRepository postMetricRepository
             )
         {
             _categoryRepository = categoryRepository;
             _userMetricRepository = userMetricRepository;
             _context = context;
             _userManager = userManager;
+            _postRepository = postRepository;
+            _postMetricRepository = postMetricRepository;
         }
 
         public IUserRepository UserRepository 
@@ -39,6 +45,12 @@ namespace Blog.SetUnitOfWork
 
         public ICategoryRepository CategoryRepository
             => _categoryRepository ??= new CategoryRepository(_context);
+
+        public IPostRepository PostRepository 
+            => _postRepository ??= new PostRepository(_context);
+
+        public IPostMetricRepository PostMetricRepository 
+            => _postMetricRepository ??= new PostMetricRepository(_context);
 
         public async Task Commit()
         {

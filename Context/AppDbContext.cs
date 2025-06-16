@@ -17,6 +17,8 @@ namespace Blog.Context
         public DbSet<UserMetricEntity> UserMetrics { get; set; }
         public DbSet<CategoryEntity> CategoryEntities { get; set; }
         public DbSet<PostEntity> PostEntities { get; set; }
+        public DbSet<PostMetricEntity> PostMetricEntities { get; set; }
+        public DbSet<FavoritePostEntity> FavoritePostEntities { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -31,7 +33,8 @@ namespace Blog.Context
             builder.Entity<ApplicationUser>()
                 .HasOne(u => u.UserMetric)
                 .WithOne()
-                .HasForeignKey<UserMetricEntity>(u => u.ApplicationUserId);
+                .HasForeignKey<UserMetricEntity>(u => u.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<UserMetricEntity>()
                 .HasKey(u => u.ApplicationUserId);
@@ -49,24 +52,29 @@ namespace Blog.Context
             builder.Entity<UserMetricEntity>()
                 .HasIndex(um => um.ProfileViews);                 
 
-            builder.Entity<CategoryEntity>()
-                .Property(u => u.RowVersion)
-                .IsRowVersion();
-
             builder.Entity<ApplicationUser>()
                 .HasMany(u => u.Categories)
                 .WithOne()
-                .HasForeignKey(c => c.ApplicationUserId);
+                .HasForeignKey(c => c.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<ApplicationUser>()
                 .HasMany(u => u.Posts)
                 .WithOne()
-                .HasForeignKey(c => c.ApplicationUserId);
+                .HasForeignKey(c => c.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ApplicationUser>()
+                .HasMany(u => u.FavoritePosts)
+                .WithOne()
+                .HasForeignKey(f => f.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<CategoryEntity>()
                 .HasMany(p => p.Posts)
                 .WithOne()
-                .HasForeignKey(u => u.categoryId);
+                .HasForeignKey(u => u.categoryId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<CategoryEntity>(entity =>
             {
@@ -83,10 +91,37 @@ namespace Blog.Context
                 entity.HasIndex(e => e.Name).IsUnique();
             });
 
+            builder.Entity<PostMetricEntity>()
+                .HasKey(u => u.PostId);
+
+            builder.Entity<PostEntity>()
+                .HasOne(p => p.PostMetricEntity)
+                .WithOne()
+                .HasForeignKey<PostMetricEntity>(u => u.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<PostEntity>()
+                .HasMany(p => p.FavoritePosts)
+                .WithOne()
+                .HasForeignKey(f => f.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<PostMetricEntity>(entity => 
+            {
+                entity.Property(p => p.RowVersion).IsRowVersion();
+                entity.Property(p => p.UpdatedAt).IsRequired(false);
+                entity.Property(p => p.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
+            });
+
             builder.Entity<PostEntity>(entity => 
             {
                 entity.Property(u => u.RowVersion).IsRowVersion();
                 entity.Property(e => e.UpdatedAt).IsRequired(false);
+            });
+
+            builder.Entity<FavoritePostEntity>(entity => 
+            {
+                entity.Property(f => f.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
             });
 
             builder.Entity<ApplicationUser>().ToTable("app_users");

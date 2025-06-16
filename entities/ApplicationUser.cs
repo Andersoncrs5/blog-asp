@@ -21,5 +21,8 @@ namespace Blog.entities
         [JsonIgnore]
         public virtual ICollection<PostEntity>? Posts { get; set; }
 
+        [JsonIgnore]
+        public virtual ICollection<FavoritePostEntity>? FavoritePosts { get; set; }
+
     }
 }

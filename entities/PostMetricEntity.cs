@@ -11,15 +11,15 @@ namespace Blog.entities
     public class PostMetricEntity
     {
         [Key] public long PostId { get; set; }
-        [Required] public long Likes { get; set; }
-        [Required] public long DisLikes { get; set; }
-        [Required] public long Shares { get; set; }
-        [Required] public long CommentCount { get; set; }
-        [Required] public long FavoriteCount { get; set; }
-        [Required] public long Bookmarks { get; set; }
-        [Required] public long Viewed { get; set; }
-        [Required] public long ReportsReceivedCount { get; set; }
-        [Required] public long EditedCount { get; set; }
+        [Required] public long Likes { get; set; } = 0;
+        [Required] public long DisLikes { get; set; } = 0;
+        [Required] public long Shares { get; set; } = 0;
+        [Required] public long CommentCount { get; set; } = 0;
+        [Required] public long FavoriteCount { get; set; } = 0;
+        [Required] public long Bookmarks { get; set; } = 0;
+        [Required] public long Viewed { get; set; } = 0;
+        [Required] public long ReportsReceivedCount { get; set; } = 0;
+        [Required] public long EditedCount { get; set; } = 0;
         [Timestamp] public byte[] RowVersion { get; set; } = Array.Empty<byte>();
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }

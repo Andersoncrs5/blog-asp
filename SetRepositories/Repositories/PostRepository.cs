@@ -25,7 +25,8 @@ namespace Blog.SetRepositories.Repositories
             if(long.IsNegative(Id)) 
                 throw new ResponseException("Id is required");
 
-            PostEntity? post = await this._context.PostEntities.AsNoTracking()
+            PostEntity? post = await _context.PostEntities.AsNoTracking()
+                .Include(p => p.PostMetricEntity)
                 .FirstOrDefaultAsync(u => u.Id == Id);
 
             if (post is null) 
@@ -87,7 +88,8 @@ namespace Blog.SetRepositories.Repositories
 
         public async Task<PaginatedList<PostEntity>> GetAllOfUserPaginated(ApplicationUser user, int pageNumber, int pageSize)
         {
-            IQueryable<PostEntity> query = _context.PostEntities.AsNoTracking().Where(p => p.ApplicationUserId == user.Id);
+            IQueryable<PostEntity> query = _context.PostEntities
+                .AsNoTracking().Where(p => p.ApplicationUserId == user.Id);
 
             return await PaginatedList<PostEntity>.CreateAsync(query, pageNumber, pageSize);
         }
