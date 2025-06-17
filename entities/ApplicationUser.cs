@@ -12,17 +12,11 @@ namespace Blog.entities
         public string? RefreshToken { get; set; }
         public DateTime RefreshTokenExpiryTime { get; set; }
 
-        [JsonIgnore]
-        public virtual UserMetricEntity? UserMetric { get; set; }
-
-        [JsonIgnore]
-        public virtual ICollection<CategoryEntity>? Categories { get; set; }
-
-        [JsonIgnore]
-        public virtual ICollection<PostEntity>? Posts { get; set; }
-
-        [JsonIgnore]
-        public virtual ICollection<FavoritePostEntity>? FavoritePosts { get; set; }
+        [JsonIgnore] public virtual UserMetricEntity? UserMetric { get; set; }
+        [JsonIgnore] public virtual ICollection<CategoryEntity>? Categories { get; set; }
+        [JsonIgnore] public virtual ICollection<PostEntity>? Posts { get; set; }
+        [JsonIgnore] public virtual ICollection<FavoritePostEntity>? FavoritePosts { get; set; }
+        [JsonIgnore] public virtual ICollection<CommentEntity>? CommentEntities { get; set; }
 
     }
 }

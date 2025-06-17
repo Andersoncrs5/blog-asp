@@ -107,6 +107,8 @@ builder.Services.AddScoped<IUserMetricRepository, UserMetricRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IPostMetricRepository, PostMetricRepository>();
+builder.Services.AddScoped<IFavoritePostRepository, FavoritePostRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 
 builder.Services.AddOpenApi();
 

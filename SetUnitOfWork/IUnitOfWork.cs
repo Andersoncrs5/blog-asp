@@ -13,6 +13,8 @@ namespace Blog.SetUnitOfWork
         ICategoryRepository CategoryRepository { get; }
         IPostRepository PostRepository { get; }
         IPostMetricRepository PostMetricRepository { get; }
+        IFavoritePostRepository FavoritePostRepository { get; }
+        ICommentRepository CommentRepository { get; }
         Task Commit();
     }
 }

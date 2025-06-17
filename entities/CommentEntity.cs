@@ -1,0 +1,45 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+
+namespace Blog.entities
+{
+    [Table("comments")]
+    public class CommentEntity
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public ulong Id { get; set; }
+
+        [Required]
+        public string ApplicationUserId { get; set; } = string.Empty;
+
+        [Required]
+        public string Content { get; set; } = string.Empty;
+
+        [Required]
+        public long PostId { get; set; }
+
+        public ulong? ParentId { get; set; }
+
+        [Timestamp]
+        public byte[] RowVersion { get; set; } = Array.Empty<byte>();
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; }
+
+        [JsonIgnore] public virtual ApplicationUser? ApplicationUser { get; set; }
+
+        [JsonIgnore] public virtual PostEntity? Post { get; set; }
+
+        [JsonIgnore] public virtual CommentEntity? ParentComment { get; set; }
+
+        [JsonIgnore] public virtual CommentMetricEntity? CommentMetricEntity { get; set; }
+
+        [JsonIgnore] public virtual ICollection<CommentEntity>? Replies { get; set; } = new List<CommentEntity>();
+    }
+}

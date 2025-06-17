@@ -3,6 +3,7 @@ using System;
 using Blog.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Blog.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250616235748_AddCommentTable")]
+    partial class AddCommentTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,6 +202,9 @@ namespace Blog.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("ApplicationUserId1")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -207,11 +213,18 @@ namespace Blog.Migrations
                     b.Property<long>("PostId")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("PostId1")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationUserId");
 
+                    b.HasIndex("ApplicationUserId1");
+
                     b.HasIndex("PostId");
+
+                    b.HasIndex("PostId1");
 
                     b.ToTable("FavoritePostEntities");
                 });
@@ -231,7 +244,7 @@ namespace Blog.Migrations
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasMaxLength(3000)
-                        .HasColumnType("text");
+                        .HasColumnType("character varying(3000)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -251,7 +264,7 @@ namespace Blog.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("varchar(300)");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -581,17 +594,25 @@ namespace Blog.Migrations
 
             modelBuilder.Entity("Blog.entities.FavoritePostEntity", b =>
                 {
-                    b.HasOne("Blog.entities.ApplicationUser", "ApplicationUser")
+                    b.HasOne("Blog.entities.ApplicationUser", null)
                         .WithMany("FavoritePosts")
                         .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Blog.entities.PostEntity", "Post")
+                    b.HasOne("Blog.entities.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId1");
+
+                    b.HasOne("Blog.entities.PostEntity", null)
                         .WithMany("FavoritePosts")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Blog.entities.PostEntity", "Post")
+                        .WithMany()
+                        .HasForeignKey("PostId1");
 
                     b.Navigation("ApplicationUser");
 
