@@ -3,6 +3,7 @@ using System;
 using Blog.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Blog.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250617164051_AddCommentMetricTable")]
+    partial class AddCommentMetricTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -230,35 +233,6 @@ namespace Blog.Migrations
                     b.HasKey("CommentId");
 
                     b.ToTable("CommentMetricEntities");
-                });
-
-            modelBuilder.Entity("Blog.entities.FavoriteCommentEntity", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("ApplicationUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<long>("CommentId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
-
-                    b.HasIndex("CommentId");
-
-                    b.ToTable("favorite_comment");
                 });
 
             modelBuilder.Entity("Blog.entities.FavoritePostEntity", b =>
@@ -662,25 +636,6 @@ namespace Blog.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Blog.entities.FavoriteCommentEntity", b =>
-                {
-                    b.HasOne("Blog.entities.ApplicationUser", "ApplicationUser")
-                        .WithMany("FavoriteCommentEntities")
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Blog.entities.CommentEntity", "Comment")
-                        .WithMany("FavoriteCommentEntities")
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ApplicationUser");
-
-                    b.Navigation("Comment");
-                });
-
             modelBuilder.Entity("Blog.entities.FavoritePostEntity", b =>
                 {
                     b.HasOne("Blog.entities.ApplicationUser", "ApplicationUser")
@@ -790,8 +745,6 @@ namespace Blog.Migrations
 
                     b.Navigation("CommentEntities");
 
-                    b.Navigation("FavoriteCommentEntities");
-
                     b.Navigation("FavoritePosts");
 
                     b.Navigation("Posts");
@@ -807,8 +760,6 @@ namespace Blog.Migrations
             modelBuilder.Entity("Blog.entities.CommentEntity", b =>
                 {
                     b.Navigation("CommentMetric");
-
-                    b.Navigation("FavoriteCommentEntities");
 
                     b.Navigation("Replies");
                 });

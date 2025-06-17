@@ -20,6 +20,8 @@ namespace Blog.Context
         public DbSet<PostMetricEntity> PostMetricEntities { get; set; }
         public DbSet<FavoritePostEntity> FavoritePostEntities { get; set; }
         public DbSet<CommentEntity> CommentEntities { get; set; }
+        public DbSet<CommentMetricEntity> CommentMetricEntities { get; set; }
+        public DbSet<FavoriteCommentEntity> FavoriteCommentEntities { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -35,6 +37,24 @@ namespace Blog.Context
                 .HasOne(u => u.UserMetric)
                 .WithOne()
                 .HasForeignKey<UserMetricEntity>(u => u.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<CommentEntity>()
+                .HasOne(c => c.CommentMetric)
+                .WithOne()
+                .HasForeignKey<CommentMetricEntity>(c => c.CommentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ApplicationUser>()
+                .HasMany(u => u.FavoriteCommentEntities)
+                .WithOne(fc => fc.ApplicationUser)
+                .HasForeignKey(f => f.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<CommentEntity>()
+                .HasMany(c => c.FavoriteCommentEntities)
+                .WithOne(fc => fc.Comment)
+                .HasForeignKey(f => f.CommentId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<UserMetricEntity>()
@@ -139,6 +159,32 @@ namespace Blog.Context
             builder.Entity<FavoritePostEntity>(entity =>
             {
                 entity.Property(f => f.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
+            });
+
+            builder.Entity<CommentMetricEntity>(entity => 
+            {
+                entity.Property(c => c.CommentId).HasColumnType("bigint");
+                entity.HasKey(c => c.CommentId);
+                entity.Property(c => c.Likes).HasColumnType("bigint");
+                entity.Property(c => c.DisLikes).HasColumnType("bigint");
+                entity.Property(c => c.ReportCount).HasColumnType("bigint");
+                entity.Property(c => c.EditedTimes).HasColumnType("bigint");
+                entity.Property(c => c.FavoritesCount).HasColumnType("bigint");
+                entity.Property(c => c.RepliesCount).HasColumnType("bigint");
+                entity.Property(c => c.ViewsCount).HasColumnType("bigint");
+                entity.Property(c => c.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
+                entity.Property(c => c.UpdatedAt).IsRequired(false);
+                entity.Property(c => c.RowVersion).IsRowVersion();
+            });
+
+            builder.Entity<FavoriteCommentEntity>(entity => 
+            {
+                entity.Property(e => e.CreatedAt)
+                      .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                      .ValueGeneratedOnAdd();
+
+                entity.Property(f => f.CommentId).HasColumnType("bigint");
+                entity.Property(f => f.Id).HasColumnType("bigint");
             });
 
             builder.Entity<CommentEntity>(entity =>

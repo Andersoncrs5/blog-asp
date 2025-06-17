@@ -3,6 +3,7 @@ using System;
 using Blog.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Blog.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250617214954_AddFavoritePostTable")]
+    partial class AddFavoritePostTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -244,7 +247,13 @@ namespace Blog.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("ApplicationUserId1")
+                        .HasColumnType("text");
+
                     b.Property<long>("CommentId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("CommentId1")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAt")
@@ -256,7 +265,11 @@ namespace Blog.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
+                    b.HasIndex("ApplicationUserId1");
+
                     b.HasIndex("CommentId");
+
+                    b.HasIndex("CommentId1");
 
                     b.ToTable("favorite_comment");
                 });
@@ -664,17 +677,25 @@ namespace Blog.Migrations
 
             modelBuilder.Entity("Blog.entities.FavoriteCommentEntity", b =>
                 {
-                    b.HasOne("Blog.entities.ApplicationUser", "ApplicationUser")
+                    b.HasOne("Blog.entities.ApplicationUser", null)
                         .WithMany("FavoriteCommentEntities")
                         .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Blog.entities.CommentEntity", "Comment")
+                    b.HasOne("Blog.entities.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId1");
+
+                    b.HasOne("Blog.entities.CommentEntity", null)
                         .WithMany("FavoriteCommentEntities")
                         .HasForeignKey("CommentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Blog.entities.CommentEntity", "Comment")
+                        .WithMany()
+                        .HasForeignKey("CommentId1");
 
                     b.Navigation("ApplicationUser");
 

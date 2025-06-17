@@ -38,8 +38,10 @@ namespace Blog.entities
 
         [JsonIgnore] public virtual CommentEntity? ParentComment { get; set; }
 
-        [JsonIgnore] public virtual CommentMetricEntity? CommentMetricEntity { get; set; }
+        [JsonIgnore] public virtual CommentMetricEntity? CommentMetric { get; set; }
 
         [JsonIgnore] public virtual ICollection<CommentEntity>? Replies { get; set; } = new List<CommentEntity>();
+        
+        [JsonIgnore] public virtual ICollection<FavoriteCommentEntity>? FavoriteCommentEntities { get; set; }
     }
 }

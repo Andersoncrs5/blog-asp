@@ -15,6 +15,7 @@ namespace Blog.SetUnitOfWork
         IPostMetricRepository PostMetricRepository { get; }
         IFavoritePostRepository FavoritePostRepository { get; }
         ICommentRepository CommentRepository { get; }
+        ICommentMetricRepository CommentMetricRepository { get; }
         Task Commit();
     }
 }

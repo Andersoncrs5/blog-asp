@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder? builder = WebApplication.CreateBuilder(args);
 
 string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -109,10 +109,11 @@ builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IPostMetricRepository, PostMetricRepository>();
 builder.Services.AddScoped<IFavoritePostRepository, FavoritePostRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<ICommentMetricRepository, CommentMetricRepository>();
 
 builder.Services.AddOpenApi();
 
-var app = builder.Build();
+WebApplication? app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
