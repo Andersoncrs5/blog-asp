@@ -52,6 +52,16 @@ namespace Blog.SetRepositories.Repositories
 
         public async Task<FavoriteCommentEntity> Save(ApplicationUser user, CommentEntity comment)
         {
+            FavoriteCommentEntity? check = await _context.FavoriteCommentEntities.AsNoTracking()
+                .FirstOrDefaultAsync(f => f.ApplicationUserId == user.Id && f.CommentId == comment.Id);
+
+            if (check is not null)
+            {
+                _context.FavoriteCommentEntities.Remove(check);
+                await _context.SaveChangesAsync();
+                return check;
+            }
+
             FavoriteCommentEntity save = new FavoriteCommentEntity();
             save.ApplicationUserId = user.Id;
             save.CommentId = comment.Id;

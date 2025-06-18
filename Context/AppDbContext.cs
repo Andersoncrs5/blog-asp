@@ -22,6 +22,7 @@ namespace Blog.Context
         public DbSet<CommentEntity> CommentEntities { get; set; }
         public DbSet<CommentMetricEntity> CommentMetricEntities { get; set; }
         public DbSet<FavoriteCommentEntity> FavoriteCommentEntities { get; set; }
+        public DbSet<ReactionPostEntity> ReactionPostEntities { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -48,6 +49,12 @@ namespace Blog.Context
             builder.Entity<ApplicationUser>()
                 .HasMany(u => u.FavoriteCommentEntities)
                 .WithOne(fc => fc.ApplicationUser)
+                .HasForeignKey(f => f.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ApplicationUser>()
+                .HasMany(u => u.ReactionPosts)
+                .WithOne(rp => rp.ApplicationUser)
                 .HasForeignKey(f => f.ApplicationUserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -95,7 +102,13 @@ namespace Blog.Context
                 .HasMany(u => u.CommentEntities)
                 .WithOne(c => c.ApplicationUser)
                 .HasForeignKey(c => c.ApplicationUserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<PostEntity>()
+                .HasMany(p => p.ReactionPosts)
+                .WithOne(r => r.Post)
+                .HasForeignKey(c => c.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<CategoryEntity>()
                 .HasMany(p => p.Posts)
@@ -159,6 +172,13 @@ namespace Blog.Context
             builder.Entity<FavoritePostEntity>(entity =>
             {
                 entity.Property(f => f.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
+            });
+
+            builder.Entity<ReactionPostEntity>(entity => 
+            {
+                entity.HasKey(r => r.Id);
+                entity.Property(u => u.Id).HasColumnType("bigint");
+                entity.Property(rp => rp.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
             });
 
             builder.Entity<CommentMetricEntity>(entity => 

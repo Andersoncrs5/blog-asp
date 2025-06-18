@@ -41,16 +41,21 @@ namespace Blog.SetRepositories.Repositories
 
         public async Task<FavoritePostEntity> Save(ApplicationUser user, PostEntity post) 
         {
-            var check = await _context.FavoritePostEntities
-                .AsNoTracking().CountAsync(f => f.ApplicationUserId == user.Id && f.PostId == post.Id);
+            FavoritePostEntity? check = await _context.FavoritePostEntities
+                .AsNoTracking().FirstOrDefaultAsync(f => f.ApplicationUserId == user.Id && f.PostId == post.Id);
 
-            if (check > 0)
-                throw new ResponseException("Post are already save how favorite");
+            if (check is not null)
+            {
+                _context.FavoritePostEntities.Remove(check);
+                await _context.SaveChangesAsync();
+                return check;
+            }
             
-            FavoritePostEntity save = new FavoritePostEntity();
-
-            save.ApplicationUserId = user.Id;
-            save.PostId = post.Id;
+            FavoritePostEntity save = new FavoritePostEntity()
+            {
+                ApplicationUserId = user.Id,
+                PostId = post.Id
+            };
 
             var result = await _context.FavoritePostEntities.AddAsync(save);
             await _context.SaveChangesAsync();

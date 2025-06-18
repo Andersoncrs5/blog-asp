@@ -6,7 +6,7 @@ using Blog.SetRepositories.IRepositories;
 
 namespace Blog.SetUnitOfWork
 {
-    public interface IUnitOfWork: IDisposable
+    public interface IUnitOfWork : IDisposable
     {
         IUserRepository UserRepository { get; }
         IUserMetricRepository UserMetricRepository { get; }
@@ -14,6 +14,8 @@ namespace Blog.SetUnitOfWork
         IPostRepository PostRepository { get; }
         IPostMetricRepository PostMetricRepository { get; }
         IFavoritePostRepository FavoritePostRepository { get; }
+        IFavoriteCommentRepository FavoriteCommentRepository { get; }
+        IReactionPostRepository ReactionPostRepository { get; }
         ICommentRepository CommentRepository { get; }
         ICommentMetricRepository CommentMetricRepository { get; }
         Task Commit();
