@@ -6,6 +6,7 @@ using Blog.Context;
 using Blog.entities;
 using Blog.SetRepositories.IRepositories;
 using Blog.SetRepositories.Repositories;
+using Blog.SetServices.IServices;
 using Microsoft.AspNetCore.Identity;
 
 namespace Blog.SetUnitOfWork
@@ -14,6 +15,7 @@ namespace Blog.SetUnitOfWork
     {
         private readonly AppDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IEmailService _emailService;
         private IUserRepository? _userRepository;
         private IUserMetricRepository? _userMetricRepository;
         private ICategoryRepository? _categoryRepository;
@@ -27,6 +29,7 @@ namespace Blog.SetUnitOfWork
         private IReactionCommentRepository? _reactionCommentRepository;
         private IPlaylistItemRepository? _playlistItemRepository;
         private IPlaylistRepository? _playlistRepository;
+        private IRecoverAccountRepository _recoverAccountRepository;
 
         public UnitOfWork(
             AppDbContext context,
@@ -38,6 +41,9 @@ namespace Blog.SetUnitOfWork
 
         public IUserRepository UserRepository
             => _userRepository ??= new UserRepository(_context, _userManager);
+
+        public IRecoverAccountRepository RecoverAccountRepository
+            => _recoverAccountRepository ??= new RecoverAccountRepository(_context, _userManager, _emailService);
 
         public IUserMetricRepository UserMetricRepository
             => _userMetricRepository ??= new UserMetricRepository(_context);

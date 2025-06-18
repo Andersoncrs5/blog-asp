@@ -21,6 +21,7 @@ namespace Blog.SetUnitOfWork
         IReactionCommentRepository ReactionCommentRepository { get; }
         IPlaylistItemRepository PlaylistItemRepository { get; }
         IPlaylistRepository PlaylistRepository { get; }
+        IRecoverAccountRepository RecoverAccountRepository { get; }
 
         Task Commit();
     }

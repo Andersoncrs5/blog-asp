@@ -103,6 +103,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserMetricRepository, UserMetricRepository>();
@@ -117,6 +118,7 @@ builder.Services.AddScoped<IReactionPostRepository, ReactionPostRepository>();
 builder.Services.AddScoped<IReactionCommentRepository, ReactionCommentRepository>();
 builder.Services.AddScoped<IPlaylistItemRepository, PlaylistItemRepository>();
 builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
+builder.Services.AddScoped<IRecoverAccountRepository, RecoverAccountRepository>();
 
 builder.Services.AddOpenApi();
 

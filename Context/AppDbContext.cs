@@ -26,6 +26,7 @@ namespace Blog.Context
         public DbSet<ReactionCommentEntity> ReactionCommentEntities { get; set; }
         public DbSet<PlaylistEntity> PlaylistEntities { get; set; }
         public DbSet<PlaylistItemEntity> PlaylistItemEntities { get; set; }
+        public DbSet<RecoverAccountEntity> RecoverAccountEntities { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -43,6 +44,25 @@ namespace Blog.Context
                 .HasForeignKey(f => f.ApplicationUserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.Entity<ApplicationUser>()
+                .HasOne(u => u.RecoverAccountEntities)
+                .WithOne()
+                .HasForeignKey<RecoverAccountEntity>(r => r.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<RecoverAccountEntity>(entity =>
+            {
+                entity.HasKey(e => e.ApplicationUserId);
+                entity.Property(e => e.Token).IsRequired().HasMaxLength(1000);
+                entity.Property(e => e.ExpireAt).IsRequired();
+                entity.Property(e => e.BlockedAt).IsRequired(false);
+                entity.Property(e => e.IsUsed).HasDefaultValue(false).IsRequired(true);
+                entity.Property(e => e.FailedAttempts).HasDefaultValue(0).IsRequired(true);
+                entity.Property(e => e.RequestIpAddress).HasMaxLength(100).IsRequired(false);
+                entity.Property(e => e.RequestUserAgent).HasMaxLength(500).IsRequired(false);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
+            });
+
             builder.Entity<PlaylistEntity>(entity => 
             {
                 entity.HasKey(e => e.Id);
@@ -54,7 +74,6 @@ namespace Blog.Context
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(250);
                 entity.Property(e => e.Description).IsRequired(false).HasMaxLength(1500);
                 entity.Property(e => e.IsPublic).IsRequired().HasDefaultValue(false);
-
             });
 
             builder.Entity<PostEntity>()
