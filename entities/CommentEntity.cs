@@ -33,15 +33,11 @@ namespace Blog.entities
         public DateTime? UpdatedAt { get; set; }
 
         [JsonIgnore] public virtual ApplicationUser? ApplicationUser { get; set; }
-
         [JsonIgnore] public virtual PostEntity? Post { get; set; }
-
         [JsonIgnore] public virtual CommentEntity? ParentComment { get; set; }
-
         [JsonIgnore] public virtual CommentMetricEntity? CommentMetric { get; set; }
-
         [JsonIgnore] public virtual ICollection<CommentEntity>? Replies { get; set; } = new List<CommentEntity>();
-        
         [JsonIgnore] public virtual ICollection<FavoriteCommentEntity>? FavoriteCommentEntities { get; set; }
+        [JsonIgnore] public virtual ICollection<ReactionCommentEntity>? ReactionComments { get; set; }
     }
 }

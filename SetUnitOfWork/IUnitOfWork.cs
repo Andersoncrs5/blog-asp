@@ -18,6 +18,10 @@ namespace Blog.SetUnitOfWork
         IReactionPostRepository ReactionPostRepository { get; }
         ICommentRepository CommentRepository { get; }
         ICommentMetricRepository CommentMetricRepository { get; }
+        IReactionCommentRepository ReactionCommentRepository { get; }
+        IPlaylistItemRepository PlaylistItemRepository { get; }
+        IPlaylistRepository PlaylistRepository { get; }
+
         Task Commit();
     }
 }

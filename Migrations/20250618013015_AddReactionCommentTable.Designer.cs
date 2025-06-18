@@ -3,6 +3,7 @@ using System;
 using Blog.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Blog.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250618013015_AddReactionCommentTable")]
+    partial class AddReactionCommentTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -290,85 +293,6 @@ namespace Blog.Migrations
                     b.ToTable("favorite_post");
                 });
 
-            modelBuilder.Entity("Blog.entities.PlaylistEntity", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("ApplicationUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(1500)
-                        .HasColumnType("character varying(1500)");
-
-                    b.Property<bool>("IsPublic")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("character varying(250)");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("bytea");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
-
-                    b.ToTable("play_lists");
-                });
-
-            modelBuilder.Entity("Blog.entities.PlaylistItemEntity", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<int?>("Order")
-                        .HasColumnType("integer");
-
-                    b.Property<long>("PlaylistId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("PostId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PostId");
-
-                    b.HasIndex("PlaylistId", "PostId")
-                        .IsUnique();
-
-                    b.ToTable("playlist_items");
-                });
-
             modelBuilder.Entity("Blog.entities.PostEntity", b =>
                 {
                     b.Property<long>("Id")
@@ -494,9 +418,6 @@ namespace Blog.Migrations
 
                     b.Property<int>("Reaction")
                         .HasColumnType("integer");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -850,36 +771,6 @@ namespace Blog.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("Blog.entities.PlaylistEntity", b =>
-                {
-                    b.HasOne("Blog.entities.ApplicationUser", "ApplicationUser")
-                        .WithMany("PlaylistEntities")
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ApplicationUser");
-                });
-
-            modelBuilder.Entity("Blog.entities.PlaylistItemEntity", b =>
-                {
-                    b.HasOne("Blog.entities.PlaylistEntity", "Playlist")
-                        .WithMany("PlaylistItems")
-                        .HasForeignKey("PlaylistId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Blog.entities.PostEntity", "Post")
-                        .WithMany("PlaylistItems")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Playlist");
-
-                    b.Navigation("Post");
-                });
-
             modelBuilder.Entity("Blog.entities.PostEntity", b =>
                 {
                     b.HasOne("Blog.entities.ApplicationUser", null)
@@ -1012,8 +903,6 @@ namespace Blog.Migrations
 
                     b.Navigation("FavoritePosts");
 
-                    b.Navigation("PlaylistEntities");
-
                     b.Navigation("Posts");
 
                     b.Navigation("ReactionComments");
@@ -1039,18 +928,11 @@ namespace Blog.Migrations
                     b.Navigation("Replies");
                 });
 
-            modelBuilder.Entity("Blog.entities.PlaylistEntity", b =>
-                {
-                    b.Navigation("PlaylistItems");
-                });
-
             modelBuilder.Entity("Blog.entities.PostEntity", b =>
                 {
                     b.Navigation("CommentEntities");
 
                     b.Navigation("FavoritePosts");
-
-                    b.Navigation("PlaylistItems");
 
                     b.Navigation("PostMetricEntity");
 

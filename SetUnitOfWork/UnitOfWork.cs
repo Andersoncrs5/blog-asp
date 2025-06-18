@@ -13,9 +13,7 @@ namespace Blog.SetUnitOfWork
     public class UnitOfWork : IUnitOfWork
     {
         private readonly AppDbContext _context;
-        private readonly UserManager<ApplicationUser> _userManager; // UserManager é uma exceção, geralmente injetado diretamente
-
-        // Campos privados para os repositórios, inicializados apenas na primeira requisição
+        private readonly UserManager<ApplicationUser> _userManager;
         private IUserRepository? _userRepository;
         private IUserMetricRepository? _userMetricRepository;
         private ICategoryRepository? _categoryRepository;
@@ -26,20 +24,17 @@ namespace Blog.SetUnitOfWork
         private ICommentMetricRepository? _commentMetricRepository;
         private IFavoriteCommentRepository? _favoriteCommentRepository;
         private IReactionPostRepository? _reactionPostRepository;
+        private IReactionCommentRepository? _reactionCommentRepository;
+        private IPlaylistItemRepository? _playlistItemRepository;
+        private IPlaylistRepository? _playlistRepository;
 
-        // O construtor agora só aceita as dependências básicas (DbContext, UserManager)
         public UnitOfWork(
             AppDbContext context,
             UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
-            // Repositórios não são inicializados aqui, mas nas propriedades (lazy)
         }
-
-        // As propriedades agora usam a inicialização lazy para criar as instâncias
-        // caso elas ainda não existam.
-        // Desta forma, os repositórios só são criados quando realmente são acessados.
 
         public IUserRepository UserRepository
             => _userRepository ??= new UserRepository(_context, _userManager);
@@ -59,12 +54,14 @@ namespace Blog.SetUnitOfWork
         public IFavoritePostRepository FavoritePostRepository
             => _favoritePostRepository ??= new FavoritePostRepository(_context);
 
-        // CORREÇÃO: Nome da propriedade no UnitOfWork
         public IFavoriteCommentRepository FavoriteCommentRepository
             => _favoriteCommentRepository ??= new FavoriteCommentRepository(_context);
 
         public IReactionPostRepository ReactionPostRepository
             => _reactionPostRepository ??= new ReactionPostRepository(_context);
+
+        public IReactionCommentRepository ReactionCommentRepository
+            => _reactionCommentRepository ??= new ReactionCommentRepository(_context);
 
         public ICommentRepository CommentRepository
             => _commentRepository ??= new CommentRepository(_context);
@@ -72,9 +69,12 @@ namespace Blog.SetUnitOfWork
         public ICommentMetricRepository CommentMetricRepository
             => _commentMetricRepository ??= new CommentMetricRepository(_context);
 
-        /// <summary>
-        /// Salva todas as mudanças pendentes no contexto do banco de dados.
-        /// </summary>
+        public IPlaylistItemRepository PlaylistItemRepository
+            => _playlistItemRepository ??= new PlaylistItemRepository(_context);
+
+        public IPlaylistRepository PlaylistRepository
+            => _playlistRepository ??= new PlaylistRepository(_context);
+
         public async Task Commit()
         {
             await _context.SaveChangesAsync();

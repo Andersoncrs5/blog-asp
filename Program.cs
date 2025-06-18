@@ -5,6 +5,7 @@ using Blog.SetRepositories.IRepositories;
 using Blog.SetRepositories.Repositories;
 using Blog.SetServices.IServices;
 using Blog.SetServices.Services;
+using Blog.SetUnitOfWork;
 using Blog.utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -102,14 +103,20 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserMetricRepository, UserMetricRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IPostMetricRepository, PostMetricRepository>();
 builder.Services.AddScoped<IFavoritePostRepository, FavoritePostRepository>();
+builder.Services.AddScoped<IFavoriteCommentRepository, FavoriteCommentRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<ICommentMetricRepository, CommentMetricRepository>();
+builder.Services.AddScoped<IReactionPostRepository, ReactionPostRepository>();
+builder.Services.AddScoped<IReactionCommentRepository, ReactionCommentRepository>();
+builder.Services.AddScoped<IPlaylistItemRepository, PlaylistItemRepository>();
+builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
 
 builder.Services.AddOpenApi();
 
