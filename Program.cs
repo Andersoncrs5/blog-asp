@@ -1,4 +1,6 @@
+using System.Net;
 using System.Text;
+using System.Threading.RateLimiting;
 using Blog.Context;
 using Blog.entities;
 using Blog.SetRepositories.IRepositories;
@@ -9,6 +11,9 @@ using Blog.SetUnitOfWork;
 using Blog.utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -53,17 +58,22 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo
+    var apiVersionDescriptionProvider = builder.Services.BuildServiceProvider().GetRequiredService<IApiVersionDescriptionProvider>();
+
+    foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
     {
-        Title = "My API",
-        Version = "v1",
-        Description = "API for system of Blog with Swagger and PostgreSQL",
-        Contact = new OpenApiContact
+        c.SwaggerDoc(description.GroupName, new OpenApiInfo
         {
-            Name = "Anderson",
-            Email = "anderson.c.rms2005@gmail.com"
-        }
-    });
+            Title = $"My Blog API {description.ApiVersion}", 
+            Version = description.ApiVersion.ToString(),     
+            Description = description.IsDeprecated ? "This API version has been deprecated." : "API for blog system with Swagger and PostgreSQL.",
+            Contact = new OpenApiContact
+            {
+                Name = "Anderson",
+                Email = "anderson.c.rms2005@gmail.com"
+            }
+        });
+    }
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -85,9 +95,70 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "Bearer"
                 }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
     });
+});
+
+builder.Services.AddRateLimiter(RateLimiterOptions =>
+{
+    RateLimiterOptions.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = (int)HttpStatusCode.TooManyRequests;
+        await context.HttpContext.Response.WriteAsync("Too many requests. Please try again later.");
+    };
+
+    RateLimiterOptions.AddFixedWindowLimiter("fixedWindowLimiter", options =>
+    {
+        options.PermitLimit = 10;
+        options.Window = TimeSpan.FromSeconds(8);
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = 0;
+    });
+
+    RateLimiterOptions.AddSlidingWindowLimiter("SlidingWindowLimiter", options => 
+    {
+        options.PermitLimit = 20;
+        options.Window = TimeSpan.FromSeconds(10);
+        options.SegmentsPerWindow = 2;
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = 5;
+    });
+
+    RateLimiterOptions.AddConcurrencyLimiter("ConcurrencyLimiter", options => 
+    {
+        options.PermitLimit = 6;
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = 2;
+    });
+
+    RateLimiterOptions.AddFixedWindowLimiter("create-item", options =>
+    {
+        options.PermitLimit = 8;
+        options.Window = TimeSpan.FromMinutes(20);
+        options.QueueLimit = 0;
+    });
+
+    RateLimiterOptions.AddFixedWindowLimiter("auth-system", options => 
+    {
+        options.PermitLimit = 4;
+        options.Window = TimeSpan.FromSeconds(20);
+        options.QueueLimit = 0;
+    });
+});
+
+builder.Services.AddApiVersioning(options => 
+{
+    options.ReportApiVersions = true;
+    options.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1,0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+});
+
+builder.Services.AddVersionedApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
 });
 
 builder.Services.AddControllers();
@@ -129,8 +200,18 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+
+        foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
+        {
+            options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
+        }
+    });
 }
+
+app.UseRateLimiter();
 
 app.UseHttpsRedirection();
 

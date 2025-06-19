@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Blog.Controllers
 {
@@ -43,6 +44,7 @@ namespace Blog.Controllers
         }
 
         [HttpPost("/login")]
+        [EnableRateLimiting("auth-system")]
         public async Task<IActionResult> Login([FromBody] LoginUserDTO dto)
         {
             if(!ModelState.IsValid)
@@ -98,6 +100,7 @@ namespace Blog.Controllers
         }
 
         [HttpPost("register")]
+        [EnableRateLimiting("auth-system")]
         public async Task<IActionResult> Register([FromBody] CreateUserDto model)
         {
             if (!ModelState.IsValid)
@@ -145,6 +148,7 @@ namespace Blog.Controllers
         }
 
         [HttpPost("refresh-token")]
+        [EnableRateLimiting("auth-system")]
         public async Task<IActionResult> RefreshToken([FromBody] TokenDto tokenModel)
         {
             if (!ModelState.IsValid)
@@ -192,6 +196,7 @@ namespace Blog.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         [Route("revoke/{email}")]
+        [EnableRateLimiting("auth-system")]
         public async Task<IActionResult> Revoke(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
@@ -210,6 +215,7 @@ namespace Blog.Controllers
         }
         
         [HttpPost("request-password-reset")]
+        [EnableRateLimiting("auth-system")]
         public async Task<IActionResult> RequestPasswordReset([FromBody] RequestPasswordResetDto requestDto)
         {
             string? ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
@@ -231,6 +237,7 @@ namespace Blog.Controllers
         }
 
         [HttpPost("reset-password")]
+        [EnableRateLimiting("auth-system")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetDto)
         {
             bool success = await this._uow.RecoverAccountRepository.ValidateAndResetPasswordAsync(resetDto);

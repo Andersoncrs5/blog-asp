@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "vqvnw1pA7/8=",
+  "dgSpecHash": "z5wcAu6xEY0=",
   "success": true,
   "projectFilePath": "/home/anderson/Desktop/c#/asp_core/api/projects/Blog/Blog.csproj",
   "expectedPackageFiles": [
@@ -10,6 +10,8 @@
     "/home/anderson/.nuget/packages/microsoft.aspnetcore.cryptography.internal/9.0.6/microsoft.aspnetcore.cryptography.internal.9.0.6.nupkg.sha512",
     "/home/anderson/.nuget/packages/microsoft.aspnetcore.cryptography.keyderivation/9.0.6/microsoft.aspnetcore.cryptography.keyderivation.9.0.6.nupkg.sha512",
     "/home/anderson/.nuget/packages/microsoft.aspnetcore.identity.entityframeworkcore/9.0.6/microsoft.aspnetcore.identity.entityframeworkcore.9.0.6.nupkg.sha512",
+    "/home/anderson/.nuget/packages/microsoft.aspnetcore.mvc.versioning/5.1.0/microsoft.aspnetcore.mvc.versioning.5.1.0.nupkg.sha512",
+    "/home/anderson/.nuget/packages/microsoft.aspnetcore.mvc.versioning.apiexplorer/5.1.0/microsoft.aspnetcore.mvc.versioning.apiexplorer.5.1.0.nupkg.sha512",
     "/home/anderson/.nuget/packages/microsoft.aspnetcore.openapi/9.0.6/microsoft.aspnetcore.openapi.9.0.6.nupkg.sha512",
     "/home/anderson/.nuget/packages/microsoft.bcl.asyncinterfaces/7.0.0/microsoft.bcl.asyncinterfaces.7.0.0.nupkg.sha512",
     "/home/anderson/.nuget/packages/microsoft.build.framework/17.8.3/microsoft.build.framework.17.8.3.nupkg.sha512",
