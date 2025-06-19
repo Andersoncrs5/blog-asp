@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Blog.SetRepositories.IRepositories;
+using Blog.SetServices.IServices;
 
 namespace Blog.SetUnitOfWork
 {
@@ -22,6 +23,7 @@ namespace Blog.SetUnitOfWork
         IPlaylistItemRepository PlaylistItemRepository { get; }
         IPlaylistRepository PlaylistRepository { get; }
         IRecoverAccountRepository RecoverAccountRepository { get; }
+        IEmailService EmailService { get; }
 
         Task Commit();
     }

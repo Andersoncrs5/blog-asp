@@ -7,6 +7,7 @@ using Blog.entities;
 using Blog.SetRepositories.IRepositories;
 using Blog.SetRepositories.Repositories;
 using Blog.SetServices.IServices;
+using Blog.SetServices.Services;
 using Microsoft.AspNetCore.Identity;
 
 namespace Blog.SetUnitOfWork
@@ -15,7 +16,8 @@ namespace Blog.SetUnitOfWork
     {
         private readonly AppDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IEmailService _emailService;
+        private IEmailService _emailService;
+        private readonly IConfiguration _configuration;
         private IUserRepository? _userRepository;
         private IUserMetricRepository? _userMetricRepository;
         private ICategoryRepository? _categoryRepository;
@@ -38,6 +40,9 @@ namespace Blog.SetUnitOfWork
             _context = context;
             _userManager = userManager;
         }
+
+        public IEmailService EmailService 
+            => _emailService ??= new EmailService(_configuration);
 
         public IUserRepository UserRepository
             => _userRepository ??= new UserRepository(_context, _userManager);

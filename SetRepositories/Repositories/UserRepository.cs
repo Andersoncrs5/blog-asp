@@ -22,7 +22,7 @@ namespace Blog.SetRepositories.Repositories
             _userManager = userManager;
         }
 
-        public async Task<ApplicationUser> Get(string id) 
+        public async Task<ApplicationUser> Get(string? id) 
         {
             if (string.IsNullOrWhiteSpace(id))
                 throw new ResponseException("Id is required", 400, "fail");
@@ -35,12 +35,9 @@ namespace Blog.SetRepositories.Repositories
             return user;
         }
 
-        public async Task Delete(ApplicationUser? user) 
+        public async Task Delete(ApplicationUser user) 
         {
-            if (user == null)
-                throw new ResponseException("User is required", 400, "fail");
-
-            await this._userManager.DeleteAsync(user);
+            await _userManager.DeleteAsync(user);
         }
 
         public async Task<ApplicationUser> Update(ApplicationUser? user, UpdateUserDto dto) 

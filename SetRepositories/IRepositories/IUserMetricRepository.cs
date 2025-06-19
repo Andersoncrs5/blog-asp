@@ -12,20 +12,20 @@ namespace Blog.SetRepositories.IRepositories
     {
         Task<UserMetricEntity> Get(string? userId);
         Task<UserMetricEntity> Create(string userId);
-        UserMetricEntity SumOrRedLikesOrDislikeGivenCountInComment(UserMetricEntity metric, SumOrRedEnum action, LikeOrDislike l);
-        UserMetricEntity SumOrRedLikesOrDislikeGivenCountInPost(UserMetricEntity metric, SumOrRedEnum action, LikeOrDislike l);
-        UserMetricEntity SumOrRedFollowersCount(UserMetricEntity metric, SumOrRedEnum action);
-        UserMetricEntity SumOrRedFollowingCount(UserMetricEntity metric, SumOrRedEnum action);
-        UserMetricEntity SumOrRedPostsCount(UserMetricEntity metric, SumOrRedEnum action);
-        UserMetricEntity SumOrRedCommentsCount(UserMetricEntity metric, SumOrRedEnum action);
-        UserMetricEntity SumOrRedSharesCount(UserMetricEntity metric, SumOrRedEnum action);
-        UserMetricEntity SumOrRedSavedMediaCount(UserMetricEntity metric, SumOrRedEnum action);
-        UserMetricEntity SumOrRedReportsReceivedCount(UserMetricEntity metric, SumOrRedEnum action);
-        UserMetricEntity SumOrRedMediaUploadsCount(UserMetricEntity metric, SumOrRedEnum action);
-        UserMetricEntity SumOrRedSavedPostsCount(UserMetricEntity metric, SumOrRedEnum action);
-        UserMetricEntity SumOrRedSavedCommentsCount(UserMetricEntity metric, SumOrRedEnum action);
-        UserMetricEntity SumOrRedEditedCount(UserMetricEntity metric, SumOrRedEnum action);
-        UserMetricEntity SumOrRedProfileViews(UserMetricEntity metric, SumOrRedEnum action);
-        UserMetricEntity SumOrRedLastLogin(UserMetricEntity metric, SumOrRedEnum action);
+        Task<UserMetricEntity> SumOrRedLikesOrDislikeGivenCountInComment(UserMetricEntity metric, SumOrRedEnum action, LikeOrDislike l);
+        Task<UserMetricEntity> SumOrRedLikesOrDislikeGivenCountInPost(UserMetricEntity metric, SumOrRedEnum action, LikeOrDislike l);
+        Task<UserMetricEntity> SumOrRedFollowersCount(UserMetricEntity metric, SumOrRedEnum action);
+        Task<UserMetricEntity> SumOrRedFollowingCount(UserMetricEntity metric, SumOrRedEnum action);
+        Task<UserMetricEntity> SumOrRedPostsCount(UserMetricEntity metric, SumOrRedEnum action);
+        Task<UserMetricEntity> SumOrRedCommentsCount(UserMetricEntity metric, SumOrRedEnum action);
+        Task<UserMetricEntity> SumOrRedSharesCount(UserMetricEntity metric, SumOrRedEnum action);
+        Task<UserMetricEntity> SumOrRedSavedMediaCount(UserMetricEntity metric, SumOrRedEnum action);
+        Task<UserMetricEntity> SumOrRedReportsReceivedCount(UserMetricEntity metric, SumOrRedEnum action);
+        Task<UserMetricEntity> SumOrRedMediaUploadsCount(UserMetricEntity metric, SumOrRedEnum action);
+        Task<UserMetricEntity> SumOrRedSavedPostsCount(UserMetricEntity metric, SumOrRedEnum action);
+        Task<UserMetricEntity> SumOrRedSavedCommentsCount(UserMetricEntity metric, SumOrRedEnum action);
+        Task<UserMetricEntity> SumOrRedEditedCount(UserMetricEntity metric, SumOrRedEnum action);
+        Task<UserMetricEntity> SumOrRedProfileViews(UserMetricEntity metric, SumOrRedEnum action);
+        Task<UserMetricEntity> SumOrRedLastLogin(UserMetricEntity metric, SumOrRedEnum action);
     }
 }

@@ -26,7 +26,8 @@ namespace Blog.SetRepositories.Repositories
             if(!string.IsNullOrWhiteSpace(userId))
                 throw new ResponseException("User id is required", 400, "fail");
 
-            UserMetricEntity? metric = await this._context.UserMetrics.FirstOrDefaultAsync(
+            UserMetricEntity? metric = await this._context.UserMetrics.AsNoTracking()
+            .FirstOrDefaultAsync(
                 u => u.ApplicationUserId == userId);
 
             if (metric == null)
@@ -48,7 +49,7 @@ namespace Blog.SetRepositories.Repositories
             return metricCreated.Entity;
         }
 
-        public UserMetricEntity SumOrRedLikesOrDislikeGivenCountInComment(UserMetricEntity metric, SumOrRedEnum action, LikeOrDislike l) 
+        public async Task<UserMetricEntity> SumOrRedLikesOrDislikeGivenCountInComment(UserMetricEntity metric, SumOrRedEnum action, LikeOrDislike l) 
         {
             if (action == SumOrRedEnum.SUM && l == LikeOrDislike.LIKE ) {
                 metric.LikesGivenCountInComment += 1;
@@ -67,11 +68,11 @@ namespace Blog.SetRepositories.Repositories
             }
 
             _context.Entry(metric).State = EntityState.Modified;
-
+            await _context.SaveChangesAsync();
             return metric;
         }
 
-        public UserMetricEntity SumOrRedLikesOrDislikeGivenCountInPost(UserMetricEntity metric, SumOrRedEnum action, LikeOrDislike l) 
+        public async Task<UserMetricEntity> SumOrRedLikesOrDislikeGivenCountInPost(UserMetricEntity metric, SumOrRedEnum action, LikeOrDislike l) 
         {
             if (action == SumOrRedEnum.SUM && l == LikeOrDislike.LIKE ) {
                 metric.LikesGivenCountInPost += 1;
@@ -90,11 +91,11 @@ namespace Blog.SetRepositories.Repositories
             }
 
             _context.Entry(metric).State = EntityState.Modified;
-
+            await _context.SaveChangesAsync();
             return metric;
         }
 
-        public UserMetricEntity SumOrRedFollowersCount(UserMetricEntity metric, SumOrRedEnum action) 
+        public async Task<UserMetricEntity> SumOrRedFollowersCount(UserMetricEntity metric, SumOrRedEnum action) 
         {
             if (action == SumOrRedEnum.SUM) 
             {
@@ -107,11 +108,11 @@ namespace Blog.SetRepositories.Repositories
             }
 
             _context.Entry(metric).State = EntityState.Modified;
-
+            await _context.SaveChangesAsync();
             return metric;
         }
 
-        public UserMetricEntity SumOrRedFollowingCount(UserMetricEntity metric, SumOrRedEnum action) 
+        public async Task<UserMetricEntity> SumOrRedFollowingCount(UserMetricEntity metric, SumOrRedEnum action) 
         {
             if (action == SumOrRedEnum.SUM) 
             {
@@ -124,11 +125,11 @@ namespace Blog.SetRepositories.Repositories
             }
 
             _context.Entry(metric).State = EntityState.Modified;
-
+            await _context.SaveChangesAsync();
             return metric;
         }
 
-        public UserMetricEntity SumOrRedPostsCount(UserMetricEntity metric, SumOrRedEnum action) 
+        public async Task<UserMetricEntity> SumOrRedPostsCount(UserMetricEntity metric, SumOrRedEnum action) 
         {
             if (action == SumOrRedEnum.SUM) 
             {
@@ -141,11 +142,12 @@ namespace Blog.SetRepositories.Repositories
             }
 
             _context.Entry(metric).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
 
             return metric;
         }
 
-        public UserMetricEntity SumOrRedCommentsCount(UserMetricEntity metric, SumOrRedEnum action) 
+        public async Task<UserMetricEntity> SumOrRedCommentsCount(UserMetricEntity metric, SumOrRedEnum action) 
         {
             if (action == SumOrRedEnum.SUM) 
             {
@@ -158,11 +160,11 @@ namespace Blog.SetRepositories.Repositories
             }
 
             _context.Entry(metric).State = EntityState.Modified;
-
+            await _context.SaveChangesAsync();
             return metric;
         }
 
-        public UserMetricEntity SumOrRedSharesCount(UserMetricEntity metric, SumOrRedEnum action) 
+        public async Task<UserMetricEntity> SumOrRedSharesCount(UserMetricEntity metric, SumOrRedEnum action) 
         {
             if (action == SumOrRedEnum.SUM) 
             {
@@ -175,11 +177,11 @@ namespace Blog.SetRepositories.Repositories
             }
 
             _context.Entry(metric).State = EntityState.Modified;
-
+            await _context.SaveChangesAsync();
             return metric;
         }
     
-        public UserMetricEntity SumOrRedSavedMediaCount(UserMetricEntity metric, SumOrRedEnum action) 
+        public async Task<UserMetricEntity> SumOrRedSavedMediaCount(UserMetricEntity metric, SumOrRedEnum action) 
         {
             if (action == SumOrRedEnum.SUM) 
             {
@@ -192,11 +194,11 @@ namespace Blog.SetRepositories.Repositories
             }
 
             _context.Entry(metric).State = EntityState.Modified;
-
+            await _context.SaveChangesAsync();
             return metric;
         }
 
-        public UserMetricEntity SumOrRedReportsReceivedCount(UserMetricEntity metric, SumOrRedEnum action)
+        public async Task<UserMetricEntity> SumOrRedReportsReceivedCount(UserMetricEntity metric, SumOrRedEnum action)
         {
             if (action == SumOrRedEnum.SUM) 
             {
@@ -209,11 +211,12 @@ namespace Blog.SetRepositories.Repositories
             }
 
             _context.Entry(metric).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
 
             return metric;
         }
 
-        public UserMetricEntity SumOrRedMediaUploadsCount(UserMetricEntity metric, SumOrRedEnum action) 
+        public async Task<UserMetricEntity> SumOrRedMediaUploadsCount(UserMetricEntity metric, SumOrRedEnum action) 
         {
             if (action == SumOrRedEnum.SUM) 
             {
@@ -226,11 +229,12 @@ namespace Blog.SetRepositories.Repositories
             }
 
             _context.Entry(metric).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
 
             return metric;
         }
 
-        public UserMetricEntity SumOrRedSavedPostsCount(UserMetricEntity metric, SumOrRedEnum action)
+        public async Task<UserMetricEntity> SumOrRedSavedPostsCount(UserMetricEntity metric, SumOrRedEnum action)
         {
             if (action == SumOrRedEnum.SUM) 
             {
@@ -243,11 +247,12 @@ namespace Blog.SetRepositories.Repositories
             }
 
             _context.Entry(metric).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
 
             return metric;
         }
 
-        public UserMetricEntity SumOrRedSavedCommentsCount(UserMetricEntity metric, SumOrRedEnum action)
+        public async Task<UserMetricEntity> SumOrRedSavedCommentsCount(UserMetricEntity metric, SumOrRedEnum action)
         {
             if (action == SumOrRedEnum.SUM) 
             {
@@ -260,11 +265,12 @@ namespace Blog.SetRepositories.Repositories
             }
 
             _context.Entry(metric).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
 
             return metric;
         }
     
-        public UserMetricEntity SumOrRedEditedCount(UserMetricEntity metric, SumOrRedEnum action)
+        public async Task<UserMetricEntity> SumOrRedEditedCount(UserMetricEntity metric, SumOrRedEnum action)
         {
             if (action == SumOrRedEnum.SUM) 
             {
@@ -277,11 +283,12 @@ namespace Blog.SetRepositories.Repositories
             }
 
             _context.Entry(metric).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
 
             return metric;
         }
     
-        public UserMetricEntity SumOrRedProfileViews(UserMetricEntity metric, SumOrRedEnum action)
+        public async Task<UserMetricEntity> SumOrRedProfileViews(UserMetricEntity metric, SumOrRedEnum action)
         {
             if (action == SumOrRedEnum.SUM) 
             {
@@ -294,15 +301,17 @@ namespace Blog.SetRepositories.Repositories
             }
 
             _context.Entry(metric).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
 
             return metric;
         }
     
-        public UserMetricEntity SumOrRedLastLogin(UserMetricEntity metric, SumOrRedEnum action)
+        public async Task<UserMetricEntity> SumOrRedLastLogin(UserMetricEntity metric, SumOrRedEnum action)
         {
             metric.LastLogin = DateTime.Now;
 
             _context.Entry(metric).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
 
             return metric;
         }

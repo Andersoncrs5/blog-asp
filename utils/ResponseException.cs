@@ -10,10 +10,13 @@ namespace Blog.utils
         public int StatusCode { get; set; }
         public string Status { get; set; }
 
-        public ResponseException(string message, int statusCode = 400, string status = "fail") : base(message)
+        public object? Description { get; set; }
+
+        public ResponseException(string message, int statusCode = 400, string status = "fail", object? description = null) : base(message)
         {
             StatusCode = statusCode;
             Status = status;
+            Description = description;
         }
     }
 }
