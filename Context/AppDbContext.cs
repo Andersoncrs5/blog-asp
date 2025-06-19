@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Blog.entities;
+using Blog.entities.enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -27,16 +28,36 @@ namespace Blog.Context
         public DbSet<PlaylistEntity> PlaylistEntities { get; set; }
         public DbSet<PlaylistItemEntity> PlaylistItemEntities { get; set; }
         public DbSet<RecoverAccountEntity> RecoverAccountEntities { get; set; }
+        public DbSet<MediaPostEntity> MediaPostEntities  { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
             optionsBuilder.UseLazyLoadingProxies();
         }
-
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<PostEntity>()
+                .HasMany(u => u.MediaPostEntities)
+                .WithOne(e => e.Post)
+                .HasForeignKey(f => f.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<MediaPostEntity>(entity => 
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnType("bigint");
+                entity.Property(e => e.PostId).IsRequired(true);
+                entity.Property(e => e.Url).IsRequired(true).HasMaxLength(1000);
+                entity.Property(e => e.Description).IsRequired(false).HasMaxLength(1000);
+                entity.Property(e => e.Order).IsRequired(false).HasColumnType("smallint");
+                entity.Property(e => e.MediaType).IsRequired(true).HasDefaultValue(MediaTypeEnum.IMAGE);
+                entity.Property(e => e.RowVersion).IsRowVersion();
+                entity.Property(e => e.UpdatedAt).IsRequired(false);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
+            });
 
             builder.Entity<ApplicationUser>()
                 .HasMany(u => u.PlaylistEntities)
@@ -221,6 +242,7 @@ namespace Blog.Context
                 entity.Property(p => p.RowVersion).IsRowVersion();
                 entity.Property(p => p.UpdatedAt).IsRequired(false);
                 entity.Property(p => p.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
+                entity.Property(p => p.MediaCount).IsRequired(true).HasDefaultValue(0);
             });
 
             builder.Entity<PostEntity>(entity =>

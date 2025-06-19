@@ -191,5 +191,23 @@ namespace Blog.SetRepositories.Repositories
             return metric;
         }
 
+        public async Task<PostMetricEntity> SumOrRedMediaCount(PostMetricEntity metric, SumOrRedEnum action) 
+        {
+            if (action == SumOrRedEnum.SUM) 
+            {
+                metric.MediaCount += 1;
+            }
+
+            if (action == SumOrRedEnum.REDUCE) 
+            {
+                metric.MediaCount -= 1;
+            }
+
+            _context.Entry(metric).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
+            return metric;
+        }
+
     }
 }

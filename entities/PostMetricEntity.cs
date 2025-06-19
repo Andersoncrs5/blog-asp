@@ -20,6 +20,7 @@ namespace Blog.entities
         [Required] public long Viewed { get; set; } = 0;
         [Required] public long ReportsReceivedCount { get; set; } = 0;
         [Required] public long EditedCount { get; set; } = 0;
+        [Required] public long MediaCount { get; set; } = 0;
         [Timestamp] public byte[] RowVersion { get; set; } = Array.Empty<byte>();
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }

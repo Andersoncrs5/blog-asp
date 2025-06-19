@@ -119,6 +119,7 @@ builder.Services.AddScoped<IReactionCommentRepository, ReactionCommentRepository
 builder.Services.AddScoped<IPlaylistItemRepository, PlaylistItemRepository>();
 builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
 builder.Services.AddScoped<IRecoverAccountRepository, RecoverAccountRepository>();
+builder.Services.AddScoped<IMediaPostRepository, MediaPostRepository>();
 
 builder.Services.AddOpenApi();
 

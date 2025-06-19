@@ -20,6 +20,7 @@ namespace Blog.SetRepositories.IRepositories
         Task<PostMetricEntity> SumOrRedViewed(PostMetricEntity metric, SumOrRedEnum action);
         Task<PostMetricEntity> SumOrRedReportsReceivedCount(PostMetricEntity metric, SumOrRedEnum action);
         Task<PostMetricEntity> SumOrRedEditedCount(PostMetricEntity metric, SumOrRedEnum action);
+        Task<PostMetricEntity> SumOrRedMediaCount(PostMetricEntity metric, SumOrRedEnum action);
 
     }
 }
