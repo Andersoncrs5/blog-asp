@@ -132,5 +132,22 @@ namespace Blog.Controllers
             ));
         }
 
+        [HttpGet("{Id:long:required}/get-metric")]
+        [EnableRateLimiting("SlidingWindowLimiterPolicy")]
+        public async Task<IActionResult> GetMetric(long Id)
+        {
+            PostEntity post = await _uow.PostRepository.Get(Id);
+            PostMetricEntity metric = await _uow.PostMetricRepository.Get(post);
+
+            return Ok(new Response(
+                "success",
+                "Post metric founded!!",
+                200,
+                metric
+            ));
+        }
+
+        
+
     }
 }

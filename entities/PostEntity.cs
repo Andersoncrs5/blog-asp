@@ -15,23 +15,17 @@ namespace Blog.entities
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
 
-        [Required]
-        [StringLength(300)]
         public string Title { get; set; } = string.Empty;
 
-        [Required]
-        [StringLength(3000)]
         public string Content { get; set; } = string.Empty;
 
-        [Required] public bool IsActived { get; set; } = true;
-
+        public bool IsActived { get; set; }
         [Required] public string ApplicationUserId { get; set; } = string.Empty;
 
         [Required] public long categoryId { get; set; }
         [Required] public long ReadTimes { get; set; } = 0;
 
-        [Timestamp]
-        public byte[] RowVersion { get; set; } = Array.Empty<byte>();
+        [Timestamp] public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }

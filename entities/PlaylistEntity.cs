@@ -15,12 +15,12 @@ namespace Blog.entities
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public ulong Id { get; set; }
 
-        [Required] public string Name { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
 
         public string? ImageUrl { get; set; }
 
-        [Required] public bool IsPublic { get; set; } = false;
+        public bool IsPublic { get; set; }
 
         [Required] public string ApplicationUserId { get; set; } = string.Empty;
 

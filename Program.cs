@@ -132,6 +132,13 @@ builder.Services.AddRateLimiter(RateLimiterOptions =>
         options.QueueLimit = 2;
     });
 
+    RateLimiterOptions.AddFixedWindowLimiter("SaveOrRemoveFavoriteItemPolicy", options =>
+    {
+        options.PermitLimit = 14;
+        options.Window = TimeSpan.FromMinutes(8);
+        options.QueueLimit = 0;
+    });
+
     RateLimiterOptions.AddFixedWindowLimiter("CreateItemPolicy", options =>
     {
         options.PermitLimit = 10;

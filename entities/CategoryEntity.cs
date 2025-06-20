@@ -15,11 +15,8 @@ namespace Blog.entities
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
 
-        [Required]
-        [StringLength(150)]
         public string Name { get; set; } = string.Empty;
-
-        [Required] public bool IsActived { get; set; } = false;
+        public bool IsActived { get; set; } = true;
 
         [Required] public string ApplicationUserId { get; set; } = string.Empty;
 

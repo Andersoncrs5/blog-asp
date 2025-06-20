@@ -17,7 +17,7 @@ namespace Blog.entities
         public ulong Id { get; set; }
         [Required] public string ApplicationUserId { get; set; } = string.Empty;
         [Required] public long PostId { get; set; }
-        [Required] public LikeOrDislike Reaction  { get; set; }
+        public LikeOrDislike Reaction  { get; set; }
         [JsonIgnore] public virtual ApplicationUser? ApplicationUser { get; set; } 
         [JsonIgnore] public virtual PostEntity? Post { get; set; } 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

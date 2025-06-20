@@ -15,14 +15,11 @@ namespace Blog.entities
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public ulong Id { get; set; }
 
-        [Required]
-        public string ApplicationUserId { get; set; } = string.Empty;
+        [Required] public string ApplicationUserId { get; set; } = string.Empty;
 
-        [Required]
         public string Content { get; set; } = string.Empty;
 
-        [Required]
-        public long PostId { get; set; }
+        [Required] public long PostId { get; set; }
 
         public ulong? ParentId { get; set; }
 

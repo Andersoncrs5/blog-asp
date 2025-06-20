@@ -213,6 +213,8 @@ namespace Blog.Context
                 entity.Property(u => u.RowVersion).IsRowVersion();
                 entity.Property(e => e.UpdatedAt).IsRequired(false);
                 entity.HasIndex(e => e.Name).IsUnique();
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(150);
+                entity.Property(e => e.IsActived).IsRequired().HasDefaultValue(true);
             });
 
             builder.Entity<PostMetricEntity>()
@@ -242,7 +244,16 @@ namespace Blog.Context
                 entity.Property(p => p.RowVersion).IsRowVersion();
                 entity.Property(p => p.UpdatedAt).IsRequired(false);
                 entity.Property(p => p.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
-                entity.Property(p => p.MediaCount).IsRequired(true).HasDefaultValue(0);
+                entity.Property(e => e.Likes).HasColumnType("bigint").IsRequired(true).HasDefaultValue(0);
+                entity.Property(e => e.DisLikes).HasColumnType("bigint").IsRequired(true).HasDefaultValue(0);
+                entity.Property(e => e.Shares).HasColumnType("bigint").IsRequired(true).HasDefaultValue(0);
+                entity.Property(e => e.CommentCount).HasColumnType("bigint").IsRequired(true).HasDefaultValue(0);
+                entity.Property(e => e.FavoriteCount).HasColumnType("bigint").IsRequired(true).HasDefaultValue(0);
+                entity.Property(e => e.Bookmarks).HasColumnType("bigint").IsRequired(true).HasDefaultValue(0);
+                entity.Property(e => e.Viewed).HasColumnType("bigint").IsRequired(true).HasDefaultValue(0);
+                entity.Property(e => e.ReportsReceivedCount).HasColumnType("bigint").IsRequired(true).HasDefaultValue(0);
+                entity.Property(e => e.EditedCount).HasColumnType("bigint").IsRequired(true).HasDefaultValue(0);
+                entity.Property(e => e.MediaCount).HasColumnType("bigint").IsRequired(true).HasDefaultValue(0);
             });
 
             builder.Entity<PostEntity>(entity =>
@@ -251,8 +262,9 @@ namespace Blog.Context
                 entity.Property(e => e.UpdatedAt).IsRequired(false);
                 entity.Property(u => u.Id).HasColumnType("bigint"); 
                 entity.Property(e => e.Content).HasColumnType("text"); 
-                entity.Property(e => e.Title).HasColumnType("varchar(350)"); 
-                entity.Property(e => e.Content).HasColumnType("varchar(3500)"); 
+                entity.Property(e => e.Title).HasColumnType("varchar(350)").IsRequired();
+                entity.Property(e => e.Content).IsRequired();
+                entity.Property(e => e.IsActived).IsRequired().HasDefaultValue(true);
             });
 
             builder.Entity<FavoritePostEntity>(entity =>
@@ -267,19 +279,20 @@ namespace Blog.Context
                 entity.Property(u => u.Id).HasColumnType("bigint");
                 entity.Property(rp => rp.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
                 entity.HasIndex(rp => new { rp.ApplicationUserId, rp.PostId }).IsUnique();
+                entity.Property(rp => rp.Reaction).IsRequired();
             });
 
             builder.Entity<CommentMetricEntity>(entity => 
             {
                 entity.HasKey(c => c.CommentId);
                 entity.Property(c => c.CommentId).HasColumnType("bigint");
-                entity.Property(c => c.Likes).HasColumnType("bigint");
-                entity.Property(c => c.DisLikes).HasColumnType("bigint");
-                entity.Property(c => c.ReportCount).HasColumnType("bigint");
-                entity.Property(c => c.EditedTimes).HasColumnType("bigint");
-                entity.Property(c => c.FavoritesCount).HasColumnType("bigint");
-                entity.Property(c => c.RepliesCount).HasColumnType("bigint");
-                entity.Property(c => c.ViewsCount).HasColumnType("bigint");
+                entity.Property(c => c.Likes).HasColumnType("bigint").IsRequired().HasDefaultValue(0);
+                entity.Property(c => c.DisLikes).HasColumnType("bigint").IsRequired().HasDefaultValue(0);
+                entity.Property(c => c.ReportCount).HasColumnType("bigint").IsRequired().HasDefaultValue(0);
+                entity.Property(c => c.EditedTimes).HasColumnType("bigint").IsRequired().HasDefaultValue(0);
+                entity.Property(c => c.FavoritesCount).HasColumnType("bigint").IsRequired().HasDefaultValue(0);
+                entity.Property(c => c.RepliesCount).HasColumnType("bigint").IsRequired().HasDefaultValue(0);
+                entity.Property(c => c.ViewsCount).HasColumnType("bigint").IsRequired().HasDefaultValue(0);
                 entity.Property(c => c.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
                 entity.Property(c => c.UpdatedAt).IsRequired(false);
                 entity.Property(c => c.RowVersion).IsRowVersion();
@@ -291,6 +304,7 @@ namespace Blog.Context
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
                 entity.Property(f => f.CommentId).HasColumnType("bigint");
                 entity.Property(f => f.Id).HasColumnType("bigint");
+                entity.Property(f => f.Reaction).IsRequired();
                 entity.HasIndex(rc => new { rc.ApplicationUserId, rc.CommentId }).IsUnique();
                 entity.Property(e => e.UpdatedAt).IsRequired(false);
             });

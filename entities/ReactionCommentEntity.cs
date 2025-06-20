@@ -15,16 +15,12 @@ namespace Blog.entities
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public ulong Id { get; set; }
-
         [Required] public string ApplicationUserId { get; set; } = string.Empty;
 
         [Required] public ulong CommentId { get; set; }        
-        
-        [Required] public LikeOrDislike Reaction  { get; set; }
-
+        public LikeOrDislike Reaction  { get; set; }
         [JsonIgnore] public virtual CommentEntity? Comment { get; set; } 
         [JsonIgnore] public virtual ApplicationUser? ApplicationUser { get; set; } 
-
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;
     }

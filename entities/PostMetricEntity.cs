@@ -11,16 +11,16 @@ namespace Blog.entities
     public class PostMetricEntity
     {
         [Key] public long PostId { get; set; }
-        [Required] public long Likes { get; set; } = 0;
-        [Required] public long DisLikes { get; set; } = 0;
-        [Required] public long Shares { get; set; } = 0;
-        [Required] public long CommentCount { get; set; } = 0;
-        [Required] public long FavoriteCount { get; set; } = 0;
-        [Required] public long Bookmarks { get; set; } = 0;
-        [Required] public long Viewed { get; set; } = 0;
-        [Required] public long ReportsReceivedCount { get; set; } = 0;
-        [Required] public long EditedCount { get; set; } = 0;
-        [Required] public long MediaCount { get; set; } = 0;
+        public ulong Likes { get; set; } = 0;
+        public ulong DisLikes { get; set; } = 0;
+        public ulong Shares { get; set; } = 0;
+        public ulong CommentCount { get; set; } = 0;
+        public ulong FavoriteCount { get; set; } = 0;
+        public ulong Bookmarks { get; set; } = 0;
+        public ulong Viewed { get; set; } = 0;
+        public ulong ReportsReceivedCount { get; set; } = 0;
+        public ulong EditedCount { get; set; } = 0;
+        public ulong MediaCount { get; set; } = 0;
         [Timestamp] public byte[] RowVersion { get; set; } = Array.Empty<byte>();
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
