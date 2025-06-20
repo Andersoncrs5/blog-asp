@@ -10,11 +10,14 @@ using Blog.utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Blog.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class UserController : ControllerBase
     {
         private readonly IUnitOfWork _uow;
@@ -24,8 +27,8 @@ namespace Blog.Controllers
             _uow = uow;
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("me")]
+        [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> Me()
         {
             string? id = User.FindFirst(ClaimTypes.Sid)?.Value;
@@ -39,14 +42,28 @@ namespace Blog.Controllers
             ));
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("{userId:required:string}")]
+        [EnableRateLimiting("SlidingWindowLimiterPolicy")]
+        public async Task<IActionResult> GetUser(string userId)
+        {
+            ApplicationUser user = await _uow.UserRepository.Get(userId);
+
+            return Ok(new Response(
+                "success",
+                "User found",
+                200,
+                new UserResponseDTO(user.Id, user.UserName!,user.Email!)
+            ));
+        }
+
         [HttpDelete]
+        [EnableRateLimiting("DeleteItemPolicy")]
         public async Task<IActionResult> Delete()
         {
             string? id = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser user = await _uow.UserRepository.Get(id);
 
-            await this._uow.UserRepository.Delete(user);
+            await _uow.UserRepository.Delete(user);
 
             return Ok(new Response(
                 "success",
@@ -57,7 +74,7 @@ namespace Blog.Controllers
         }
 
         [HttpPut]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [EnableRateLimiting("UpdateItemPolicy")]
         public async Task<ActionResult> Update([FromBody] UpdateUserDto userDto) 
         {
             if (!ModelState.IsValid)
@@ -75,8 +92,8 @@ namespace Blog.Controllers
             ));
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("get-metric")]
+        [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> GetMetric()
         {
             string? id = User.FindFirst(ClaimTypes.Sid)?.Value;

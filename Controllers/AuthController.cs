@@ -20,7 +20,8 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace Blog.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    [ApiVersion("1.0")]
     public class AuthController : ControllerBase
     {
         private readonly ITokenService _tokenService;
@@ -44,7 +45,8 @@ namespace Blog.Controllers
         }
 
         [HttpPost("/login")]
-        [EnableRateLimiting("auth-system")]
+        [EnableRateLimiting("authSystemPolicy")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginUserDTO dto)
         {
             if(!ModelState.IsValid)
@@ -100,7 +102,8 @@ namespace Blog.Controllers
         }
 
         [HttpPost("register")]
-        [EnableRateLimiting("auth-system")]
+        [EnableRateLimiting("authSystemPolicy")]
+        [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] CreateUserDto model)
         {
             if (!ModelState.IsValid)
@@ -148,7 +151,8 @@ namespace Blog.Controllers
         }
 
         [HttpPost("refresh-token")]
-        [EnableRateLimiting("auth-system")]
+        [EnableRateLimiting("authSystemPolicy")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> RefreshToken([FromBody] TokenDto tokenModel)
         {
             if (!ModelState.IsValid)
@@ -196,7 +200,7 @@ namespace Blog.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         [Route("revoke/{email}")]
-        [EnableRateLimiting("auth-system")]
+        [EnableRateLimiting("authSystemPolicy")]
         public async Task<IActionResult> Revoke(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
@@ -215,7 +219,8 @@ namespace Blog.Controllers
         }
         
         [HttpPost("request-password-reset")]
-        [EnableRateLimiting("auth-system")]
+        [EnableRateLimiting("authSystemPolicy")]
+        [AllowAnonymous]
         public async Task<IActionResult> RequestPasswordReset([FromBody] RequestPasswordResetDto requestDto)
         {
             string? ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
@@ -237,7 +242,8 @@ namespace Blog.Controllers
         }
 
         [HttpPost("reset-password")]
-        [EnableRateLimiting("auth-system")]
+        [EnableRateLimiting("authSystemPolicy")]
+        [AllowAnonymous]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetDto)
         {
             bool success = await this._uow.RecoverAccountRepository.ValidateAndResetPasswordAsync(resetDto);

@@ -108,7 +108,7 @@ builder.Services.AddRateLimiter(RateLimiterOptions =>
         await context.HttpContext.Response.WriteAsync("Too many requests. Please try again later.");
     };
 
-    RateLimiterOptions.AddFixedWindowLimiter("fixedWindowLimiter", options =>
+    RateLimiterOptions.AddFixedWindowLimiter("fixedWindowLimiterPolicy", options =>
     {
         options.PermitLimit = 10;
         options.Window = TimeSpan.FromSeconds(8);
@@ -116,33 +116,47 @@ builder.Services.AddRateLimiter(RateLimiterOptions =>
         options.QueueLimit = 0;
     });
 
-    RateLimiterOptions.AddSlidingWindowLimiter("SlidingWindowLimiter", options => 
+    RateLimiterOptions.AddSlidingWindowLimiter("SlidingWindowLimiterPolicy", options => 
     {
-        options.PermitLimit = 20;
+        options.PermitLimit = 16;
         options.Window = TimeSpan.FromSeconds(10);
         options.SegmentsPerWindow = 2;
         options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         options.QueueLimit = 5;
     });
 
-    RateLimiterOptions.AddConcurrencyLimiter("ConcurrencyLimiter", options => 
+    RateLimiterOptions.AddConcurrencyLimiter("ConcurrencyLimiterPolicy", options => 
     {
         options.PermitLimit = 6;
         options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         options.QueueLimit = 2;
     });
 
-    RateLimiterOptions.AddFixedWindowLimiter("create-item", options =>
+    RateLimiterOptions.AddFixedWindowLimiter("CreateItemPolicy", options =>
     {
-        options.PermitLimit = 8;
-        options.Window = TimeSpan.FromMinutes(20);
+        options.PermitLimit = 10;
+        options.Window = TimeSpan.FromMinutes(10);
         options.QueueLimit = 0;
     });
 
-    RateLimiterOptions.AddFixedWindowLimiter("auth-system", options => 
+    RateLimiterOptions.AddFixedWindowLimiter("DeleteItemPolicy", options =>
     {
-        options.PermitLimit = 4;
-        options.Window = TimeSpan.FromSeconds(20);
+        options.PermitLimit = 8;
+        options.Window = TimeSpan.FromMinutes(12);
+        options.QueueLimit = 0;
+    });
+
+    RateLimiterOptions.AddFixedWindowLimiter("UpdateItemPolicy", options =>
+    {
+        options.PermitLimit = 8;
+        options.Window = TimeSpan.FromMinutes(12);
+        options.QueueLimit = 0;
+    });
+
+    RateLimiterOptions.AddFixedWindowLimiter("authSystemPolicy", options => 
+    {
+        options.PermitLimit = 3;
+        options.Window = TimeSpan.FromSeconds(16);
         options.QueueLimit = 0;
     });
 });

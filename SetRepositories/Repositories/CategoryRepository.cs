@@ -25,10 +25,10 @@ namespace Blog.SetRepositories.Repositories
             if(long.IsNegative(Id))
                 throw new ResponseException("Id is required");
 
-            CategoryEntity? category = await this._context.CategoryEntities.AsNoTracking()
+            CategoryEntity? category = await _context.CategoryEntities.AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id.Equals(Id));
             
-            if (category is null) 
+            if (category == null) 
                 throw new ResponseException("Category not found", 404);
             
             return category;

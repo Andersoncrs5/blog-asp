@@ -11,7 +11,7 @@ namespace Blog.SetRepositories.IRepositories
     public interface ICategoryRepository
     {
         Task<CategoryEntity> Get(long Id);
-        Task<CategoryEntity> Create(CreateCategoryDTO dto, ApplicationUser Id);
+        Task<CategoryEntity> Create(CreateCategoryDTO dto, ApplicationUser user);
         Task<List<CategoryEntity>> GetAll(bool IsActived = true);
         Task Delete(CategoryEntity category);
         Task<CategoryEntity> Update(CategoryEntity category, UpdateCategoryDTO dto);

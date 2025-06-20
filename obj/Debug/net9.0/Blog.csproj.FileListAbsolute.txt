@@ -145,3 +145,5 @@
 /home/anderson/Desktop/c#/asp_core/api/projects/Blog/obj/Debug/net9.0/Blog.sourcelink.json
 /home/anderson/Desktop/c#/asp_core/api/projects/Blog/bin/Debug/net9.0/appsettings.Development.example.json
 /home/anderson/Desktop/c#/asp_core/api/projects/Blog/bin/Debug/net9.0/appsettings.example.json
+/home/anderson/Desktop/c#/asp_core/api/projects/Blog/bin/Debug/net9.0/Microsoft.AspNetCore.Mvc.Versioning.dll
+/home/anderson/Desktop/c#/asp_core/api/projects/Blog/bin/Debug/net9.0/Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer.dll
