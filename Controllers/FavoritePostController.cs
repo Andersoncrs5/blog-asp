@@ -96,7 +96,7 @@ namespace blog.Controllers
         }
 
         [HttpGet("{postId:required:long}/exists")]
-        [EnableRateLimiting("SlidingWindowLimiterPolicy")]
+        [EnableRateLimiting("CheckExistsPolicy")]
         public async Task<IActionResult> Exists(long postId)
         {
             PostEntity post = await _uow.PostRepository.Get(postId);

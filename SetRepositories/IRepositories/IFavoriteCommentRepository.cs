@@ -12,7 +12,7 @@ namespace Blog.SetRepositories.IRepositories
         Task<FavoriteCommentEntity> Get(ulong Id);
         Task<PaginatedList<FavoriteCommentEntity>> GetAllOfUserPaginated(ApplicationUser user, int pageNumber, int pageSize);
         Task<PaginatedList<FavoriteCommentEntity>> GetAllOfCommentPaginated(CommentEntity comment, int pageNumber, int pageSize);
-        Task<FavoriteCommentEntity> Save(ApplicationUser user, CommentEntity comment);
+        Task<FavoriteCommentEntity> SaveOrRemove(ApplicationUser user, CommentEntity comment);
         Task Remove(FavoriteCommentEntity favorite);
         Task<bool> Exists(ApplicationUser user, CommentEntity comment);
     }

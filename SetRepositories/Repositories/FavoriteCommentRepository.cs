@@ -50,7 +50,7 @@ namespace Blog.SetRepositories.Repositories
             return await PaginatedList<FavoriteCommentEntity>.CreateAsync(query, pageNumber, pageSize);
         }
 
-        public async Task<FavoriteCommentEntity> Save(ApplicationUser user, CommentEntity comment)
+        public async Task<FavoriteCommentEntity> SaveOrRemove(ApplicationUser user, CommentEntity comment)
         {
             FavoriteCommentEntity? check = await _context.FavoriteCommentEntities.AsNoTracking()
                 .FirstOrDefaultAsync(f => f.ApplicationUserId == user.Id && f.CommentId == comment.Id);
@@ -62,10 +62,13 @@ namespace Blog.SetRepositories.Repositories
                 return check;
             }
 
-            FavoriteCommentEntity save = new FavoriteCommentEntity();
-            save.ApplicationUserId = user.Id;
-            save.CommentId = comment.Id;
-
+            FavoriteCommentEntity save = new FavoriteCommentEntity
+            {
+                ApplicationUserId = user.Id,
+                CommentId = comment.Id,
+                CreatedAt = DateTime.UtcNow
+            };
+            
             var result = await _context.FavoriteCommentEntities.AddAsync(save);
             await _context.SaveChangesAsync();
             return result.Entity;
