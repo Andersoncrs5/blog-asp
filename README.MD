@@ -28,6 +28,10 @@ This is an API project for a blog application, developed using ASP.NET Core .NET
 
     Fluent API: Detailed Entity Framework Core configurations for database schema control and relationship mapping.
 
+    Ratelimiting 
+
+    versioning api
+
 ## Technology Stack:
 
     Backend: ASP.NET Core .NET 9
