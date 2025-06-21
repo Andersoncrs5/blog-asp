@@ -316,5 +316,23 @@ namespace Blog.SetRepositories.Repositories
             return metric;
         }
     
+        public async Task<UserMetricEntity> SumOrRedPlaylistCount(UserMetricEntity metric, SumOrRedEnum action)
+        {
+            if (action == SumOrRedEnum.SUM) 
+            {
+                metric.PlaylistCount += 1;
+            }
+
+            if (action == SumOrRedEnum.REDUCE) 
+            {
+                metric.PlaylistCount -= 1;
+            }
+
+            _context.Entry(metric).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return metric;
+        }
+    
     }
 }
