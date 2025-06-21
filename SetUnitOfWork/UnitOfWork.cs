@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using blog.SetRepositories.IRepositories;
+using blog.SetRepositories.Repositories;
 using Blog.Context;
 using Blog.entities;
 using Blog.SetRepositories.IRepositories;
@@ -33,6 +35,7 @@ namespace Blog.SetUnitOfWork
         private IPlaylistRepository? _playlistRepository;
         private IRecoverAccountRepository _recoverAccountRepository;
         private IMediaPostRepository _mediaPostRepository;
+        private IFollowRepository _followRepository;
 
         public UnitOfWork(
             AppDbContext context,
@@ -42,12 +45,12 @@ namespace Blog.SetUnitOfWork
             _userManager = userManager;
         }
 
+        public IFollowRepository FollowRepository
+            => _followRepository ??= new FollowRepository(_context);
         public IMediaPostRepository MediaPostRepository
             => _mediaPostRepository ??= new MediaPostRepository(_context);
-
         public IEmailService EmailService 
             => _emailService ??= new EmailService(_configuration);
-
         public IUserRepository UserRepository
             => _userRepository ??= new UserRepository(_context, _userManager);
 

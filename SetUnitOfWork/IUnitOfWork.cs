@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using blog.SetRepositories.IRepositories;
 using Blog.SetRepositories.IRepositories;
 using Blog.SetServices.IServices;
 
@@ -25,6 +26,7 @@ namespace Blog.SetUnitOfWork
         IRecoverAccountRepository RecoverAccountRepository { get; }
         IEmailService EmailService { get; }
         IMediaPostRepository MediaPostRepository { get; }
+        IFollowRepository FollowRepository { get; }
 
         Task Commit();
     }
