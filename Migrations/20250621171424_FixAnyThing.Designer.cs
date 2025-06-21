@@ -3,6 +3,7 @@ using System;
 using Blog.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Blog.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250621171424_FixAnyThing")]
+    partial class FixAnyThing
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -27,9 +30,8 @@ namespace Blog.Migrations
 
             modelBuilder.Entity("Blog.entities.ApplicationUser", b =>
                 {
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
@@ -38,11 +40,12 @@ namespace Blog.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("text");
 
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -70,7 +73,7 @@ namespace Blog.Migrations
                     b.Property<string>("RefreshToken")
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                    b.Property<DateTime>("RefreshTokenExpiryTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SecurityStamp")
@@ -83,7 +86,7 @@ namespace Blog.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
-                    b.HasKey("Email");
+                    b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -105,7 +108,7 @@ namespace Blog.Migrations
 
                     b.Property<string>("ApplicationUserId")
                         .IsRequired()
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -151,7 +154,7 @@ namespace Blog.Migrations
 
                     b.Property<string>("ApplicationUserId")
                         .IsRequired()
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -245,8 +248,6 @@ namespace Blog.Migrations
 
                     b.HasKey("CommentId");
 
-                    b.HasIndex("ReportCount");
-
                     b.ToTable("CommentMetricEntities");
                 });
 
@@ -260,7 +261,7 @@ namespace Blog.Migrations
 
                     b.Property<string>("ApplicationUserId")
                         .IsRequired()
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("text");
 
                     b.Property<long>("CommentId")
                         .HasColumnType("bigint");
@@ -289,7 +290,7 @@ namespace Blog.Migrations
 
                     b.Property<string>("ApplicationUserId")
                         .IsRequired()
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -354,8 +355,6 @@ namespace Blog.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.HasIndex("Url");
-
                     b.ToTable("media_post");
                 });
 
@@ -369,7 +368,7 @@ namespace Blog.Migrations
 
                     b.Property<string>("ApplicationUserId")
                         .IsRequired()
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -452,7 +451,7 @@ namespace Blog.Migrations
 
                     b.Property<string>("ApplicationUserId")
                         .IsRequired()
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -578,7 +577,7 @@ namespace Blog.Migrations
 
                     b.Property<string>("ApplicationUserId")
                         .IsRequired()
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("text");
 
                     b.Property<long>("CommentId")
                         .HasColumnType("bigint");
@@ -614,7 +613,7 @@ namespace Blog.Migrations
 
                     b.Property<string>("ApplicationUserId")
                         .IsRequired()
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -640,7 +639,7 @@ namespace Blog.Migrations
             modelBuilder.Entity("Blog.entities.RecoverAccountEntity", b =>
                 {
                     b.Property<string>("ApplicationUserId")
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("BlockedAt")
                         .HasColumnType("timestamp with time zone");
@@ -682,12 +681,12 @@ namespace Blog.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
 
-                    b.Property<string>("UserEmail")
-                        .HasColumnType("character varying(256)");
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
 
                     b.HasKey("ApplicationUserId");
 
-                    b.HasIndex("UserEmail");
+                    b.HasIndex("UserId");
 
                     b.ToTable("recover_account");
                 });
@@ -695,7 +694,7 @@ namespace Blog.Migrations
             modelBuilder.Entity("Blog.entities.UserMetricEntity", b =>
                 {
                     b.Property<string>("ApplicationUserId")
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("text");
 
                     b.Property<long>("CommentsCount")
                         .HasColumnType("bigint")
@@ -780,8 +779,6 @@ namespace Blog.Migrations
 
                     b.HasKey("ApplicationUserId");
 
-                    b.HasIndex("ApplicationUserId");
-
                     b.HasIndex("ProfileViews");
 
                     b.ToTable("user_metric");
@@ -854,7 +851,7 @@ namespace Blog.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -876,7 +873,7 @@ namespace Blog.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("text");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -888,7 +885,7 @@ namespace Blog.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("text");
 
                     b.Property<string>("RoleId")
                         .HasColumnType("text");
@@ -903,7 +900,7 @@ namespace Blog.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("text");
 
                     b.Property<string>("LoginProvider")
                         .HasColumnType("text");
@@ -1116,7 +1113,7 @@ namespace Blog.Migrations
 
                     b.HasOne("Blog.entities.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserEmail");
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });

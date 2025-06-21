@@ -10,7 +10,7 @@ namespace Blog.entities
     public class ApplicationUser: IdentityUser
     {
         public string? RefreshToken { get; set; }
-        public DateTime RefreshTokenExpiryTime { get; set; }
+        public DateTime? RefreshTokenExpiryTime { get; set; }
 
         [JsonIgnore] public virtual UserMetricEntity? UserMetric { get; set; }
         [JsonIgnore] public virtual ICollection<CategoryEntity>? Categories { get; set; }

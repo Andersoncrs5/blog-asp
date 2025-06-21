@@ -45,9 +45,15 @@ namespace Blog.Context
                 .HasForeignKey(f => f.PostId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.Entity<ApplicationUser>(entity => 
+            {
+                entity.HasKey(u => u.Email);
+            });   
+
             builder.Entity<MediaPostEntity>(entity => 
             {
                 entity.HasKey(e => e.Id);
+                entity.HasIndex(c => c.Url);
                 entity.Property(e => e.Id).HasColumnType("bigint");
                 entity.Property(e => e.PostId).IsRequired(true);
                 entity.Property(e => e.Url).IsRequired(true).HasMaxLength(1000);
@@ -169,6 +175,7 @@ namespace Blog.Context
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
                 entity.Property(e => e.UpdatedAt).IsRequired(false);
                 entity.HasIndex(um => um.ProfileViews);
+                entity.HasIndex(um => um.ApplicationUserId);
             });
                 
             builder.Entity<ApplicationUser>()
@@ -267,6 +274,7 @@ namespace Blog.Context
                 entity.Property(e => e.IsActived).IsRequired().HasDefaultValue(true);
             });
 
+            
             builder.Entity<FavoritePostEntity>(entity =>
             {
                 entity.Property(f => f.Id).HasColumnType("bigint");
@@ -285,6 +293,7 @@ namespace Blog.Context
             builder.Entity<CommentMetricEntity>(entity => 
             {
                 entity.HasKey(c => c.CommentId);
+                entity.HasIndex(c => c.ReportCount);
                 entity.Property(c => c.CommentId).HasColumnType("bigint");
                 entity.Property(c => c.Likes).HasColumnType("bigint").IsRequired().HasDefaultValue(0);
                 entity.Property(c => c.DisLikes).HasColumnType("bigint").IsRequired().HasDefaultValue(0);
