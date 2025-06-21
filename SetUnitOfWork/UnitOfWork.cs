@@ -32,6 +32,7 @@ namespace Blog.SetUnitOfWork
         private IPlaylistItemRepository? _playlistItemRepository;
         private IPlaylistRepository? _playlistRepository;
         private IRecoverAccountRepository _recoverAccountRepository;
+        private IMediaPostRepository _mediaPostRepository;
 
         public UnitOfWork(
             AppDbContext context,
@@ -40,6 +41,9 @@ namespace Blog.SetUnitOfWork
             _context = context;
             _userManager = userManager;
         }
+
+        public IMediaPostRepository MediaPostRepository
+            => _mediaPostRepository ??= new MediaPostRepository(_context);
 
         public IEmailService EmailService 
             => _emailService ??= new EmailService(_configuration);

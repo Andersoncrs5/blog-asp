@@ -27,7 +27,7 @@ namespace blog.Controllers
             _uow = uow;
         }
 
-        [HttpGet("/{Id:required}/{includeRelated:bool?}/{includeMetric:bool?}")]
+        [HttpGet("{Id:required}/{includeRelated:bool?}/{includeMetric:bool?}")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> Get(ulong Id, bool includeRelated, bool includeMetric )
         {
@@ -122,5 +122,20 @@ namespace blog.Controllers
                 result
             ));   
         }
+    
+        [HttpGet("{commentId:required}/get-metric")]
+        public async Task<IActionResult> GetMetric(ulong commentId)
+        {
+            CommentEntity comment = await _uow.CommentRepository.Get(commentId);
+            CommentMetricEntity metric = await _uow.CommentMetricRepository.Get(comment);
+
+            return Ok(new Response(
+                "success",
+                "Comment metric found with successfully",
+                200,
+                metric
+            ));
+        }
+
     }
 }

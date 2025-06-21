@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Blog.DTOs.Media;
 using Blog.entities;
+using Blog.utils;
 
 namespace Blog.SetRepositories.IRepositories
 {
@@ -11,7 +12,7 @@ namespace Blog.SetRepositories.IRepositories
     {
         Task<MediaPostEntity> GetAsync(ulong Id);
         Task DeleteAsync(MediaPostEntity media);
-        Task<List<MediaPostEntity>> GetAllOfPost(PostEntity post);
+        Task<PaginatedList<MediaPostEntity>> GetAllOfPostPaginatedListAsync(PostEntity post, int pageNumber, int pageSize);
         Task<MediaPostEntity> CreateAsync(PostEntity post, CreateMediaDTO dto);
         Task<MediaPostEntity> UpdateAsync(MediaPostEntity media, UpdateMediaDTO dto);
     }

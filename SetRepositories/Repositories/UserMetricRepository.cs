@@ -23,7 +23,7 @@ namespace Blog.SetRepositories.Repositories
         
         public async Task<UserMetricEntity> Get(string? userId) 
         {
-            if(!string.IsNullOrWhiteSpace(userId))
+            if(string.IsNullOrWhiteSpace(userId))
                 throw new ResponseException("User id is required", 400, "fail");
 
             UserMetricEntity? metric = await this._context.UserMetrics.AsNoTracking()
@@ -38,7 +38,7 @@ namespace Blog.SetRepositories.Repositories
 
         public async Task<UserMetricEntity> Create(string userId) 
         {
-            if(!string.IsNullOrWhiteSpace(userId))
+            if(string.IsNullOrWhiteSpace(userId))
                 throw new ResponseException("User id is required", 400, "fail");
 
             UserMetricEntity metric = new UserMetricEntity();

@@ -40,13 +40,14 @@ namespace Blog.SetRepositories.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<MediaPostEntity>> GetAllOfPost(PostEntity post)
+        public async Task<PaginatedList<MediaPostEntity>> GetAllOfPostPaginatedListAsync(PostEntity post, int pageNumber, int pageSize)
         {
-            return await _context.MediaPostEntities.AsNoTracking()
+            IQueryable<MediaPostEntity> query = _context.MediaPostEntities.AsNoTracking()
                 .Where(e => e.PostId == post.Id)
                 .OrderBy(e => e.Order ?? int.MaxValue)
-                .ThenBy(e => e.CreatedAt)
-                .ToListAsync();
+                .ThenBy(e => e.CreatedAt);
+
+            return await PaginatedList<MediaPostEntity>.CreateAsync(query, pageNumber, pageSize);
         }
 
         public async Task<MediaPostEntity> CreateAsync(PostEntity post, CreateMediaDTO dto)

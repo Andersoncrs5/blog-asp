@@ -44,7 +44,7 @@ namespace Blog.Controllers
             _uow = unit;
         }
 
-        [HttpPost("/login")]
+        [HttpPost("login")]
         [EnableRateLimiting("authSystemPolicy")]
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginUserDTO dto)
@@ -138,7 +138,7 @@ namespace Blog.Controllers
                 ));
             }
 
-            await this._uow.UserMetricRepository.Create(user.Id);
+            await _uow.UserMetricRepository.Create(user.Id);
 
             // await this._uow.EmailService.SendWelcomeEmailAsync(user.Email, user.UserName);
 

@@ -24,6 +24,7 @@ namespace Blog.SetUnitOfWork
         IPlaylistRepository PlaylistRepository { get; }
         IRecoverAccountRepository RecoverAccountRepository { get; }
         IEmailService EmailService { get; }
+        IMediaPostRepository MediaPostRepository { get; }
 
         Task Commit();
     }
