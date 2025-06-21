@@ -176,6 +176,8 @@ namespace Blog.Context
                 entity.Property(e => e.UpdatedAt).IsRequired(false);
                 entity.HasIndex(um => um.ProfileViews);
                 entity.HasIndex(um => um.ApplicationUserId);
+                entity.HasIndex(um => um.PlaylistCount);
+                entity.Property(e => e.PlaylistCount).HasColumnType("bigint").HasDefaultValue(0).IsRequired();
             });
                 
             builder.Entity<ApplicationUser>()
@@ -273,7 +275,6 @@ namespace Blog.Context
                 entity.Property(e => e.Content).IsRequired();
                 entity.Property(e => e.IsActived).IsRequired().HasDefaultValue(true);
             });
-
             
             builder.Entity<FavoritePostEntity>(entity =>
             {
