@@ -125,6 +125,15 @@ builder.Services.AddRateLimiter(RateLimiterOptions =>
         options.QueueLimit = 0;
     });
 
+    RateLimiterOptions.AddSlidingWindowLimiter("CheckExistsPolicy", options => 
+    {
+        options.PermitLimit = 30;
+        options.Window = TimeSpan.FromSeconds(10);
+        options.SegmentsPerWindow = 2;
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = 0;
+    });
+
     RateLimiterOptions.AddConcurrencyLimiter("ConcurrencyLimiterPolicy", options => 
     {
         options.PermitLimit = 6;
