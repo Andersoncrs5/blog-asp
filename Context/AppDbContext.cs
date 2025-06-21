@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using blog.entities;
 using Blog.entities;
 using Blog.entities.enums;
 using Microsoft.AspNetCore.Identity;
@@ -29,6 +30,7 @@ namespace Blog.Context
         public DbSet<PlaylistItemEntity> PlaylistItemEntities { get; set; }
         public DbSet<RecoverAccountEntity> RecoverAccountEntities { get; set; }
         public DbSet<MediaPostEntity> MediaPostEntities  { get; set; }
+        public DbSet<FollowEntity> FollowsEntities { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -38,6 +40,25 @@ namespace Blog.Context
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<FollowEntity>(entity =>
+            {
+                entity.HasKey(f => new { f.FollowerId, f.FollowedId });
+
+                entity.Property(f => f.CreatedAt)
+                      .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                      .ValueGeneratedOnAdd();
+
+                entity.HasOne(f => f.Follower)
+                      .WithMany(u => u.Following) 
+                      .HasForeignKey(f => f.FollowerId)
+                      .OnDelete(DeleteBehavior.Restrict); 
+                                                            
+                entity.HasOne(f => f.Followed)
+                      .WithMany(u => u.Followers) 
+                      .HasForeignKey(f => f.FollowedId)
+                      .OnDelete(DeleteBehavior.Restrict);                
+            });
 
             builder.Entity<PostEntity>()
                 .HasMany(u => u.MediaPostEntities)

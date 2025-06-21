@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using blog.entities;
 using Microsoft.AspNetCore.Identity;
 
 namespace Blog.entities
@@ -22,6 +23,7 @@ namespace Blog.entities
         [JsonIgnore] public virtual ICollection<ReactionCommentEntity>? ReactionComments { get; set; }
         [JsonIgnore] public virtual ICollection<PlaylistEntity>? PlaylistEntities { get; set; }
         [JsonIgnore] public virtual RecoverAccountEntity? RecoverAccountEntities { get; set; }
-
+        [JsonIgnore] public virtual ICollection<FollowEntity>? Following { get; set; } = new List<FollowEntity>();
+        [JsonIgnore] public virtual ICollection<FollowEntity>? Followers { get; set; } = new List<FollowEntity>();
     }
 }
