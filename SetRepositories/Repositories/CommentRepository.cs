@@ -20,7 +20,7 @@ namespace Blog.SetRepositories.Repositories
             _context = context;
         }
 
-        public async Task<CommentEntity> Get(ulong Id, bool includeRelated = false)
+        public async Task<CommentEntity> Get(ulong Id, bool includeRelated = false, bool includeMetric = false)
         {
 
             IQueryable<CommentEntity> query = _context.CommentEntities.AsNoTracking();
@@ -30,6 +30,12 @@ namespace Blog.SetRepositories.Repositories
                 query = query
                     .Include(c => c.ApplicationUser)
                     .Include(c => c.Post);          
+            }
+
+            if (includeMetric)
+            {
+                query = query
+                    .Include(c => c.CommentMetric);
             }
         
             CommentEntity? comment = await query.FirstOrDefaultAsync(c => c.Id == Id);
@@ -42,20 +48,36 @@ namespace Blog.SetRepositories.Repositories
 
         public async Task Delete(CommentEntity comment)
         {
+            List<CommentEntity> comments = await _context.CommentEntities.AsNoTracking()
+                .Where(c => c.ParentId == comment.Id).ToListAsync();
+
+            _context.CommentEntities.RemoveRange(comments);
+
             _context.Remove(comment);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<PaginatedList<CommentEntity>> GetAllOfUser(ApplicationUser user, int pageNumber, int pageSize)
+        public async Task<PaginatedList<CommentEntity>> GetAllOfUserPaginatedList(ApplicationUser user, int pageNumber, int pageSize, bool includeRelated = false, bool includeMetric = false)
         {
             IQueryable<CommentEntity> query = _context.CommentEntities
                 .AsNoTracking()
                 .Where(c => c.ApplicationUserId == user.Id);
 
+            if (includeRelated) 
+            {
+                query = query.Include(c => c.ApplicationUser).Include(c => c.Post);
+            }
+            
+            if (includeMetric)
+            {
+                query = query
+                    .Include(c => c.CommentMetric);
+            }
+
             return await PaginatedList<CommentEntity>.CreateAsync(query, pageNumber, pageSize);
         }
 
-        public async Task<PaginatedList<CommentEntity>> GetAllOfPost(PostEntity post, int pageNumber, int pageSize)
+        public async Task<PaginatedList<CommentEntity>> GetAllOfPostPaginatedList(PostEntity post, int pageNumber, int pageSize)
         {
             IQueryable<CommentEntity> query = _context.CommentEntities.AsNoTracking()
                 .Include(c => c.ApplicationUser)
@@ -64,15 +86,16 @@ namespace Blog.SetRepositories.Repositories
             return await PaginatedList<CommentEntity>.CreateAsync(query, pageNumber, pageSize);
         }
 
-        public async Task<CommentEntity> Create(ApplicationUser user, PostEntity post, CreateCommentDTO dto) 
+        public async Task<CommentEntity> Create(ApplicationUser user, PostEntity post, CreateCommentDTO dto, ulong? parentId = null) 
         {
             CommentEntity comment = new CommentEntity
             {
                 Content = dto.Content,
                 ApplicationUserId = user.Id,
                 PostId = post.Id,
-                ParentId = null
-            };
+                ParentId = parentId,
+                CreatedAt = DateTime.UtcNow
+            };            
 
             var result = await _context.CommentEntities.AddAsync(comment);
             await _context.SaveChangesAsync();
@@ -80,28 +103,24 @@ namespace Blog.SetRepositories.Repositories
             return result.Entity;
         }
 
-        public async Task<CommentEntity> CreateOnComment(ApplicationUser user, PostEntity post, CreateCommentDTO dto, CommentEntity commentExist)
-        {
-            CommentEntity comment = new CommentEntity
-            {
-                Content = dto.Content,
-                ApplicationUserId = user.Id,
-                PostId = post.Id,
-                ParentId = commentExist.Id 
-            };
-            
-            var result = await _context.CommentEntities.AddAsync(comment);
-
-            await _context.SaveChangesAsync();
-            return result.Entity;
-        }
-
-        public async Task<PaginatedList<CommentEntity>> GetAllCommentOnComment(CommentEntity comment, int pageNumber, int pageSize)
+        public async Task<PaginatedList<CommentEntity>> GetAllCommentOnCommentPaginatedList(CommentEntity comment, int pageNumber, int pageSize, bool includeRelated = false, bool includeMetric = false)
         {
             IQueryable<CommentEntity> query = _context.CommentEntities
                 .AsNoTracking()
-                .Include(c => c.ApplicationUser)
                 .Where(c => c.ParentId == comment.Id);
+
+            if (includeRelated)
+            {
+                query = query
+                    .Include(c => c.ApplicationUser)
+                    .Include(c => c.Post);
+            }
+
+            if (includeMetric)
+            {
+                query = query
+                    .Include(c => c.CommentMetric);
+            }
 
             return await PaginatedList<CommentEntity>.CreateAsync(query, pageNumber, pageSize);
         }

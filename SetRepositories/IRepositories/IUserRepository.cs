@@ -9,7 +9,7 @@ namespace Blog.SetRepositories.IRepositories
 {
     public interface IUserRepository
     {
-        Task<ApplicationUser> Get(string? id);
+        Task<ApplicationUser> Get(string? id, bool includeMetric = false);
         Task Delete(ApplicationUser user);
         Task<ApplicationUser> Update(ApplicationUser? user, UpdateUserDto dto);
     }

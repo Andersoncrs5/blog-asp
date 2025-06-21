@@ -118,18 +118,18 @@ builder.Services.AddRateLimiter(RateLimiterOptions =>
 
     RateLimiterOptions.AddSlidingWindowLimiter("SlidingWindowLimiterPolicy", options => 
     {
-        options.PermitLimit = 16;
+        options.PermitLimit = 20;
         options.Window = TimeSpan.FromSeconds(10);
         options.SegmentsPerWindow = 2;
         options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        options.QueueLimit = 5;
+        options.QueueLimit = 0;
     });
 
     RateLimiterOptions.AddConcurrencyLimiter("ConcurrencyLimiterPolicy", options => 
     {
         options.PermitLimit = 6;
         options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        options.QueueLimit = 2;
+        options.QueueLimit = 0;
     });
 
     RateLimiterOptions.AddFixedWindowLimiter("SaveOrRemoveFavoriteItemPolicy", options =>

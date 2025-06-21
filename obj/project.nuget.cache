@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "z5wcAu6xEY0=",
+  "dgSpecHash": "Ok1Y1y7dpoE=",
   "success": true,
-  "projectFilePath": "/home/anderson/Desktop/c#/asp_core/api/projects/Blog/Blog.csproj",
+  "projectFilePath": "/home/anderson/Desktop/c#/asp_core/api/projects/blog-asp/Blog.csproj",
   "expectedPackageFiles": [
     "/home/anderson/.nuget/packages/castle.core/5.1.1/castle.core.5.1.1.nupkg.sha512",
     "/home/anderson/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",

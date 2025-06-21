@@ -17,6 +17,7 @@ namespace Blog.Controllers
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiVersion("1.0")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CategoryController : ControllerBase
     {
         private readonly IUnitOfWork _uow;
@@ -40,7 +41,6 @@ namespace Blog.Controllers
         }
 
         [HttpPost]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [EnableRateLimiting("CreateItemPolicy")]
         public async Task<IActionResult> Create([FromBody] CreateCategoryDTO dto)
         {
@@ -71,7 +71,6 @@ namespace Blog.Controllers
         }
         
         [HttpDelete("{Id:long}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [EnableRateLimiting("DeleteItemPolicy")]
         public async Task<IActionResult> Delete(long Id)
         {
@@ -87,7 +86,6 @@ namespace Blog.Controllers
         }
 
         [HttpPut("{Id:long}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [EnableRateLimiting("UpdateItemPolicy")]
         public async Task<IActionResult> Update([FromBody] UpdateCategoryDTO dto, long Id)
         {
@@ -103,7 +101,6 @@ namespace Blog.Controllers
         }
         
         [HttpGet("change-status/{Id:long}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [EnableRateLimiting("UpdateItemPolicy")]
         public async Task<IActionResult> ChangeStatusActive(long Id)
         {

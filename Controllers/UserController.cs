@@ -42,11 +42,11 @@ namespace Blog.Controllers
             ));
         }
 
-        [HttpGet("{userId:required:string}")]
+        [HttpGet("{userId:required}/{includeMetric:bool?}")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetUser(string userId)
+        public async Task<IActionResult> GetUser(string userId, bool includeMetric = false)
         {
-            ApplicationUser user = await _uow.UserRepository.Get(userId);
+            ApplicationUser user = await _uow.UserRepository.Get(userId, includeMetric);
 
             return Ok(new Response(
                 "success",
@@ -99,6 +99,20 @@ namespace Blog.Controllers
             string? id = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser user = await _uow.UserRepository.Get(id);
             UserMetricEntity metric = await this._uow.UserMetricRepository.Get(user.Id);
+
+            return Ok(new Response(
+                "success",
+                "User metric found",
+                200,
+                metric
+            ));
+        }
+
+        [HttpGet("{userId:required}/get-metric")]
+        [EnableRateLimiting("SlidingWindowLimiterPolicy")]
+        public async Task<IActionResult> GetMetric(string userId)
+        {
+            UserMetricEntity metric = await this._uow.UserMetricRepository.Get(userId);
 
             return Ok(new Response(
                 "success",

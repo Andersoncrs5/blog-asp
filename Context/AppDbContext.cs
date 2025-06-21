@@ -340,7 +340,7 @@ namespace Blog.Context
 
                 entity.Property(e => e.Content)
                       .IsRequired()
-                      .HasMaxLength(2000);
+                      .HasMaxLength(1000);
             });
 
             builder.Entity<ApplicationUser>().ToTable("app_users");

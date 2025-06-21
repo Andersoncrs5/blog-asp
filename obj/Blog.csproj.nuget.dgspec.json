@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/anderson/Desktop/c#/asp_core/api/projects/Blog/Blog.csproj": {}
+    "/home/anderson/Desktop/c#/asp_core/api/projects/blog-asp/Blog.csproj": {}
   },
   "projects": {
-    "/home/anderson/Desktop/c#/asp_core/api/projects/Blog/Blog.csproj": {
+    "/home/anderson/Desktop/c#/asp_core/api/projects/blog-asp/Blog.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/anderson/Desktop/c#/asp_core/api/projects/Blog/Blog.csproj",
+        "projectUniqueName": "/home/anderson/Desktop/c#/asp_core/api/projects/blog-asp/Blog.csproj",
         "projectName": "Blog",
-        "projectPath": "/home/anderson/Desktop/c#/asp_core/api/projects/Blog/Blog.csproj",
+        "projectPath": "/home/anderson/Desktop/c#/asp_core/api/projects/blog-asp/Blog.csproj",
         "packagesPath": "/home/anderson/.nuget/packages/",
-        "outputPath": "/home/anderson/Desktop/c#/asp_core/api/projects/Blog/obj/",
+        "outputPath": "/home/anderson/Desktop/c#/asp_core/api/projects/blog-asp/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/anderson/.nuget/NuGet/NuGet.Config"

@@ -39,7 +39,7 @@ namespace blog.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{Id:required:string}/get-all-another-user")]
+        [HttpGet("{Id:required}/get-all-another-user")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> GetAllAnotherOfUserPaginated(string Id, [FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
         {
