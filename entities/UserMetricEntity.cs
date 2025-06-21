@@ -77,6 +77,10 @@ namespace Blog.entities
         [Column("profile_views")] 
         public long ProfileViews { get; set; } = 0;
 
+        [Required] 
+        [Column("play_list_count")] 
+        public long PlaylistCount { get; set; } = 0;
+
         [Timestamp]
         public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 
