@@ -31,6 +31,7 @@ namespace Blog.Context
         public DbSet<RecoverAccountEntity> RecoverAccountEntities { get; set; }
         public DbSet<MediaPostEntity> MediaPostEntities  { get; set; }
         public DbSet<FollowEntity> FollowsEntities { get; set; }
+        public DbSet<UserPreferenceEntity> UserPreferenceEntities { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -40,6 +41,26 @@ namespace Blog.Context
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<UserPreferenceEntity>(entity =>
+            {
+                entity.HasKey(up => up.Id); 
+                entity.Property(up => up.Id).HasColumnType("bigint").ValueGeneratedOnAdd();
+
+                entity.Property(up => up.ApplicationUserId).IsRequired();
+                entity.Property(up => up.CategoryId).IsRequired();
+                entity.Property(up => up.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
+                
+                entity.HasOne(up => up.ApplicationUser)
+                      .WithMany(u => u.UserPreferenceEntities) 
+                      .HasForeignKey(up => up.ApplicationUserId)
+                      .OnDelete(DeleteBehavior.Cascade); 
+                
+                entity.HasOne(up => up.Category)
+                      .WithMany(c => c.UserPreferenceEntities) 
+                      .HasForeignKey(up => up.CategoryId)
+                      .OnDelete(DeleteBehavior.Restrict); 
+            });
 
             builder.Entity<FollowEntity>(entity =>
             {
