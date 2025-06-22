@@ -240,6 +240,7 @@ namespace Blog.Context
                 entity.HasIndex(um => um.ProfileViews);
                 entity.HasIndex(um => um.ApplicationUserId);
                 entity.HasIndex(um => um.PlaylistCount);
+                entity.HasIndex(um => um.PreferenceCount);
                 entity.Property(e => e.PlaylistCount).HasColumnType("bigint").HasDefaultValue(0).IsRequired();
             });
                 

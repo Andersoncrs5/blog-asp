@@ -20,6 +20,8 @@ namespace blog.entities
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        public bool ReceiveNotifications { get; set; } = false;
+
         [JsonIgnore]
         [ForeignKey(nameof(FollowerId))] 
         public virtual ApplicationUser? Follower { get; set; }
