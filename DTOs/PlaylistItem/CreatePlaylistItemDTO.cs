@@ -8,7 +8,8 @@ namespace Blog.DTOs.PlaylistItem
 {
     public class CreatePlaylistItemDTO
     {
-        [Required] public ulong PostId { get; set; }
+        [Required] public long PostId { get; set; }
+        [Required] public ulong Playlist { get; set; }
         public int? Order { get; set; } 
     }
 }
