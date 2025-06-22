@@ -28,6 +28,7 @@ namespace Blog.SetUnitOfWork
         IMediaPostRepository MediaPostRepository { get; }
         IFollowRepository FollowRepository { get; }
         IUserConfigRepository UserConfigRepository { get; }
+        IUserPreferenceRepository UserPreferenceRepository { get; }
 
         Task Commit();
     }

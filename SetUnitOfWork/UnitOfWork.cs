@@ -37,6 +37,7 @@ namespace Blog.SetUnitOfWork
         private IMediaPostRepository _mediaPostRepository;
         private IFollowRepository _followRepository;
         private IUserConfigRepository _userConfigRepository;
+        private IUserPreferenceRepository _userPreferenceRepository;
 
         public UnitOfWork(
             AppDbContext context,
@@ -46,6 +47,8 @@ namespace Blog.SetUnitOfWork
             _userManager = userManager;
         }
 
+        public IUserPreferenceRepository UserPreferenceRepository
+            => _userPreferenceRepository ??= new UserPreferenceRepository(_context);
         public IUserConfigRepository UserConfigRepository 
             => _userConfigRepository ??= new UserConfigRepository(_context);
         public IFollowRepository FollowRepository
@@ -56,43 +59,30 @@ namespace Blog.SetUnitOfWork
             => _emailService ??= new EmailService(_configuration);
         public IUserRepository UserRepository
             => _userRepository ??= new UserRepository(_context, _userManager);
-
         public IRecoverAccountRepository RecoverAccountRepository
             => _recoverAccountRepository ??= new RecoverAccountRepository(_context, _userManager, _emailService);
-
         public IUserMetricRepository UserMetricRepository
             => _userMetricRepository ??= new UserMetricRepository(_context);
-
         public ICategoryRepository CategoryRepository
             => _categoryRepository ??= new CategoryRepository(_context);
-
         public IPostRepository PostRepository
             => _postRepository ??= new PostRepository(_context);
-
         public IPostMetricRepository PostMetricRepository
             => _postMetricRepository ??= new PostMetricRepository(_context);
-
         public IFavoritePostRepository FavoritePostRepository
             => _favoritePostRepository ??= new FavoritePostRepository(_context);
-
         public IFavoriteCommentRepository FavoriteCommentRepository
             => _favoriteCommentRepository ??= new FavoriteCommentRepository(_context);
-
         public IReactionPostRepository ReactionPostRepository
             => _reactionPostRepository ??= new ReactionPostRepository(_context);
-
         public IReactionCommentRepository ReactionCommentRepository
             => _reactionCommentRepository ??= new ReactionCommentRepository(_context);
-
         public ICommentRepository CommentRepository
             => _commentRepository ??= new CommentRepository(_context);
-
         public ICommentMetricRepository CommentMetricRepository
             => _commentMetricRepository ??= new CommentMetricRepository(_context);
-
         public IPlaylistItemRepository PlaylistItemRepository
             => _playlistItemRepository ??= new PlaylistItemRepository(_context);
-
         public IPlaylistRepository PlaylistRepository
             => _playlistRepository ??= new PlaylistRepository(_context);
 
