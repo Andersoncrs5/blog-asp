@@ -10,7 +10,7 @@ namespace blog.SetRepositories.IRepositories
 {
     public interface IUserConfigRepository
     {
-        Task<UserConfigEntity> GetAsync(ApplicationUser user, bool includeRelations);
+        Task<UserConfigEntity> GetAsync(ApplicationUser user, bool includeRelations = false);
         Task DeleteAsync(UserConfigEntity config);
         Task<UserConfigEntity> CreateAsync(CreateUserConfigDTO dto ,ApplicationUser user);
         Task<UserConfigEntity> UpdateAsync(UpdateUserConfigDTO dto ,ApplicationUser user);

@@ -21,7 +21,7 @@ namespace blog.SetRepositories.Repositories
             _context = context;
         }
 
-        public async Task<UserConfigEntity> GetAsync(ApplicationUser user, bool includeRelations)
+        public async Task<UserConfigEntity> GetAsync(ApplicationUser user, bool includeRelations = false)
         {
             UserConfigEntity? config = await _context.UserConfigEntities.AsNoTracking()
                 .FirstOrDefaultAsync(c => c.ApplicationUserId == user.Id);
