@@ -32,6 +32,7 @@ namespace Blog.Context
         public DbSet<MediaPostEntity> MediaPostEntities  { get; set; }
         public DbSet<FollowEntity> FollowsEntities { get; set; }
         public DbSet<UserPreferenceEntity> UserPreferenceEntities { get; set; }
+        public DbSet<UserConfigEntity> UserConfigEntities { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -41,6 +42,26 @@ namespace Blog.Context
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<UserConfigEntity>(entity =>
+            {
+                entity.HasKey(uc => uc.ApplicationUserId);
+
+                entity.HasOne(uc => uc.ApplicationUser) 
+                      .WithOne(u => u.UserConfig)       
+                      .HasForeignKey<UserConfigEntity>(uc => uc.ApplicationUserId) 
+                      .OnDelete(DeleteBehavior.Cascade); 
+
+                entity.Property(uc => uc.ThemeName).HasMaxLength(50).IsRequired(false);
+                entity.Property(uc => uc.PrimaryColor).HasMaxLength(7).IsRequired(false);
+                entity.Property(uc => uc.SecondaryColor).HasMaxLength(7).IsRequired(false);
+                entity.Property(uc => uc.AccentColor).HasMaxLength(7).IsRequired(false);
+                entity.Property(uc => uc.BorderColor).HasMaxLength(7).IsRequired(false);
+                entity.Property(uc => uc.BorderColor).HasMaxLength(50).IsRequired(false);
+                entity.Property(uc => uc.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
+                entity.Property(uc => uc.UpdatedAt).IsRequired(false);
+                entity.Property(uc => uc.RowVersion).IsRowVersion();
+            });
 
             builder.Entity<UserPreferenceEntity>(entity =>
             {
