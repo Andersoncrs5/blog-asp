@@ -334,5 +334,24 @@ namespace Blog.SetRepositories.Repositories
             return metric;
         }
     
+        public async Task<UserMetricEntity> SumOrRedPreferenceCount(UserMetricEntity metric, SumOrRedEnum action)
+        {
+            if (action == SumOrRedEnum.SUM) 
+            {
+                metric.PreferenceCount += 1;
+            }
+
+            if (action == SumOrRedEnum.REDUCE) 
+            {
+                metric.PreferenceCount -= 1;
+            }
+
+            _context.Entry(metric).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return metric;
+        }
+    
+
     }
 }

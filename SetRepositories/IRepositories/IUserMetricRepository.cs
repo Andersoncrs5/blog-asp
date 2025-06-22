@@ -28,5 +28,6 @@ namespace Blog.SetRepositories.IRepositories
         Task<UserMetricEntity> SumOrRedProfileViews(UserMetricEntity metric, SumOrRedEnum action);
         Task<UserMetricEntity> SumOrRedPlaylistCount(UserMetricEntity metric, SumOrRedEnum action);
         Task<UserMetricEntity> SumOrRedLastLogin(UserMetricEntity metric, SumOrRedEnum action);
+        Task<UserMetricEntity> SumOrRedPreferenceCount(UserMetricEntity metric, SumOrRedEnum action);
     }
 }
