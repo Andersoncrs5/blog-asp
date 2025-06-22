@@ -104,5 +104,22 @@ namespace blog.SetRepositories.Repositories
             return await PaginatedList<FollowEntity>.CreateAsync(query, pageNumber, pageSize);
         }
         
+        public async Task<FollowEntity> ChangeStatusReceiveNotifications(ApplicationUser follower, ApplicationUser followed)
+        {
+            FollowEntity? follow = await _context.FollowsEntities.AsNoTracking()
+                .FirstOrDefaultAsync(f => f.FollowerId == follower.Id && f.FollowedId == followed.Id);
+
+            if (follow is null)
+                throw new ResponseException("Error the change status.", 404);
+
+            follow.ReceiveNotifications = !follow.ReceiveNotifications;
+
+            _context.Entry(follow).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return follow;
+        }
+
+        
+
     }
 }
