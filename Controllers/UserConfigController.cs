@@ -8,12 +8,17 @@ using blog.entities;
 using Blog.entities;
 using Blog.SetUnitOfWork;
 using Blog.utils;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace blog.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    [ApiVersion("1.0")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class UserConfigController : ControllerBase
     {
         private readonly IUnitOfWork _uow;
@@ -24,6 +29,7 @@ namespace blog.Controllers
         }
 
         [HttpGet]
+        [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> Get()
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
@@ -39,6 +45,7 @@ namespace blog.Controllers
         }
 
         [HttpDelete]
+        [EnableRateLimiting("DeleteItemPolicy")]
         public async Task<IActionResult> Delete()
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
@@ -55,6 +62,7 @@ namespace blog.Controllers
         }
 
         [HttpPost]
+        [EnableRateLimiting("CreateItemPolicy")]
         public async Task<IActionResult> Create([FromBody] CreateUserConfigDTO dto)
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
@@ -70,6 +78,7 @@ namespace blog.Controllers
         }
 
         [HttpPut]
+        [EnableRateLimiting("UpdateItemPolicy")]
         public async Task<IActionResult> Update([FromBody] UpdateUserConfigDTO dto)
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;

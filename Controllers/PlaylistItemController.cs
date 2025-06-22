@@ -7,12 +7,17 @@ using Blog.DTOs.PlaylistItem;
 using Blog.entities;
 using Blog.SetUnitOfWork;
 using Blog.utils;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace blog.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    [ApiVersion("1.0")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class PlaylistItemController : ControllerBase
     {
         private readonly IUnitOfWork _uow;
@@ -23,6 +28,7 @@ namespace blog.Controllers
         }
 
         [HttpPost]
+        [EnableRateLimiting("CreateItemPolicy")]
         public async Task<IActionResult> AddPostToPlaylist([FromBody] CreatePlaylistItemDTO dto)
         {
             PlaylistEntity play = await _uow.PlaylistRepository.Get(dto.Playlist);
@@ -38,6 +44,7 @@ namespace blog.Controllers
         }
 
         [HttpDelete("itemId:required")]
+        [EnableRateLimiting("DeleteItemPolicy")]
         public async Task<IActionResult> RemovePostFromPlaylist(ulong itemId)
         {
             PlaylistItemEntity item = await _uow.PlaylistItemRepository.Get(itemId);
@@ -52,6 +59,7 @@ namespace blog.Controllers
         }
 
         [HttpGet("{playId:required}")]
+        [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> GetAllOfPlaylistPaginated(ulong playId , [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             PlaylistEntity play = await _uow.PlaylistRepository.Get(playId);
@@ -62,6 +70,7 @@ namespace blog.Controllers
         }
 
         [HttpPut]
+        [EnableRateLimiting("UpdateItemPolicy")]
         public async Task<IActionResult> UpdateOrder([FromBody] UpdatePlaylistItemDTO dto)
         {
             PlaylistItemEntity item = await _uow.PlaylistItemRepository.Get(dto.PlaylistItem);
