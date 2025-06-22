@@ -59,10 +59,10 @@ namespace Blog.SetRepositories.Repositories
             throw new InvalidOperationException("Error the reactioning on comment!");
         }
 
-        public async Task Remove(ulong Id)
+        public async Task Remove(CommentEntity comment, ApplicationUser user)
         {
             ReactionCommentEntity? reaction = await _context.ReactionCommentEntities 
-                .FirstOrDefaultAsync(rc => rc.Id == Id);
+                .FirstOrDefaultAsync(rc => rc.CommentId == comment.Id && rc.ApplicationUserId == user.Id);
 
             if (reaction == null)
                 throw new ResponseException("Reaction not found", 404);
@@ -89,7 +89,7 @@ namespace Blog.SetRepositories.Repositories
             return await PaginatedList<ReactionCommentEntity>.CreateAsync(query, pageNumber, pageSize);
         }
         
-        public async Task<PaginatedList<ReactionCommentEntity>> GetAllOfPostPaginated(CommentEntity comment, int pageNumber, int pageSize)
+        public async Task<PaginatedList<ReactionCommentEntity>> GetAllOfCommentPaginated(CommentEntity comment, int pageNumber, int pageSize)
         {
             IQueryable<ReactionCommentEntity> query = _context.ReactionCommentEntities
                 .AsNoTracking()
