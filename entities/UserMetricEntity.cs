@@ -81,8 +81,11 @@ namespace Blog.entities
         [Column("play_list_count")] 
         public long PlaylistCount { get; set; } = 0;
 
-        [Timestamp]
-        public byte[] RowVersion { get; set; } = Array.Empty<byte>();
+        [Required] 
+        [Column("preference_count")] 
+        public long PreferenceCount { get; set; } = 0;
+
+        [Timestamp] public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 
         public DateTime? LastLogin { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
