@@ -27,6 +27,7 @@ namespace Blog.SetUnitOfWork
         IEmailService EmailService { get; }
         IMediaPostRepository MediaPostRepository { get; }
         IFollowRepository FollowRepository { get; }
+        IUserConfigRepository UserConfigRepository { get; }
 
         Task Commit();
     }

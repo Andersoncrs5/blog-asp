@@ -36,6 +36,7 @@ namespace Blog.SetUnitOfWork
         private IRecoverAccountRepository _recoverAccountRepository;
         private IMediaPostRepository _mediaPostRepository;
         private IFollowRepository _followRepository;
+        private IUserConfigRepository _userConfigRepository;
 
         public UnitOfWork(
             AppDbContext context,
@@ -45,6 +46,8 @@ namespace Blog.SetUnitOfWork
             _userManager = userManager;
         }
 
+        public IUserConfigRepository UserConfigRepository 
+            => _userConfigRepository ??= new UserConfigRepository(_context);
         public IFollowRepository FollowRepository
             => _followRepository ??= new FollowRepository(_context);
         public IMediaPostRepository MediaPostRepository
