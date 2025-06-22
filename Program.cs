@@ -1,6 +1,8 @@
 using System.Net;
 using System.Text;
 using System.Threading.RateLimiting;
+using blog.SetRepositories.IRepositories;
+using blog.SetRepositories.Repositories;
 using Blog.Context;
 using Blog.entities;
 using Blog.SetRepositories.IRepositories;
@@ -221,6 +223,7 @@ builder.Services.AddScoped<IPlaylistItemRepository, PlaylistItemRepository>();
 builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
 builder.Services.AddScoped<IRecoverAccountRepository, RecoverAccountRepository>();
 builder.Services.AddScoped<IMediaPostRepository, MediaPostRepository>();
+builder.Services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
 
 builder.Services.AddOpenApi();
 
