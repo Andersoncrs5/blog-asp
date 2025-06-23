@@ -10,6 +10,6 @@ namespace blog.DTOs.ReactionPost
     public class ReactionPostDTO
     {
         [Required] public long PostId { get; set; }
-        [Required] public LikeOrDislike action { get; set; }
+        [Required] public LikeOrDislike Action { get; set; }
     }
 }

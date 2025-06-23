@@ -73,21 +73,25 @@ namespace Blog.SetRepositories.Repositories
         }
 
         //
-        public async Task<UserMetricEntity> SumOrRedLikesOrDislikeGivenCountInPost(UserMetricEntity metric, SumOrRedEnum action, LikeOrDislike l) 
+        public async Task<UserMetricEntity> SumOrRedLikesOrDislikeGivenCountInPost(UserMetricEntity metric, SumOrRedEnum action, LikeOrDislike l) // NOVO MÉTODO
         {
-            if (action == SumOrRedEnum.SUM && l == LikeOrDislike.LIKE ) {
+            if (action == SumOrRedEnum.SUM && l == LikeOrDislike.LIKE)
+            {
                 metric.LikesGivenCountInPost += 1;
             }
 
-            if (action == SumOrRedEnum.REDUCE && l == LikeOrDislike.LIKE ) {
+            if (action == SumOrRedEnum.REDUCE && l == LikeOrDislike.LIKE)
+            {
                 metric.LikesGivenCountInPost -= 1;
             }
 
-            if (action == SumOrRedEnum.SUM && l == LikeOrDislike.DISLIKE ) {
+            if (action == SumOrRedEnum.SUM && l == LikeOrDislike.DISLIKE)
+            {
                 metric.DeslikesGivenCountInPost += 1;
             }
 
-            if (action == SumOrRedEnum.REDUCE && l == LikeOrDislike.DISLIKE ) {
+            if (action == SumOrRedEnum.REDUCE && l == LikeOrDislike.DISLIKE)
+            {
                 metric.DeslikesGivenCountInPost -= 1;
             }
 

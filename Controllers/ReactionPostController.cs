@@ -4,9 +4,12 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using blog.DTOs.ReactionPost;
+using blog.utils.enums;
+using blog.utils.Responses.ReactionPost;
 using Blog.entities;
 using Blog.SetUnitOfWork;
 using Blog.utils;
+using Blog.utils.enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -46,21 +49,68 @@ namespace blog.Controllers
         }
 
         [HttpPost]
-        [EnableRateLimiting("CreateItemPolicy")]
-        public async Task<IActionResult> ToggleReaction([FromBody] ReactionPostDTO dto )
+        [EnableRateLimiting("createItemPolicy")]
+        public async Task<IActionResult> ToggleReaction([FromBody] ReactionPostDTO dto)
         {
-            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
-            ApplicationUser user = await _uow.UserRepository.Get(userId);
-            PostEntity post = await _uow.PostRepository.Get(dto.PostId);
+                string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                ApplicationUser? user = await _uow.UserRepository.Get(userId);
 
-            ReactionPostEntity? result = await _uow.ReactionPostRepository.ToggleReaction(user, post, dto.action);
+                PostEntity post = await _uow.PostRepository.Get(dto.PostId);
+                
+                ReactionPostResponse reactionResult = await _uow.ReactionPostRepository.ToggleReaction(user, post, dto.Action);
 
-            return Ok(new Response(
-                "success",
-                result == null? "Reaction removed!": "Reaction added!",
-                200,
-                result
-            ));
+                UserMetricEntity userMetric = await _uow.UserMetricRepository.Get(user.Id);
+
+                switch (reactionResult.ChangeType)
+                {
+                    case ReactionPostChangeType.Added:
+                        if (reactionResult.NewReaction.HasValue)
+                        {
+                            await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInPost(userMetric, SumOrRedEnum.SUM, reactionResult.NewReaction.Value);
+                        }
+                        break;
+
+                    case ReactionPostChangeType.Removed:
+                        
+                        if (reactionResult.OldReaction.HasValue)
+                        {
+                            
+                            await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInPost(userMetric, SumOrRedEnum.REDUCE, reactionResult.OldReaction.Value);
+                        }
+                        break;
+
+                    case ReactionPostChangeType.Updated:
+                        
+                        
+                        if (reactionResult.OldReaction.HasValue)
+                        {
+                            
+                            await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInPost(userMetric, SumOrRedEnum.REDUCE, reactionResult.OldReaction.Value);
+                        }
+                        
+                        if (reactionResult.NewReaction.HasValue)
+                        {
+                            
+                            await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInPost(userMetric, SumOrRedEnum.SUM, reactionResult.NewReaction.Value);
+                        }
+                        break;
+                }
+
+                
+                string responseMessage = reactionResult.ChangeType switch
+                {
+                    ReactionPostChangeType.Added => "Reaction added!",
+                    ReactionPostChangeType.Removed => "Reaction removed!",
+                    ReactionPostChangeType.Updated => "Reaction updated!",
+                    _ => "Reaction processed."
+                };
+
+                return Ok(new Response( 
+                    "success",
+                    responseMessage,
+                    200, 
+                    reactionResult.ReactionEntity 
+                ));
         }
 
         [HttpDelete("{PostId:required}")]

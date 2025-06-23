@@ -13,7 +13,7 @@ namespace Blog.SetRepositories.IRepositories
         Task<UserMetricEntity> Get(string? userId);
         Task<UserMetricEntity> Create(string userId);
         Task<UserMetricEntity> SumOrRedLikesOrDislikeGivenCountInComment(UserMetricEntity metric, SumOrRedEnum action, LikeOrDislike l);
-        Task<UserMetricEntity> SumOrRedLikesOrDislikeGivenCountInPost(UserMetricEntity metric, SumOrRedEnum action, LikeOrDislike l);
+        Task<UserMetricEntity> SumOrRedLikesOrDislikeGivenCountInPost(UserMetricEntity metric, SumOrRedEnum action, LikeOrDislike l); 
         Task<UserMetricEntity> SumOrRedFollowersCount(UserMetricEntity metric, SumOrRedEnum action);
         Task<UserMetricEntity> SumOrRedFollowingCount(UserMetricEntity metric, SumOrRedEnum action);
         Task<UserMetricEntity> SumOrRedPostsCount(UserMetricEntity metric, SumOrRedEnum action);

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using blog.utils.enums;
+using blog.utils.Responses.ReactionPost;
 using Blog.Context;
 using Blog.entities;
 using Blog.entities.enums;
@@ -19,29 +21,41 @@ namespace Blog.SetRepositories.Repositories
         {
             _context = context;
         }
-        public async Task<ReactionPostEntity?> ToggleReaction(ApplicationUser user, PostEntity post, LikeOrDislike newAction)
+        public async Task<ReactionPostResponse> ToggleReaction(ApplicationUser user, PostEntity post, LikeOrDislike newAction)
         {
-            ReactionPostEntity? existingReaction = await _context.ReactionPostEntities
+            ReactionPostEntity? existingReaction = await _context.ReactionPostEntities 
                 .FirstOrDefaultAsync(rp => rp.ApplicationUserId == user.Id && rp.PostId == post.Id);
 
-            if (existingReaction != null)
+            if (existingReaction != null && existingReaction.Reaction == newAction)
             {
-                if (existingReaction.Reaction == newAction)
-                {   
-                    _context.ReactionPostEntities.Remove(existingReaction);
-                    await _context.SaveChangesAsync();
-                    return null; 
-                }
-                else
+                _context.ReactionPostEntities.Remove(existingReaction);
+                await _context.SaveChangesAsync();
+                return new ReactionPostResponse
                 {
-                    existingReaction.Reaction = newAction;
-                    existingReaction.CreatedAt = DateTime.UtcNow; 
-                    _context.ReactionPostEntities.Update(existingReaction);
-                    await _context.SaveChangesAsync();
-                    return existingReaction; 
-                }
+                    ReactionEntity = null, 
+                    ChangeType = ReactionPostChangeType.Removed,
+                    OldReaction = newAction, 
+                    NewReaction = null
+                };
             }
-            else
+
+            if (existingReaction != null && existingReaction.Reaction != newAction)
+            {
+                LikeOrDislike oldReactionType = existingReaction.Reaction; 
+                existingReaction.Reaction = newAction;
+                existingReaction.CreatedAt = DateTime.UtcNow; 
+                
+                await _context.SaveChangesAsync();
+                return new ReactionPostResponse
+                {
+                    ReactionEntity = existingReaction,
+                    ChangeType = ReactionPostChangeType.Updated,
+                    OldReaction = oldReactionType, 
+                    NewReaction = newAction 
+                };
+            }
+
+            if (existingReaction == null)
             {
                 ReactionPostEntity newReaction = new ReactionPostEntity
                 {
@@ -53,8 +67,15 @@ namespace Blog.SetRepositories.Repositories
 
                 var result = await _context.ReactionPostEntities.AddAsync(newReaction);
                 await _context.SaveChangesAsync();
-                return result.Entity; 
+                return new ReactionPostResponse
+                {
+                    ReactionEntity = result.Entity,
+                    ChangeType = ReactionPostChangeType.Added,
+                    OldReaction = null, 
+                    NewReaction = newAction 
+                };
             }
+            throw new InvalidOperationException("Erro inesperado ao processar a reação no post.");
         }
 
         public async Task<bool> Exists(ApplicationUser user, PostEntity post)
