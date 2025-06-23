@@ -24,6 +24,8 @@ namespace Blog.entities
 
         [Required] public string ApplicationUserId { get; set; } = string.Empty;
 
+        [Required] public byte ItemCount { get; set; }
+
         [Timestamp] public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
