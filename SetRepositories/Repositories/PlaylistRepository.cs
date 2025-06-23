@@ -7,6 +7,7 @@ using Blog.DTOs.Playlist;
 using Blog.entities;
 using Blog.SetRepositories.IRepositories;
 using Blog.utils;
+using Blog.utils.enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blog.SetRepositories.Repositories
@@ -101,5 +102,22 @@ namespace Blog.SetRepositories.Repositories
 
             return play;
         }
+
+        public async Task SumOrReduceItemCount(PlaylistEntity play, SumOrRedEnum action)
+        {
+            if (action == SumOrRedEnum.SUM) 
+            {
+                play.ItemCount += 1;
+            }
+
+            if (action == SumOrRedEnum.REDUCE) 
+            {
+                play.ItemCount -= 1;
+            }
+
+            _context.Entry(play).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

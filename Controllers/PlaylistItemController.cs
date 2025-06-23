@@ -35,6 +35,8 @@ namespace blog.Controllers
             PostEntity post = await _uow.PostRepository.Get(dto.PostId);
             PlaylistItemEntity result = await _uow.PlaylistItemRepository.AddPostToPlaylist(play, post, dto.Order);
 
+            await _uow.PlaylistRepository.SumOrReduceItemCount(play, Blog.utils.enums.SumOrRedEnum.SUM);
+
             return Ok(new Response(
                 "success",
                 "Post added in play list: " + play.Name,
@@ -49,6 +51,9 @@ namespace blog.Controllers
         {
             PlaylistItemEntity item = await _uow.PlaylistItemRepository.Get(itemId);
             await _uow.PlaylistItemRepository.RemovePostFromPlaylist(item);
+
+            PlaylistEntity play = await _uow.PlaylistRepository.Get(item.PlaylistId);
+            await _uow.PlaylistRepository.SumOrReduceItemCount(play, Blog.utils.enums.SumOrRedEnum.REDUCE);
 
             return Ok(new Response(
                 "success",

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Blog.DTOs.Playlist;
 using Blog.entities;
 using Blog.utils;
+using Blog.utils.enums;
 
 namespace Blog.SetRepositories.IRepositories
 {
@@ -16,5 +17,6 @@ namespace Blog.SetRepositories.IRepositories
         Task Delete(PlaylistEntity play);
         Task<PaginatedList<PlaylistEntity>> GetAllOfUserPaginated(ApplicationUser user, int pageNumber, int pageSize, bool showPublic = false);
         Task<PlaylistEntity> ChangeStatusIsPublic(PlaylistEntity play);
+        Task SumOrReduceItemCount(PlaylistEntity play, SumOrRedEnum action);
     }
 }
