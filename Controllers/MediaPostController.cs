@@ -74,6 +74,9 @@ namespace blog.Controllers
         [EnableRateLimiting("CreateItemPolicy")]
         public async Task<IActionResult> Create(long postId, [FromBody] CreateMediaDTO dto )
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             PostEntity post = await _uow.PostRepository.Get(postId);
             MediaPostEntity media = await _uow.MediaPostRepository.CreateAsync(post, dto);
 
@@ -92,6 +95,9 @@ namespace blog.Controllers
         [EnableRateLimiting("UpdateItemPolicy")]
         public async Task<IActionResult> Update(ulong Id, [FromBody] UpdateMediaDTO dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             MediaPostEntity media = await _uow.MediaPostRepository.GetAsync(Id);
             MediaPostEntity result = await _uow.MediaPostRepository.UpdateAsync(media, dto);
 
@@ -99,7 +105,7 @@ namespace blog.Controllers
                 "success",
                 "Media updated with successfully",
                 200,
-                media
+                result
             ));
         }
 

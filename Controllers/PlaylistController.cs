@@ -31,6 +31,9 @@ namespace blog.Controllers
         [EnableRateLimiting("CreateItemPolicy")]
         public async Task<IActionResult> Create([FromBody] CreatePlaylistDTO dto )
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser user = await _uow.UserRepository.Get(userId);
 
@@ -65,6 +68,9 @@ namespace blog.Controllers
         [EnableRateLimiting("UpdateItemPolicy")]
         public async Task<IActionResult> Update(ulong Id, [FromBody] UpdatePlaylistDTO dto )
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+                
             PlaylistEntity play = await _uow.PlaylistRepository.Get(Id);
             PlaylistEntity result = await _uow.PlaylistRepository.Update(play, dto);
 

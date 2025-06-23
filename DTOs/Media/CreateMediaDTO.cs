@@ -10,11 +10,14 @@ namespace Blog.DTOs.Media
     public class CreateMediaDTO
     {
         [Required]
-        [StringLength(1000)]
+        [StringLength(1250)]
+        [Url]
         public string Url { get; set; } = string.Empty;
-        public MediaTypeEnum MediaType { get; set; } = MediaTypeEnum.IMAGE;
-        [StringLength(500)]
-        public string? Description { get; set; }
+
+        [Required] public MediaTypeEnum MediaType { get; set; } = MediaTypeEnum.IMAGE;
+
+        [StringLength(500)] public string? Description { get; set; }
+
         public int? Order { get; set; }
 
     }

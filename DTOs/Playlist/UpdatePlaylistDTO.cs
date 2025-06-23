@@ -9,14 +9,13 @@ namespace Blog.DTOs.Playlist
     public class UpdatePlaylistDTO
     {
         [Required]
-        [StringLength(maximumLength:250, MinimumLength = 4)]
+        [StringLength(maximumLength:150, MinimumLength = 2)]
         public string Name { get; set; } = string.Empty;
 
-        [StringLength(maximumLength:1500)]
+        [StringLength(maximumLength:1000)]
         public string? Description { get; set; } = string.Empty;
 
-        [StringLength(maximumLength:500)]
-        [Url]
-        public string? ImageUrl { get; set; } = string.Empty;
+        [StringLength(maximumLength:1000)]
+        [Url] public string? ImageUrl { get; set; } = string.Empty;
     }
 }

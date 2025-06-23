@@ -32,6 +32,9 @@ namespace blog.Controllers
 
         public async Task<IActionResult> Reaction([FromBody] CreateReactionCommentDTO dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            
             string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value; 
 
             ApplicationUser user = await _uow.UserRepository.Get(userId);

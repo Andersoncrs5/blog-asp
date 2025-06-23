@@ -10,10 +10,8 @@ namespace Blog.DTOs.Category
     public class CreateCategoryDTO
     {
         [Required]
-        [StringLength(maximumLength:150, MinimumLength = 4)]
+        [StringLength(maximumLength:150, MinimumLength = 2)]
         public string Name { get; set; } = string.Empty;
-
-        
 
         public CategoryEntity toCategoryEntity() 
         {

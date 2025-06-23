@@ -31,6 +31,9 @@ namespace blog.Controllers
         [EnableRateLimiting("CreateItemPolicy")]
         public async Task<IActionResult> AddPostToPlaylist([FromBody] CreatePlaylistItemDTO dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             PlaylistEntity play = await _uow.PlaylistRepository.Get(dto.Playlist);
             PostEntity post = await _uow.PostRepository.Get(dto.PostId);
             PlaylistItemEntity result = await _uow.PlaylistItemRepository.AddPostToPlaylist(play, post, dto.Order);
@@ -78,6 +81,8 @@ namespace blog.Controllers
         [EnableRateLimiting("UpdateItemPolicy")]
         public async Task<IActionResult> UpdateOrder([FromBody] UpdatePlaylistItemDTO dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             PlaylistItemEntity item = await _uow.PlaylistItemRepository.Get(dto.PlaylistItem);
             PlaylistItemEntity update = await _uow.PlaylistItemRepository.UpdateOrder(item, dto.Order);
 

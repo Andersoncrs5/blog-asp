@@ -52,69 +52,70 @@ namespace blog.Controllers
         [EnableRateLimiting("createItemPolicy")]
         public async Task<IActionResult> ToggleReaction([FromBody] ReactionPostDTO dto)
         {
-                string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                PostEntity post = await _uow.PostRepository.Get(dto.PostId);
-                
-                ReactionPostResponse reactionResult = await _uow.ReactionPostRepository.ToggleReaction(user, post, dto.Action);
+            string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
 
-                UserMetricEntity userMetric = await _uow.UserMetricRepository.Get(user.Id);
+            PostEntity post = await _uow.PostRepository.Get(dto.PostId);
+            
+            ReactionPostResponse reactionResult = await _uow.ReactionPostRepository.ToggleReaction(user, post, dto.Action);
 
-                PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
-                
+            UserMetricEntity userMetric = await _uow.UserMetricRepository.Get(user.Id);
+            PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
+            
+            switch (reactionResult.ChangeType)
+            {
+                case ReactionPostChangeType.Added:
+                    if (reactionResult.NewReaction.HasValue)
+                    {
+                        await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInPost(userMetric, SumOrRedEnum.SUM, reactionResult.NewReaction.Value);
+                        await _uow.PostMetricRepository.SumOrRedLikeOrDislike(postMetric, SumOrRedEnum.SUM, reactionResult.NewReaction.Value);
+                    }
+                    break;
 
-                switch (reactionResult.ChangeType)
-                {
-                    case ReactionPostChangeType.Added:
-                        if (reactionResult.NewReaction.HasValue)
-                        {
-                            await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInPost(userMetric, SumOrRedEnum.SUM, reactionResult.NewReaction.Value);
-                            await _uow.PostMetricRepository.SumOrRedLikeOrDislike(postMetric, SumOrRedEnum.SUM, reactionResult.NewReaction.Value);
-                        }
-                        break;
+                case ReactionPostChangeType.Removed:
+                    
+                    if (reactionResult.OldReaction.HasValue)
+                    {
+                        await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInPost(userMetric, SumOrRedEnum.REDUCE, reactionResult.OldReaction.Value);
+                        await _uow.PostMetricRepository.SumOrRedLikeOrDislike(postMetric, SumOrRedEnum.REDUCE, reactionResult.OldReaction.Value);
+                    }
+                    break;
 
-                    case ReactionPostChangeType.Removed:
+                case ReactionPostChangeType.Updated:
+                    
+                    
+                    if (reactionResult.OldReaction.HasValue)
+                    {
                         
-                        if (reactionResult.OldReaction.HasValue)
-                        {
-                            await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInPost(userMetric, SumOrRedEnum.REDUCE, reactionResult.OldReaction.Value);
-                            await _uow.PostMetricRepository.SumOrRedLikeOrDislike(postMetric, SumOrRedEnum.REDUCE, reactionResult.OldReaction.Value);
-                        }
-                        break;
-
-                    case ReactionPostChangeType.Updated:
+                        await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInPost(userMetric, SumOrRedEnum.REDUCE, reactionResult.OldReaction.Value);
+                    }
+                    
+                    if (reactionResult.NewReaction.HasValue)
+                    {
                         
-                        
-                        if (reactionResult.OldReaction.HasValue)
-                        {
-                            
-                            await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInPost(userMetric, SumOrRedEnum.REDUCE, reactionResult.OldReaction.Value);
-                        }
-                        
-                        if (reactionResult.NewReaction.HasValue)
-                        {
-                            
-                            await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInPost(userMetric, SumOrRedEnum.SUM, reactionResult.NewReaction.Value);
-                        }
-                        break;
-                }
+                        await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInPost(userMetric, SumOrRedEnum.SUM, reactionResult.NewReaction.Value);
+                    }
+                    break;
+            }
 
-                
-                string responseMessage = reactionResult.ChangeType switch
-                {
-                    ReactionPostChangeType.Added => "Reaction added!",
-                    ReactionPostChangeType.Removed => "Reaction removed!",
-                    ReactionPostChangeType.Updated => "Reaction updated!",
-                    _ => "Reaction processed."
-                };
+            
+            string responseMessage = reactionResult.ChangeType switch
+            {
+                ReactionPostChangeType.Added => "Reaction added!",
+                ReactionPostChangeType.Removed => "Reaction removed!",
+                ReactionPostChangeType.Updated => "Reaction updated!",
+                _ => "Reaction processed."
+            };
 
-                return Ok(new Response( 
-                    "success",
-                    responseMessage,
-                    200, 
-                    reactionResult.ReactionEntity 
-                ));
+            return Ok(new Response( 
+                "success",
+                responseMessage,
+                200, 
+                reactionResult.ReactionEntity 
+            ));
         }
 
         [HttpDelete("{PostId:required}")]

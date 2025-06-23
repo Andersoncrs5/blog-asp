@@ -68,6 +68,9 @@ namespace Blog.Controllers
         [EnableRateLimiting("CreateItemPolicy")]
         public async Task<IActionResult> Create([FromBody] CreatePostDTO dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             CategoryEntity category = await _uow.CategoryRepository.Get(dto.categoryId);
             ApplicationUser user = await _uow.UserRepository.Get(userId);
@@ -112,6 +115,9 @@ namespace Blog.Controllers
         [EnableRateLimiting("UpdateItemPolicy")]
         public async Task<IActionResult> Update(long PostId, [FromBody] UpdatePostDTO dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser user = await _uow.UserRepository.Get(userId);
             PostEntity post = await _uow.PostRepository.Get(PostId);

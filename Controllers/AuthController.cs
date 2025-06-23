@@ -226,6 +226,9 @@ namespace Blog.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> RequestPasswordReset([FromBody] RequestPasswordResetDto requestDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             string? ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
             string? userAgent = Request.Headers["User-Agent"].ToString();
 
@@ -249,6 +252,9 @@ namespace Blog.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+                
             bool success = await this._uow.RecoverAccountRepository.ValidateAndResetPasswordAsync(resetDto);
 
             if (success)

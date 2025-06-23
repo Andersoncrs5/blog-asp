@@ -57,7 +57,7 @@ namespace Blog.Context
                 entity.Property(uc => uc.SecondaryColor).HasMaxLength(7).IsRequired(false);
                 entity.Property(uc => uc.AccentColor).HasMaxLength(7).IsRequired(false);
                 entity.Property(uc => uc.BorderColor).HasMaxLength(7).IsRequired(false);
-                entity.Property(uc => uc.BorderColor).HasMaxLength(50).IsRequired(false);
+                entity.Property(uc => uc.BorderSize).HasMaxLength(50).IsRequired(false);
                 entity.Property(uc => uc.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
                 entity.Property(uc => uc.UpdatedAt).IsRequired(false);
                 entity.Property(uc => uc.RowVersion).IsRowVersion();
@@ -110,17 +110,18 @@ namespace Blog.Context
 
             builder.Entity<ApplicationUser>(entity => 
             {
-                entity.HasKey(u => u.Email);
+                entity.HasKey(u => u.Id);
             });   
 
             builder.Entity<MediaPostEntity>(entity => 
             {
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(c => c.Url);
+                entity.HasIndex(c => c.MediaType);
                 entity.Property(e => e.Id).HasColumnType("bigint");
                 entity.Property(e => e.PostId).IsRequired(true);
-                entity.Property(e => e.Url).IsRequired(true).HasMaxLength(1000);
-                entity.Property(e => e.Description).IsRequired(false).HasMaxLength(1000);
+                entity.Property(e => e.Url).IsRequired(true).HasMaxLength(1250);
+                entity.Property(e => e.Description).IsRequired(false).HasMaxLength(600);
                 entity.Property(e => e.Order).IsRequired(false).HasColumnType("smallint");
                 entity.Property(e => e.MediaType).IsRequired(true).HasDefaultValue(MediaTypeEnum.IMAGE);
                 entity.Property(e => e.RowVersion).IsRowVersion();
@@ -159,10 +160,10 @@ namespace Blog.Context
                 entity.Property(e => e.Id).HasColumnType("bigint");
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
                 entity.Property(e => e.UpdatedAt).IsRequired(false);
-                entity.Property(e => e.ImageUrl).IsRequired(false).HasMaxLength(500);
+                entity.Property(e => e.ImageUrl).IsRequired(false).HasMaxLength(1000);
                 entity.Property(e => e.RowVersion).IsRowVersion();
-                entity.Property(e => e.Name).IsRequired().HasMaxLength(250);
-                entity.Property(e => e.Description).IsRequired(false).HasMaxLength(1500);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(150);
+                entity.Property(e => e.Description).IsRequired(false).HasMaxLength(1000);
                 entity.Property(e => e.IsPublic).IsRequired().HasDefaultValue(false);
             });
 
@@ -183,7 +184,7 @@ namespace Blog.Context
                 entity.HasOne(pi => pi.Playlist)
                       .WithMany(p => p.PlaylistItems) 
                       .HasForeignKey(pi => pi.PlaylistId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                      .OnDelete(DeleteBehavior.Restrict);
                
                 entity.HasIndex(pi => new { pi.PlaylistId, pi.PostId }).IsUnique();
             });
@@ -230,11 +231,9 @@ namespace Blog.Context
                 .HasForeignKey(f => f.CommentId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<UserMetricEntity>()
-                .HasKey(u => u.ApplicationUserId);
-
             builder.Entity<UserMetricEntity>(entity =>
             {
+                entity.HasKey(u => u.ApplicationUserId);
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
                 entity.Property(e => e.UpdatedAt).IsRequired(false);
                 entity.HasIndex(um => um.ProfileViews);
@@ -290,9 +289,6 @@ namespace Blog.Context
                 entity.Property(e => e.IsActived).IsRequired().HasDefaultValue(true);
             });
 
-            builder.Entity<PostMetricEntity>()
-                .HasKey(u => u.PostId);
-
             builder.Entity<PostEntity>()
                 .HasOne(p => p.PostMetricEntity)
                 .WithOne() 
@@ -335,8 +331,9 @@ namespace Blog.Context
                 entity.Property(e => e.UpdatedAt).IsRequired(false);
                 entity.Property(u => u.Id).HasColumnType("bigint"); 
                 entity.Property(e => e.Content).HasColumnType("text"); 
-                entity.Property(e => e.Title).HasColumnType("varchar(350)").IsRequired();
+                entity.Property(e => e.Title).HasMaxLength(350).IsRequired();
                 entity.Property(e => e.Content).IsRequired();
+                entity.Property(e => e.ReadTimes).IsRequired().HasMaxLength(120);
                 entity.Property(e => e.IsActived).IsRequired().HasDefaultValue(true);
             });
             
@@ -414,7 +411,7 @@ namespace Blog.Context
 
                 entity.Property(e => e.Content)
                       .IsRequired()
-                      .HasMaxLength(1000);
+                      .HasMaxLength(800);
             });
 
             builder.Entity<ApplicationUser>().ToTable("app_users");

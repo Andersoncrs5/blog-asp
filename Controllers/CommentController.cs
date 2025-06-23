@@ -103,6 +103,9 @@ namespace blog.Controllers
         [EnableRateLimiting("CreateItemPolicy")]
         public async Task<IActionResult> Create([FromBody] CreateCommentDTO dto, long postId, ulong? parentId)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser user = await _uow.UserRepository.Get(userId);
             PostEntity post = await _uow.PostRepository.Get(postId);
@@ -127,6 +130,9 @@ namespace blog.Controllers
         [EnableRateLimiting("UpdateItemPolicy")]
         public async Task<IActionResult> Update(ulong commentId, [FromBody] UpdateCommentDTO dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+                
             CommentEntity comment = await _uow.CommentRepository.Get(commentId);
             CommentEntity result = await _uow.CommentRepository.Update(comment, dto);
 

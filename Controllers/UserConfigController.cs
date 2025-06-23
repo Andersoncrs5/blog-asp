@@ -65,6 +65,9 @@ namespace blog.Controllers
         [EnableRateLimiting("CreateItemPolicy")]
         public async Task<IActionResult> Create([FromBody] CreateUserConfigDTO dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser user = await _uow.UserRepository.Get(userId);
             UserConfigEntity config = await _uow.UserConfigRepository.CreateAsync(dto, user);
@@ -81,6 +84,9 @@ namespace blog.Controllers
         [EnableRateLimiting("UpdateItemPolicy")]
         public async Task<IActionResult> Update([FromBody] UpdateUserConfigDTO dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+                
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser user = await _uow.UserRepository.Get(userId);
             UserConfigEntity config = await _uow.UserConfigRepository.UpdateAsync(dto, user);

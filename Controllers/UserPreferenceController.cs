@@ -78,6 +78,9 @@ namespace blog.Controllers
         [EnableRateLimiting("CreateItemPolicy")]
         public async Task<IActionResult> Save([FromBody] CreatePreferenceDTO dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+                
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value; 
             ApplicationUser user = await _uow.UserRepository.Get(userId);
             UserPreferenceEntity prefer = await _uow.UserPreferenceRepository.SaveAsync(dto, user);
