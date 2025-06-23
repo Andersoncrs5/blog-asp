@@ -23,8 +23,10 @@ namespace Blog.SetRepositories.Repositories
 
         public async Task<PostMetricEntity> Create(PostEntity post)
         {
-            PostMetricEntity metric = new PostMetricEntity();
-            metric.PostId = post.Id;
+            PostMetricEntity metric = new PostMetricEntity
+            {
+                PostId = post.Id
+            };
 
             var result = await _context.PostMetricEntities.AddAsync(metric);
             return result.Entity;
@@ -58,6 +60,8 @@ namespace Blog.SetRepositories.Repositories
             if (action == SumOrRedEnum.REDUCE && ld == LikeOrDislike.DISLIKE ) {
                 metric.Likes -= 1;
             }
+
+            metric.UpdatedAt = DateTime.UtcNow;
 
             _context.Entry(metric).State = EntityState.Modified;
             await _context.SaveChangesAsync();

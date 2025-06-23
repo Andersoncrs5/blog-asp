@@ -47,9 +47,13 @@ namespace blog.Controllers
             MediaPostEntity media = await _uow.MediaPostRepository.GetAsync(Id);
             await _uow.MediaPostRepository.DeleteAsync(media);
 
+            PostEntity post = await _uow.PostRepository.Get(media.PostId);
+            PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
+            await _uow.PostMetricRepository.SumOrRedMediaCount(postMetric, Blog.utils.enums.SumOrRedEnum.REDUCE);
+
             return Ok(new Response(
                 "success",
-                "Media deleted with successfully",
+                "Media deleted",
                 200,
                 media
             ));
@@ -72,6 +76,9 @@ namespace blog.Controllers
         {
             PostEntity post = await _uow.PostRepository.Get(postId);
             MediaPostEntity media = await _uow.MediaPostRepository.CreateAsync(post, dto);
+
+            PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
+            await _uow.PostMetricRepository.SumOrRedMediaCount(postMetric, Blog.utils.enums.SumOrRedEnum.SUM);
 
             return Ok(new Response(
                 "success",

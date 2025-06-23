@@ -48,10 +48,14 @@ namespace blog.Controllers
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser user = await _uow.UserRepository.Get(userId);
             CommentEntity comment = await _uow.CommentRepository.Get(Id, false);
+            PostEntity post = await _uow.PostRepository.Get(comment.PostId);
             await _uow.CommentRepository.Delete(comment);
 
             UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
             await _uow.UserMetricRepository.SumOrRedCommentsCount(metric, Blog.utils.enums.SumOrRedEnum.REDUCE);
+
+            PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
+            await _uow.PostMetricRepository.SumOrRedCommentCount(postMetric, Blog.utils.enums.SumOrRedEnum.REDUCE);
 
             return Ok(new Response(
                 "success",
@@ -107,6 +111,9 @@ namespace blog.Controllers
 
             UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
             await _uow.UserMetricRepository.SumOrRedCommentsCount(metric, Blog.utils.enums.SumOrRedEnum.SUM);
+
+            PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
+            await _uow.PostMetricRepository.SumOrRedCommentCount(postMetric, Blog.utils.enums.SumOrRedEnum.SUM);
 
             return Ok(new Response(
                 "success",

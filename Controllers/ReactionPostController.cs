@@ -61,12 +61,16 @@ namespace blog.Controllers
 
                 UserMetricEntity userMetric = await _uow.UserMetricRepository.Get(user.Id);
 
+                PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
+                
+
                 switch (reactionResult.ChangeType)
                 {
                     case ReactionPostChangeType.Added:
                         if (reactionResult.NewReaction.HasValue)
                         {
                             await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInPost(userMetric, SumOrRedEnum.SUM, reactionResult.NewReaction.Value);
+                            await _uow.PostMetricRepository.SumOrRedLikeOrDislike(postMetric, SumOrRedEnum.SUM, reactionResult.NewReaction.Value);
                         }
                         break;
 
@@ -74,8 +78,8 @@ namespace blog.Controllers
                         
                         if (reactionResult.OldReaction.HasValue)
                         {
-                            
                             await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInPost(userMetric, SumOrRedEnum.REDUCE, reactionResult.OldReaction.Value);
+                            await _uow.PostMetricRepository.SumOrRedLikeOrDislike(postMetric, SumOrRedEnum.REDUCE, reactionResult.OldReaction.Value);
                         }
                         break;
 

@@ -33,6 +33,9 @@ namespace Blog.Controllers
         {
             PostEntity post = await _uow.PostRepository.Get(Id);
             
+            PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
+            await _uow.PostMetricRepository.SumOrRedViewed(postMetric, Blog.utils.enums.SumOrRedEnum.SUM);
+
             return Ok(new Response(
                 "success",
                 "Post founded with success",
@@ -73,6 +76,8 @@ namespace Blog.Controllers
             UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
             await _uow.UserMetricRepository.SumOrRedPostsCount(metric, utils.enums.SumOrRedEnum.SUM);
 
+            await _uow.PostMetricRepository.Create(postCreated);
+
             return Ok(new Response(
                 "success",
                 "Post created with successfully",
@@ -112,6 +117,9 @@ namespace Blog.Controllers
             PostEntity post = await _uow.PostRepository.Get(PostId);
 
             PostEntity result = await _uow.PostRepository.Update(post, dto, user);
+
+            PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
+            await _uow.PostMetricRepository.SumOrRedEditedCount(postMetric, Blog.utils.enums.SumOrRedEnum.SUM);
 
             return Ok(new Response(
                 "success",

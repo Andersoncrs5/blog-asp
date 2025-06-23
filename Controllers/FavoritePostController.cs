@@ -76,6 +76,9 @@ namespace blog.Controllers
             UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
             await _uow.UserMetricRepository.SumOrRedSavedPostsCount(metric, Blog.utils.enums.SumOrRedEnum.SUM);
 
+            PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
+            await _uow.PostMetricRepository.SumOrRedCommentCount(postMetric, Blog.utils.enums.SumOrRedEnum.SUM);
+
             return Ok(new Response(
                 "success",
                 "",
@@ -96,6 +99,10 @@ namespace blog.Controllers
 
             UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
             await _uow.UserMetricRepository.SumOrRedSavedPostsCount(metric, Blog.utils.enums.SumOrRedEnum.REDUCE);
+
+            PostEntity post = await _uow.PostRepository.Get(save.PostId);
+            PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
+            await _uow.PostMetricRepository.SumOrRedCommentCount(postMetric, Blog.utils.enums.SumOrRedEnum.REDUCE);
 
             return Ok(new Response(
                 "success",
