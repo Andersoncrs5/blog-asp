@@ -27,7 +27,7 @@ namespace Blog.SetRepositories.IRepositories
         Task<UserMetricEntity> SumOrRedEditedCount(UserMetricEntity metric, SumOrRedEnum action);
         Task<UserMetricEntity> SumOrRedProfileViews(UserMetricEntity metric, SumOrRedEnum action);
         Task<UserMetricEntity> SumOrRedPlaylistCount(UserMetricEntity metric, SumOrRedEnum action);
-        Task<UserMetricEntity> SumOrRedLastLogin(UserMetricEntity metric, SumOrRedEnum action);
+        Task<UserMetricEntity> SetLastLogin(UserMetricEntity metric);
         Task<UserMetricEntity> SumOrRedPreferenceCount(UserMetricEntity metric, SumOrRedEnum action);
     }
 }

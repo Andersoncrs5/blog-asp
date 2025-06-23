@@ -28,14 +28,17 @@ namespace blog.Controllers
 
         [HttpPost("{commentId:required}")]
         [EnableRateLimiting("SaveOrRemoveFavoriteItemPolicy")]
-        public async Task<IActionResult> SaveOrRemove(ulong commentId)
+        public async Task<IActionResult> Save(ulong commentId)
         {
             CommentEntity comment = await _uow.CommentRepository.Get(commentId);
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
 
             ApplicationUser user = await _uow.UserRepository.Get(userId);
 
-            FavoriteCommentEntity result = await _uow.FavoriteCommentRepository.SaveOrRemove(user, comment);
+            FavoriteCommentEntity result = await _uow.FavoriteCommentRepository.Save(user, comment);
+
+            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            await _uow.UserMetricRepository.SumOrRedSavedCommentsCount(metric, Blog.utils.enums.SumOrRedEnum.SUM);
 
             return Ok(new Response(
                 "success",
@@ -49,8 +52,15 @@ namespace blog.Controllers
         [EnableRateLimiting("SaveOrRemoveFavoriteItemPolicy")]
         public async Task<IActionResult> Remove(ulong Id)
         {
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            ApplicationUser user = await _uow.UserRepository.Get(userId);
+
             FavoriteCommentEntity favorite = await _uow.FavoriteCommentRepository.Get(Id);
             await _uow.FavoriteCommentRepository.Remove(favorite);
+
+            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            await _uow.UserMetricRepository.SumOrRedSavedCommentsCount(metric, Blog.utils.enums.SumOrRedEnum.REDUCE);
+
             return Ok(new Response(
                 "success",
                 "Comment removed with favorite",

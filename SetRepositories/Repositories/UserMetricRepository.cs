@@ -72,6 +72,7 @@ namespace Blog.SetRepositories.Repositories
             return metric;
         }
 
+        //
         public async Task<UserMetricEntity> SumOrRedLikesOrDislikeGivenCountInPost(UserMetricEntity metric, SumOrRedEnum action, LikeOrDislike l) 
         {
             if (action == SumOrRedEnum.SUM && l == LikeOrDislike.LIKE ) {
@@ -95,6 +96,7 @@ namespace Blog.SetRepositories.Repositories
             return metric;
         }
 
+        //
         public async Task<UserMetricEntity> SumOrRedFollowersCount(UserMetricEntity metric, SumOrRedEnum action) 
         {
             if (action == SumOrRedEnum.SUM) 
@@ -112,6 +114,7 @@ namespace Blog.SetRepositories.Repositories
             return metric;
         }
 
+        //
         public async Task<UserMetricEntity> SumOrRedFollowingCount(UserMetricEntity metric, SumOrRedEnum action) 
         {
             if (action == SumOrRedEnum.SUM) 
@@ -164,6 +167,7 @@ namespace Blog.SetRepositories.Repositories
             return metric;
         }
 
+        //
         public async Task<UserMetricEntity> SumOrRedSharesCount(UserMetricEntity metric, SumOrRedEnum action) 
         {
             if (action == SumOrRedEnum.SUM) 
@@ -181,6 +185,7 @@ namespace Blog.SetRepositories.Repositories
             return metric;
         }
     
+        //
         public async Task<UserMetricEntity> SumOrRedSavedMediaCount(UserMetricEntity metric, SumOrRedEnum action) 
         {
             if (action == SumOrRedEnum.SUM) 
@@ -198,6 +203,7 @@ namespace Blog.SetRepositories.Repositories
             return metric;
         }
 
+        //
         public async Task<UserMetricEntity> SumOrRedReportsReceivedCount(UserMetricEntity metric, SumOrRedEnum action)
         {
             if (action == SumOrRedEnum.SUM) 
@@ -216,6 +222,7 @@ namespace Blog.SetRepositories.Repositories
             return metric;
         }
 
+        //
         public async Task<UserMetricEntity> SumOrRedMediaUploadsCount(UserMetricEntity metric, SumOrRedEnum action) 
         {
             if (action == SumOrRedEnum.SUM) 
@@ -306,7 +313,7 @@ namespace Blog.SetRepositories.Repositories
             return metric;
         }
     
-        public async Task<UserMetricEntity> SumOrRedLastLogin(UserMetricEntity metric, SumOrRedEnum action)
+        public async Task<UserMetricEntity> SetLastLogin(UserMetricEntity metric)
         {
             metric.LastLogin = DateTime.Now;
 

@@ -45,8 +45,13 @@ namespace blog.Controllers
         [EnableRateLimiting("DeleteItemPolicy")]
         public async Task<IActionResult> Delete(ulong Id)
         {
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            ApplicationUser user = await _uow.UserRepository.Get(userId);
             CommentEntity comment = await _uow.CommentRepository.Get(Id, false);
             await _uow.CommentRepository.Delete(comment);
+
+            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            await _uow.UserMetricRepository.SumOrRedCommentsCount(metric, Blog.utils.enums.SumOrRedEnum.REDUCE);
 
             return Ok(new Response(
                 "success",
@@ -99,6 +104,9 @@ namespace blog.Controllers
             PostEntity post = await _uow.PostRepository.Get(postId);
 
             CommentEntity comment = await _uow.CommentRepository.Create(user, post, dto, parentId);
+
+            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            await _uow.UserMetricRepository.SumOrRedCommentsCount(metric, Blog.utils.enums.SumOrRedEnum.SUM);
 
             return Ok(new Response(
                 "success",

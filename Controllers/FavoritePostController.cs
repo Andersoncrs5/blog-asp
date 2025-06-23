@@ -65,12 +65,16 @@ namespace blog.Controllers
 
         [HttpPost("{postId:required:long}/save-remove")]
         [EnableRateLimiting("SaveOrRemoveFavoriteItemPolicy")]
-        public async Task<IActionResult> SaveOrRemove(long postId)
+        public async Task<IActionResult> Save(long postId)
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser user = await _uow.UserRepository.Get(userId);
+
             PostEntity post = await _uow.PostRepository.Get(postId);
-            FavoritePostEntity save = await _uow.FavoritePostRepository.SaveOrRemove(user, post);
+            FavoritePostEntity save = await _uow.FavoritePostRepository.Save(user, post);
+
+            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            await _uow.UserMetricRepository.SumOrRedSavedPostsCount(metric, Blog.utils.enums.SumOrRedEnum.SUM);
 
             return Ok(new Response(
                 "success",
@@ -84,8 +88,14 @@ namespace blog.Controllers
         [EnableRateLimiting("SaveOrRemoveFavoriteItemPolicy")]
         public async Task<IActionResult> Remove(long saveId)
         {
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            ApplicationUser user = await _uow.UserRepository.Get(userId);
+            
             FavoritePostEntity save = await _uow.FavoritePostRepository.Get(saveId);
             await _uow.FavoritePostRepository.Remove(save);
+
+            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            await _uow.UserMetricRepository.SumOrRedSavedPostsCount(metric, Blog.utils.enums.SumOrRedEnum.REDUCE);
 
             return Ok(new Response(
                 "success",

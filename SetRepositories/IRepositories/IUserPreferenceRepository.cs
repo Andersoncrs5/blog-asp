@@ -16,6 +16,5 @@ namespace blog.SetRepositories.IRepositories
         Task<PaginatedList<UserPreferenceEntity>> GetAllOfUserPaginatedAsync(ApplicationUser user, int pageNumber, int pageSize, bool includeRelations = true);
         Task<UserPreferenceEntity> SaveAsync(CreatePreferenceDTO dto, ApplicationUser user);
         Task<bool> GetPreferenceByCategoryAsync(ApplicationUser user, long categoryId);
-
     }
 }

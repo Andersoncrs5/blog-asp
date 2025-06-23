@@ -48,6 +48,9 @@ namespace Blog.Controllers
         {
             ApplicationUser user = await _uow.UserRepository.Get(userId, includeMetric);
 
+            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            await _uow.UserMetricRepository.SumOrRedProfileViews(metric, utils.enums.SumOrRedEnum.SUM);
+
             return Ok(new Response(
                 "success",
                 "User found",
@@ -83,6 +86,9 @@ namespace Blog.Controllers
             string? id = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser user = await _uow.UserRepository.Get(id);
             ApplicationUser result = await _uow.UserRepository.Update(user, userDto);
+
+            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            await _uow.UserMetricRepository.SumOrRedEditedCount(metric, utils.enums.SumOrRedEnum.SUM);
 
             return Ok(new Response(
                 "success",

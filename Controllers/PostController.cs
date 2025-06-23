@@ -49,6 +49,9 @@ namespace Blog.Controllers
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser user = await _uow.UserRepository.Get(userId);
             await _uow.PostRepository.Delete(post, user);
+
+            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            await _uow.UserMetricRepository.SumOrRedPostsCount(metric, utils.enums.SumOrRedEnum.SUM);
             
             return Ok(new Response(
                 "success",
@@ -66,6 +69,9 @@ namespace Blog.Controllers
             CategoryEntity category = await _uow.CategoryRepository.Get(dto.categoryId);
             ApplicationUser user = await _uow.UserRepository.Get(userId);
             PostEntity postCreated = await _uow.PostRepository.Create(user, dto.MappearToPostEntity(), category);
+
+            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            await _uow.UserMetricRepository.SumOrRedPostsCount(metric, utils.enums.SumOrRedEnum.SUM);
 
             return Ok(new Response(
                 "success",

@@ -36,6 +36,9 @@ namespace blog.Controllers
 
             PlaylistEntity result = await _uow.PlaylistRepository.Create(user, dto);
 
+            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            await _uow.UserMetricRepository.SumOrRedPlaylistCount(metric, Blog.utils.enums.SumOrRedEnum.SUM);
+
             return Ok(new Response(
                 "success",
                 "Play list created!!",
@@ -77,8 +80,14 @@ namespace blog.Controllers
         [EnableRateLimiting("DeleteItemPolicy")]
         public async Task<IActionResult> Delete(ulong Id)
         {
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            ApplicationUser user = await _uow.UserRepository.Get(userId);
+
             PlaylistEntity play = await _uow.PlaylistRepository.Get(Id);
             await _uow.PlaylistRepository.Delete(play);
+
+            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            await _uow.UserMetricRepository.SumOrRedPlaylistCount(metric, Blog.utils.enums.SumOrRedEnum.REDUCE);
 
             return Ok(new Response(
                 "success",

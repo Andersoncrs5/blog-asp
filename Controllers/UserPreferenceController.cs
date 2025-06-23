@@ -32,8 +32,14 @@ namespace blog.Controllers
         [EnableRateLimiting("DeleteItemPolicy")]
         public async Task<IActionResult> Remove(long Id)
         {
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value; 
+            ApplicationUser user = await _uow.UserRepository.Get(userId);
+            
             UserPreferenceEntity prefer = await _uow.UserPreferenceRepository.GetAsync(Id);
             await _uow.UserPreferenceRepository.RemoveAsync(prefer);
+
+            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            await _uow.UserMetricRepository.SumOrRedPreferenceCount(metric, Blog.utils.enums.SumOrRedEnum.REDUCE);
 
             return Ok(new Response(
                 "success",
@@ -75,6 +81,9 @@ namespace blog.Controllers
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value; 
             ApplicationUser user = await _uow.UserRepository.Get(userId);
             UserPreferenceEntity prefer = await _uow.UserPreferenceRepository.SaveAsync(dto, user);
+
+            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            await _uow.UserMetricRepository.SumOrRedPreferenceCount(metric, Blog.utils.enums.SumOrRedEnum.SUM);
 
             return Ok(new Response(
                 "success",

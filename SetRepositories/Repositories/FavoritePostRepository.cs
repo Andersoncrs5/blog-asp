@@ -39,17 +39,13 @@ namespace Blog.SetRepositories.Repositories
             return await PaginatedList<FavoritePostEntity>.CreateAsync(query, pageNumber, pageSize);
         }
 
-        public async Task<FavoritePostEntity> SaveOrRemove(ApplicationUser user, PostEntity post) 
+        public async Task<FavoritePostEntity> Save(ApplicationUser user, PostEntity post) 
         {
             FavoritePostEntity? check = await _context.FavoritePostEntities
                 .AsNoTracking().FirstOrDefaultAsync(f => f.ApplicationUserId == user.Id && f.PostId == post.Id);
 
             if (check is not null)
-            {
-                _context.FavoritePostEntities.Remove(check);
-                await _context.SaveChangesAsync();
-                return check;
-            }
+                throw new ResponseException("Post already are saved!!!!", 400);
             
             FavoritePostEntity save = new FavoritePostEntity()
             {

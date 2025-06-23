@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using blog.utils.enums;
+using blog.utils.Responses.ReactionComment;
 using Blog.Context;
 using Blog.entities;
 using Blog.entities.enums;
@@ -20,25 +22,38 @@ namespace Blog.SetRepositories.Repositories
             _context = context;
         }
 
-        public async Task<ReactionCommentEntity?> Reaction(CommentEntity comment, ApplicationUser user, LikeOrDislike newAction)
+        public async Task<ReactionCommentResponse> Reaction(CommentEntity comment, ApplicationUser user, LikeOrDislike newAction)
         {
-            ReactionCommentEntity? existingReaction = await _context.ReactionCommentEntities 
+            ReactionCommentEntity? existingReaction = await _context.ReactionCommentEntities
                 .FirstOrDefaultAsync(rc => rc.CommentId == comment.Id && rc.ApplicationUserId == user.Id);
 
             if (existingReaction != null && existingReaction.Reaction == newAction)
             {
-                _context.ReactionCommentEntities.Remove(existingReaction); 
+                _context.ReactionCommentEntities.Remove(existingReaction);
                 await _context.SaveChangesAsync();
-                return null; 
+                return new ReactionCommentResponse
+                {
+                    ReactionEntity = null,
+                    ChangeType = ReactionCommentChangeType.Removed,
+                    OldReaction = newAction,
+                    NewReaction = null
+                };
             }
 
             if (existingReaction != null && existingReaction.Reaction != newAction)
             {
-                existingReaction.Reaction = newAction; 
+                LikeOrDislike oldReactionType = existingReaction.Reaction;
+                existingReaction.Reaction = newAction;
                 existingReaction.UpdatedAt = DateTime.UtcNow; 
 
                 await _context.SaveChangesAsync();
-                return existingReaction; 
+                return new ReactionCommentResponse
+                {
+                    ReactionEntity = existingReaction,
+                    ChangeType = ReactionCommentChangeType.Updated,
+                    OldReaction = oldReactionType, 
+                    NewReaction = newAction
+                };
             }
 
             if (existingReaction == null)
@@ -48,27 +63,37 @@ namespace Blog.SetRepositories.Repositories
                     CommentId = comment.Id,
                     ApplicationUserId = user.Id,
                     Reaction = newAction,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow 
                 };
 
                 var result = await _context.ReactionCommentEntities.AddAsync(newReaction);
                 await _context.SaveChangesAsync();
-                return result.Entity;
+                return new ReactionCommentResponse
+                {
+                    ReactionEntity = result.Entity,
+                    ChangeType = ReactionCommentChangeType.Added,
+                    OldReaction = null, 
+                    NewReaction = newAction 
+                };
             }
 
-            throw new InvalidOperationException("Error the reactioning on comment!");
+            throw new ResponseException("Erro inesperado ao processar a reação no comentário.", 500);
         }
 
-        public async Task Remove(CommentEntity comment, ApplicationUser user)
+        public async Task<ReactionCommentEntity> Remove(ulong Id)
         {
-            ReactionCommentEntity? reaction = await _context.ReactionCommentEntities 
-                .FirstOrDefaultAsync(rc => rc.CommentId == comment.Id && rc.ApplicationUserId == user.Id);
+            if (Id == 0)
+                throw new ResponseException("Reaction ID is required and must be positive.");
+
+            ReactionCommentEntity? reaction = await _context.ReactionCommentEntities
+                .FirstOrDefaultAsync(rc => rc.Id == Id);
 
             if (reaction == null)
                 throw new ResponseException("Reaction not found", 404);
-            
+
             _context.ReactionCommentEntities.Remove(reaction);
             await _context.SaveChangesAsync();
+            return reaction;
         }
 
         public async Task<bool> Exists(ApplicationUser user, CommentEntity comment)

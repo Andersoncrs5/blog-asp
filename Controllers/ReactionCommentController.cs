@@ -4,9 +4,12 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using blog.DTOs.ReactionComment;
+using blog.utils.enums;
+using blog.utils.Responses.ReactionComment;
 using Blog.entities;
 using Blog.SetUnitOfWork;
 using Blog.utils;
+using Blog.utils.enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,31 +30,73 @@ namespace blog.Controllers
             _uow = uow;
         }
 
-        [HttpPost]
-        [EnableRateLimiting("CreateItemPolicy")]
-        public async Task<IActionResult> Reaction([FromBody] CreateReactionCommentDTO dto )
+        public async Task<IActionResult> Reaction([FromBody] CreateReactionCommentDTO dto)
         {
-            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value; 
+
             ApplicationUser user = await _uow.UserRepository.Get(userId);
             CommentEntity comment = await _uow.CommentRepository.Get(dto.CommentId);
-            ReactionCommentEntity? reaction = await _uow.ReactionCommentRepository.Reaction(comment, user, dto.action);
 
-            return Ok(new Response(
+            ReactionCommentResponse reactionResult = await _uow.ReactionCommentRepository.Reaction(comment, user, dto.Action);
+
+            UserMetricEntity userMetric = await _uow.UserMetricRepository.Get(user.Id);
+
+            switch (reactionResult.ChangeType)
+            {
+                case ReactionCommentChangeType.Added:
+                    if (reactionResult.NewReaction.HasValue)
+                    {
+                        await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInComment(userMetric, SumOrRedEnum.SUM, reactionResult.NewReaction.Value);
+                    }
+                    break;
+
+                case ReactionCommentChangeType.Removed:
+                    if (reactionResult.OldReaction.HasValue)
+                    {
+                        await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInComment(userMetric, SumOrRedEnum.REDUCE, reactionResult.OldReaction.Value);
+                    }
+                    break;
+
+                case ReactionCommentChangeType.Updated:
+                    if (reactionResult.OldReaction.HasValue)
+                    {
+                        await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInComment(userMetric, SumOrRedEnum.REDUCE, reactionResult.OldReaction.Value);
+                    }
+                    if (reactionResult.NewReaction.HasValue)
+                    {
+                        await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInComment(userMetric, SumOrRedEnum.SUM, reactionResult.NewReaction.Value);
+                    }
+                    break;
+            }
+
+            string responseMessage = reactionResult.ChangeType switch
+            {
+                ReactionCommentChangeType.Added => "Reaction added!",
+                ReactionCommentChangeType.Removed => "Reaction removed!",
+                ReactionCommentChangeType.Updated => "Reaction updated!",
+                _ => "Reaction processed."
+            };
+
+            return Ok(new Response( 
                 "success",
-                reaction == null? "Reaction removed!": "Reaction added!",
-                200,
-                reaction
+                responseMessage,
+                200, 
+                reactionResult.ReactionEntity 
             ));
         }
 
-        [HttpDelete("CommentId:required")]
+        [HttpDelete("Id:required")]
         [EnableRateLimiting("DeleteItemPolicy")]
-        public async Task<IActionResult> Remove(ulong CommentId)
+        public async Task<IActionResult> Remove(ulong Id)
         {
-            CommentEntity comment = await _uow.CommentRepository.Get(CommentId);
-            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value; 
+
             ApplicationUser user = await _uow.UserRepository.Get(userId);
-            await _uow.ReactionCommentRepository.Remove(comment, user);
+
+            UserMetricEntity userMetric = await _uow.UserMetricRepository.Get(user.Id);
+
+            var result = await _uow.ReactionCommentRepository.Remove(Id);
+            await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInComment(userMetric, SumOrRedEnum.REDUCE, result.Reaction);
 
             return Ok(new Response(
                 "success",

@@ -93,6 +93,9 @@ namespace Blog.Controllers
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddMinutes(refreshTokenValidity);
             await _userManager.UpdateAsync(user);
 
+            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            await _uow.UserMetricRepository.SetLastLogin(metric);
+
             return Ok(new ResponseTokens(
                 new JwtSecurityTokenHandler().WriteToken(token),
                 refreshToken,
