@@ -137,7 +137,7 @@ namespace Blog.Context
 
             builder.Entity<ApplicationUser>()
                 .HasOne(u => u.RecoverAccountEntities)
-                .WithOne()
+                .WithOne(r => r.User)
                 .HasForeignKey<RecoverAccountEntity>(r => r.ApplicationUserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -245,13 +245,13 @@ namespace Blog.Context
                 
             builder.Entity<ApplicationUser>()
                 .HasMany(u => u.Categories)
-                .WithOne() 
+                .WithOne(c => c.ApplicationUser) 
                 .HasForeignKey(c => c.ApplicationUserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<ApplicationUser>()
                 .HasMany(u => u.Posts)
-                .WithOne()
+                .WithOne(p => p.ApplicationUser)
                 .HasForeignKey(c => c.ApplicationUserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -275,7 +275,7 @@ namespace Blog.Context
 
             builder.Entity<CategoryEntity>()
                 .HasMany(p => p.Posts)
-                .WithOne() 
+                .WithOne(c => c.Category) 
                 .HasForeignKey(u => u.CategoryId)
                 .OnDelete(DeleteBehavior.Cascade);
 

@@ -3,6 +3,7 @@ using System;
 using Blog.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Blog.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250625151530_AddEngagementScoreAndNewCountsToPost")]
+    partial class AddEngagementScoreAndNewCountsToPost
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -459,7 +462,13 @@ namespace Blog.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("ApplicationUserId1")
+                        .HasColumnType("text");
+
                     b.Property<long>("CategoryId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("CategoryId1")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Content")
@@ -501,7 +510,11 @@ namespace Blog.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
+                    b.HasIndex("ApplicationUserId1");
+
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("CategoryId1");
 
                     b.ToTable("posts");
                 });
@@ -694,7 +707,12 @@ namespace Blog.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
                     b.HasKey("ApplicationUserId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("recover_account");
                 });
@@ -1072,13 +1090,11 @@ namespace Blog.Migrations
 
             modelBuilder.Entity("Blog.entities.CategoryEntity", b =>
                 {
-                    b.HasOne("Blog.entities.ApplicationUser", "ApplicationUser")
+                    b.HasOne("Blog.entities.ApplicationUser", null)
                         .WithMany("Categories")
                         .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("ApplicationUser");
                 });
 
             modelBuilder.Entity("Blog.entities.CommentEntity", b =>
@@ -1199,17 +1215,25 @@ namespace Blog.Migrations
 
             modelBuilder.Entity("Blog.entities.PostEntity", b =>
                 {
-                    b.HasOne("Blog.entities.ApplicationUser", "ApplicationUser")
+                    b.HasOne("Blog.entities.ApplicationUser", null)
                         .WithMany("Posts")
                         .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Blog.entities.CategoryEntity", "Category")
+                    b.HasOne("Blog.entities.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId1");
+
+                    b.HasOne("Blog.entities.CategoryEntity", null)
                         .WithMany("Posts")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Blog.entities.CategoryEntity", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId1");
 
                     b.Navigation("ApplicationUser");
 
@@ -1265,11 +1289,15 @@ namespace Blog.Migrations
 
             modelBuilder.Entity("Blog.entities.RecoverAccountEntity", b =>
                 {
-                    b.HasOne("Blog.entities.ApplicationUser", "User")
+                    b.HasOne("Blog.entities.ApplicationUser", null)
                         .WithOne("RecoverAccountEntities")
                         .HasForeignKey("Blog.entities.RecoverAccountEntity", "ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Blog.entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
