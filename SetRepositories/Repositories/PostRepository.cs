@@ -48,7 +48,7 @@ namespace Blog.SetRepositories.Repositories
         public async Task<PostEntity> Create(ApplicationUser user, PostEntity post, CategoryEntity category)
         {
             post.ApplicationUserId = user.Id;
-            post.categoryId = category.Id;
+            post.CategoryId = category.Id;
             
             var result = await _context.PostEntities.AddAsync(post);
             await _context.SaveChangesAsync();
@@ -95,7 +95,7 @@ namespace Blog.SetRepositories.Repositories
                 .Where(p => followedUserIds.Contains(p.ApplicationUserId));
 
             IQueryable<PostEntity> preferredPostsQuery = activePostsBaseQuery
-                .Where(p => preferredCategoryIds.Contains(p.categoryId));
+                .Where(p => preferredCategoryIds.Contains(p.CategoryId));
 
             IQueryable<PostEntity> generalPostsQuery = activePostsBaseQuery;
 

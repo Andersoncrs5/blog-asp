@@ -22,8 +22,10 @@ namespace Blog.entities
         public bool IsActived { get; set; }
         [Required] public string ApplicationUserId { get; set; } = string.Empty;
 
-        [Required] public long categoryId { get; set; }
+        [Required] public long CategoryId { get; set; }
         [Required] public long ReadTimes { get; set; } = 0;
+
+        public double EngagementScore { get; set; } = 0.0;
 
         [Timestamp] public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 
@@ -33,7 +35,7 @@ namespace Blog.entities
         [JsonIgnore] public virtual PostMetricEntity? PostMetricEntity { get; set; }
         [JsonIgnore] public virtual ICollection<FavoritePostEntity>? FavoritePosts { get; set; }
         [JsonIgnore] [ForeignKey(nameof(ApplicationUserId))] public virtual ApplicationUser? ApplicationUser { get; set; }
-        [JsonIgnore] [ForeignKey(nameof(categoryId))] public virtual CategoryEntity? Category { get; set; }
+        [JsonIgnore] [ForeignKey(nameof(CategoryId))] public virtual CategoryEntity? Category { get; set; }
         [JsonIgnore] public virtual ICollection<CommentEntity>? CommentEntities { get; set; }
         [JsonIgnore] public virtual ICollection<ReactionPostEntity>? ReactionPosts { get; set; }
         [JsonIgnore] public virtual ICollection<PlaylistItemEntity>? PlaylistItems { get; set; } = new List<PlaylistItemEntity>();

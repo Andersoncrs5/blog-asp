@@ -276,7 +276,7 @@ namespace Blog.Context
             builder.Entity<CategoryEntity>()
                 .HasMany(p => p.Posts)
                 .WithOne() 
-                .HasForeignKey(u => u.categoryId)
+                .HasForeignKey(u => u.CategoryId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<CategoryEntity>(entity =>
@@ -335,6 +335,7 @@ namespace Blog.Context
                 entity.Property(e => e.Content).IsRequired();
                 entity.Property(e => e.ReadTimes).IsRequired().HasMaxLength(120);
                 entity.Property(e => e.IsActived).IsRequired().HasDefaultValue(true);
+                entity.Property(e => e.EngagementScore).HasDefaultValue(0.0).IsRequired();
             });
             
             builder.Entity<FavoritePostEntity>(entity =>
