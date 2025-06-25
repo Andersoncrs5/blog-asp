@@ -27,6 +27,7 @@ namespace Blog.entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
 
+        [JsonIgnore] public virtual ApplicationUser? ApplicationUser { get; set; }
         [JsonIgnore] public virtual ICollection<PostEntity>? Posts { get; set; }
         [JsonIgnore] public virtual ICollection<UserPreferenceEntity>? UserPreferenceEntities { get; set; } = new List<UserPreferenceEntity>();
     }
