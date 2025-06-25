@@ -33,6 +33,7 @@ namespace Blog.Context
         public DbSet<FollowEntity> FollowsEntities { get; set; }
         public DbSet<UserPreferenceEntity> UserPreferenceEntities { get; set; }
         public DbSet<UserConfigEntity> UserConfigEntities { get; set; }
+        public DbSet<NotificationEntity> NotificationEntities { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -413,6 +414,27 @@ namespace Blog.Context
                 entity.Property(e => e.Content)
                       .IsRequired()
                       .HasMaxLength(800);
+            });
+
+            builder.Entity<ApplicationUser>()
+                .HasMany(u => u.NotificationEntities)
+                .WithOne(n => n.ApplicationUser)
+                .HasForeignKey(n => n.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<NotificationEntity>(entity => 
+            {
+                entity.HasKey(n => n.Id);
+                entity.Property(n => n.Title).IsRequired().HasMaxLength(200);
+                entity.Property(n => n.Content).IsRequired().HasMaxLength(1000);
+                entity.Property(n => n.LinkUrl).IsRequired(false).HasMaxLength(1000);
+                entity.Property(n => n.IconCssClass).IsRequired(false).HasMaxLength(200);
+                entity.Property(n => n.NotificationType).IsRequired();
+                entity.Property(e => e.IsRead).IsRequired().HasDefaultValue(false);
+                entity.Property(e => e.RelatedEntityId).IsRequired(false);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
+                entity.Property(e => e.UpdatedAt).IsRequired(false);
+                entity.Property(e => e.RowVersion).IsRowVersion();
             });
 
             builder.Entity<ApplicationUser>().ToTable("app_users");

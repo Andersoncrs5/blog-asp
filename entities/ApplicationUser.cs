@@ -26,6 +26,7 @@ namespace Blog.entities
         [JsonIgnore] public virtual ICollection<FollowEntity>? Following { get; set; } = new List<FollowEntity>();
         [JsonIgnore] public virtual ICollection<FollowEntity>? Followers { get; set; } = new List<FollowEntity>();
         [JsonIgnore] public virtual ICollection<UserPreferenceEntity>? UserPreferenceEntities { get; set; } = new List<UserPreferenceEntity>();
+        [JsonIgnore] public virtual ICollection<NotificationEntity>? NotificationEntities { get; set; } = new List<NotificationEntity>();
         [JsonIgnore] public virtual UserConfigEntity? UserConfig { get; set; }
 
     }
