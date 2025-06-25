@@ -50,8 +50,8 @@ namespace Blog.SetRepositories.Repositories
             post.ApplicationUserId = user.Id;
             post.categoryId = category.Id;
             
-            var result = await this._context.PostEntities.AddAsync(post);
-            await this._context.SaveChangesAsync();
+            var result = await _context.PostEntities.AddAsync(post);
+            await _context.SaveChangesAsync();
 
             return result.Entity;
         }
@@ -62,6 +62,58 @@ namespace Blog.SetRepositories.Repositories
             _context.Entry(post).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return post;
+        }
+
+        public async Task<PaginatedList<PostEntity>> GetAllOfUserPaginated(ApplicationUser user, int pageNumber, int pageSize, bool IsActived = true)
+        {
+            IQueryable<PostEntity> query = _context.PostEntities
+                .AsNoTracking()
+                .Where(p => p.ApplicationUserId == user.Id && p.IsActived == IsActived);
+
+            return await PaginatedList<PostEntity>.CreateAsync(query, pageNumber, pageSize);
+        }
+
+        public async Task<PaginatedList<PostEntity>> GetAllToMePaginated( ApplicationUser currentUser,int pageNumber,int pageSize,bool includeRelations = true)
+        {
+            List<string> followedUserIds = await _context.FollowsEntities
+                .AsNoTracking()
+                .Where(f => f.FollowerId == currentUser.Id)
+                .Select(f => f.FollowedId)
+                .ToListAsync();
+
+            List<long> preferredCategoryIds = await _context.UserPreferenceEntities
+                .AsNoTracking()
+                .Where(up => up.ApplicationUserId == currentUser.Id)
+                .Select(up => up.CategoryId)
+                .ToListAsync();
+
+            IQueryable<PostEntity> activePostsBaseQuery = _context.PostEntities
+                .AsNoTracking()
+                .Where(p => p.IsActived == true);
+
+            IQueryable<PostEntity> followedPostsQuery = activePostsBaseQuery
+                .Where(p => followedUserIds.Contains(p.ApplicationUserId));
+
+            IQueryable<PostEntity> preferredPostsQuery = activePostsBaseQuery
+                .Where(p => preferredCategoryIds.Contains(p.categoryId));
+
+            IQueryable<PostEntity> generalPostsQuery = activePostsBaseQuery;
+
+            IQueryable<PostEntity> combinedQuery = followedPostsQuery
+                                                    .Union(preferredPostsQuery)
+                                                    .Union(generalPostsQuery);
+
+            combinedQuery = combinedQuery.OrderByDescending(p => p.CreatedAt);
+
+            if (includeRelations)
+            {
+                combinedQuery = combinedQuery
+                    .Include(p => p.ApplicationUser)
+                    .Include(p => p.MediaPostEntities)           
+                    .Include(p => p.Category);       
+            }
+
+            return await PaginatedList<PostEntity>.CreateAsync(combinedQuery, pageNumber, pageSize);
         }
 
         public async Task<PaginatedList<PostEntity>> GetAllPaginated(int pageNumber, int pageSize)
@@ -84,14 +136,6 @@ namespace Blog.SetRepositories.Repositories
             _context.Entry(postExist).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return postExist;
-        }
-
-        public async Task<PaginatedList<PostEntity>> GetAllOfUserPaginated(ApplicationUser user, int pageNumber, int pageSize)
-        {
-            IQueryable<PostEntity> query = _context.PostEntities
-                .AsNoTracking().Where(p => p.ApplicationUserId == user.Id);
-
-            return await PaginatedList<PostEntity>.CreateAsync(query, pageNumber, pageSize);
         }
 
     }

@@ -31,9 +31,9 @@ namespace Blog.entities
         public DateTime? UpdatedAt { get; set; }
 
         [JsonIgnore] public virtual PostMetricEntity? PostMetricEntity { get; set; }
-
         [JsonIgnore] public virtual ICollection<FavoritePostEntity>? FavoritePosts { get; set; }
-
+        [JsonIgnore] [ForeignKey(nameof(ApplicationUserId))] public virtual ApplicationUser? ApplicationUser { get; set; }
+        [JsonIgnore] [ForeignKey(nameof(categoryId))] public virtual CategoryEntity? Category { get; set; }
         [JsonIgnore] public virtual ICollection<CommentEntity>? CommentEntities { get; set; }
         [JsonIgnore] public virtual ICollection<ReactionPostEntity>? ReactionPosts { get; set; }
         [JsonIgnore] public virtual ICollection<PlaylistItemEntity>? PlaylistItems { get; set; } = new List<PlaylistItemEntity>();

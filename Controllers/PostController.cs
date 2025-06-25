@@ -102,6 +102,31 @@ namespace Blog.Controllers
             return Ok(result);
         }
 
+        [HttpGet("{userId:required}/get-all-user-paginated")] 
+        [EnableRateLimiting("SlidingWindowLimiterPolicy")]
+        public async Task<IActionResult> GetAllOfAnotherUserPaginated(string userId, [FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        { 
+            ApplicationUser user = await _uow.UserRepository.Get(userId);
+
+            PaginatedList<PostEntity> result = await _uow.PostRepository.GetAllOfUserPaginated(user, pageNumber, pageSize);
+            
+            result.Code = 200;
+            return Ok(result);
+        }
+        
+        [HttpGet("get-all-to-me-paginated")] 
+        [EnableRateLimiting("SlidingWindowLimiterPolicy")]
+        public async Task<IActionResult> GetAllOfAnotherUserPaginated([FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        { 
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            ApplicationUser user = await _uow.UserRepository.Get(userId);
+
+            PaginatedList<PostEntity> result = await _uow.PostRepository.GetAllToMePaginated(user, pageNumber, pageSize);
+            
+            result.Code = 200;
+            return Ok(result);
+        }
+
         [HttpGet("get-all")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
