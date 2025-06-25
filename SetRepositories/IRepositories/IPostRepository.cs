@@ -18,5 +18,6 @@ namespace Blog.SetRepositories.IRepositories
         Task<PostEntity> Update(PostEntity postExist, UpdatePostDTO dto, ApplicationUser user);
         Task<PostEntity> ChangeStatusActive(PostEntity post, ApplicationUser user);
         Task<PaginatedList<PostEntity>> GetAllToMePaginated( ApplicationUser currentUser,int pageNumber,int pageSize,bool includeRelations = true);
+        Task CalculateEngagementScore(PostEntity post, PostMetricEntity metric);
     }
 }

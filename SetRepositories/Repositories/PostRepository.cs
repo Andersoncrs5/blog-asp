@@ -138,5 +138,14 @@ namespace Blog.SetRepositories.Repositories
             return postExist;
         }
 
+        public async Task CalculateEngagementScore(PostEntity post, PostMetricEntity metric)
+        {
+            double scorePositive = (metric.Likes + metric.FavoriteCount + metric.Viewed + metric.MediaCount + metric.CommentCount)/5;
+            double scoreNegavite = (metric.DisLikes + metric.ReportsReceivedCount)/2;
+            post.EngagementScore = scorePositive - scoreNegavite;
+            _context.Entry(post).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
+
     }
 }
