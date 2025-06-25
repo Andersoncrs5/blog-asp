@@ -28,7 +28,7 @@ namespace blog.Controllers
             _uow = uow;
         }
 
-        [HttpDelete("Id:required")]
+        [HttpDelete("{Id:required:long}")]
         [EnableRateLimiting("DeleteItemPolicy")]
         public async Task<IActionResult> Remove(long Id)
         {
