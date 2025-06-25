@@ -86,7 +86,7 @@ namespace Blog.SetRepositories.Repositories
             return exists > 0;
         }
 
-        public async Task Remove(ApplicationUser user, PostEntity post)
+        public async Task<ReactionPostEntity> Remove(ApplicationUser user, PostEntity post)
         {
             ReactionPostEntity? reactionToRemove = await _context.ReactionPostEntities
                 .FirstOrDefaultAsync(rp => rp.ApplicationUserId == user.Id && rp.PostId == post.Id);
@@ -96,6 +96,7 @@ namespace Blog.SetRepositories.Repositories
 
             _context.ReactionPostEntities.Remove(reactionToRemove);
             await _context.SaveChangesAsync();
+            return reactionToRemove;
         }
 
         public async Task<PaginatedList<ReactionPostEntity>> GetAllOfUserPaginated(ApplicationUser user, int pageNumber, int pageSize)

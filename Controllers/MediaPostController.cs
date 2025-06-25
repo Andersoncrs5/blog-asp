@@ -49,7 +49,9 @@ namespace blog.Controllers
 
             PostEntity post = await _uow.PostRepository.Get(media.PostId);
             PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
-            await _uow.PostMetricRepository.SumOrRedMediaCount(postMetric, Blog.utils.enums.SumOrRedEnum.REDUCE);
+            PostMetricEntity metricUpdate = await _uow.PostMetricRepository.SumOrRedMediaCount(postMetric, Blog.utils.enums.SumOrRedEnum.REDUCE);
+
+            await _uow.PostRepository.CalculateEngagementScore(post, metricUpdate);
 
             return Ok(new Response(
                 "success",
@@ -81,7 +83,9 @@ namespace blog.Controllers
             MediaPostEntity media = await _uow.MediaPostRepository.CreateAsync(post, dto);
 
             PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
-            await _uow.PostMetricRepository.SumOrRedMediaCount(postMetric, Blog.utils.enums.SumOrRedEnum.SUM);
+            PostMetricEntity metricUpdate = await _uow.PostMetricRepository.SumOrRedMediaCount(postMetric, Blog.utils.enums.SumOrRedEnum.SUM);
+
+            await _uow.PostRepository.CalculateEngagementScore(post, metricUpdate);
 
             return Ok(new Response(
                 "success",

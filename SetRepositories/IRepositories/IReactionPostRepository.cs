@@ -13,7 +13,7 @@ namespace Blog.SetRepositories.IRepositories
     {
         Task<bool> Exists(ApplicationUser user, PostEntity post);
         Task<ReactionPostResponse> ToggleReaction(ApplicationUser user, PostEntity post, LikeOrDislike newAction);
-        Task Remove(ApplicationUser user, PostEntity post);
+        Task<ReactionPostEntity> Remove(ApplicationUser user, PostEntity post);
         Task<PaginatedList<ReactionPostEntity>> GetAllOfUserPaginated(ApplicationUser user, int pageNumber, int pageSize);
         Task<PaginatedList<ReactionPostEntity>> GetAllOfPostPaginated(PostEntity post, int pageNumber, int pageSize);
     }

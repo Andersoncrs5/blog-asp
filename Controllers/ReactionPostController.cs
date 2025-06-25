@@ -71,7 +71,8 @@ namespace blog.Controllers
                     if (reactionResult.NewReaction.HasValue)
                     {
                         await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInPost(userMetric, SumOrRedEnum.SUM, reactionResult.NewReaction.Value);
-                        await _uow.PostMetricRepository.SumOrRedLikeOrDislike(postMetric, SumOrRedEnum.SUM, reactionResult.NewReaction.Value);
+                        var metricUpdate = await _uow.PostMetricRepository.SumOrRedLikeOrDislike(postMetric, SumOrRedEnum.SUM, reactionResult.NewReaction.Value);
+                        await _uow.PostRepository.CalculateEngagementScore(post, metricUpdate);
                     }
                     break;
 
@@ -80,7 +81,8 @@ namespace blog.Controllers
                     if (reactionResult.OldReaction.HasValue)
                     {
                         await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInPost(userMetric, SumOrRedEnum.REDUCE, reactionResult.OldReaction.Value);
-                        await _uow.PostMetricRepository.SumOrRedLikeOrDislike(postMetric, SumOrRedEnum.REDUCE, reactionResult.OldReaction.Value);
+                        var metricUpdate = await _uow.PostMetricRepository.SumOrRedLikeOrDislike(postMetric, SumOrRedEnum.REDUCE, reactionResult.OldReaction.Value);
+                        await _uow.PostRepository.CalculateEngagementScore(post, metricUpdate!);
                     }
                     break;
 
@@ -91,6 +93,7 @@ namespace blog.Controllers
                     {
                         
                         await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInPost(userMetric, SumOrRedEnum.REDUCE, reactionResult.OldReaction.Value);
+                        
                     }
                     
                     if (reactionResult.NewReaction.HasValue)
@@ -125,7 +128,12 @@ namespace blog.Controllers
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser user = await _uow.UserRepository.Get(userId);
             PostEntity post = await _uow.PostRepository.Get(PostId);
-            await _uow.ReactionPostRepository.Remove(user, post);
+            PostMetricEntity metric = await _uow.PostMetricRepository.Get(post);
+            ReactionPostEntity reaction = await _uow.ReactionPostRepository.Remove(user, post);
+
+            PostMetricEntity metricUpdate = await _uow.PostMetricRepository.SumOrRedLikeOrDislike(metric, SumOrRedEnum.REDUCE ,reaction.Reaction);
+
+            await _uow.PostRepository.CalculateEngagementScore(post, metricUpdate);
 
             return Ok(new Response(
                 "success",
