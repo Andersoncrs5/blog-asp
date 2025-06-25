@@ -30,6 +30,7 @@ namespace blog.Controllers
             _uow = uow;
         }
 
+        [HttpPost]
         public async Task<IActionResult> Reaction([FromBody] CreateReactionCommentDTO dto)
         {
             if (!ModelState.IsValid)
