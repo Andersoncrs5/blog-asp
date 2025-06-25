@@ -171,6 +171,13 @@ builder.Services.AddRateLimiter(RateLimiterOptions =>
         options.QueueLimit = 0;
     });
 
+    RateLimiterOptions.AddFixedWindowLimiter("FollowOrUnfollowPolicy", options =>
+    {
+        options.PermitLimit = 15;
+        options.Window = TimeSpan.FromMinutes(15);
+        options.QueueLimit = 0;
+    });
+
     RateLimiterOptions.AddFixedWindowLimiter("authSystemPolicy", options => 
     {
         options.PermitLimit = 3;
