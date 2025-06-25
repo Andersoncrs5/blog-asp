@@ -26,7 +26,7 @@ namespace blog.SetRepositories.Repositories
             {
                 throw new ResponseException("Invalid follower or followed user.", 400);
             }
-            
+
             int check = await _context.FollowsEntities.AsNoTracking()
                 .CountAsync(f => f.FollowerId == follower.Id && f.FollowedId == followed.Id);
 
@@ -104,10 +104,13 @@ namespace blog.SetRepositories.Repositories
             return await PaginatedList<FollowEntity>.CreateAsync(query, pageNumber, pageSize);
         }
         
-        public async Task<FollowEntity> ChangeStatusReceiveNotifications(ApplicationUser follower, ApplicationUser followed)
+        public async Task<FollowEntity> ChangeStatusReceiveNotifications(string? followerId, string? followedId)
         {
+            if(string.IsNullOrEmpty(followerId) || string.IsNullOrEmpty(followedId)) 
+                throw new ResponseException("Ids are required", 400);
+
             FollowEntity? follow = await _context.FollowsEntities.AsNoTracking()
-                .FirstOrDefaultAsync(f => f.FollowerId == follower.Id && f.FollowedId == followed.Id);
+                .FirstOrDefaultAsync(f => f.FollowerId == followerId && f.FollowedId == followedId);
 
             if (follow is null)
                 throw new ResponseException("Error the change status.", 404);
