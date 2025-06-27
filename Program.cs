@@ -232,6 +232,7 @@ builder.Services.AddScoped<IRecoverAccountRepository, RecoverAccountRepository>(
 builder.Services.AddScoped<IMediaPostRepository, MediaPostRepository>();
 builder.Services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
 builder.Services.AddScoped<IUserConfigRepository, UserConfigRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 builder.Services.AddOpenApi();
 

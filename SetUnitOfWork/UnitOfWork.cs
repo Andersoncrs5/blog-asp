@@ -38,6 +38,8 @@ namespace Blog.SetUnitOfWork
         private IFollowRepository _followRepository;
         private IUserConfigRepository _userConfigRepository;
         private IUserPreferenceRepository _userPreferenceRepository;
+        private INotificationRepository _notificationRepository;
+        private IConfiguration configuration;
 
         public UnitOfWork(
             AppDbContext context,
@@ -47,6 +49,8 @@ namespace Blog.SetUnitOfWork
             _userManager = userManager;
         }
 
+        public INotificationRepository NotificationRepository 
+            => _notificationRepository ??= new NotificationRepository(_context, configuration);
         public IUserPreferenceRepository UserPreferenceRepository
             => _userPreferenceRepository ??= new UserPreferenceRepository(_context);
         public IUserConfigRepository UserConfigRepository 

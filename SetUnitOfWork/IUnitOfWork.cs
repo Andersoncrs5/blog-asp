@@ -29,6 +29,7 @@ namespace Blog.SetUnitOfWork
         IFollowRepository FollowRepository { get; }
         IUserConfigRepository UserConfigRepository { get; }
         IUserPreferenceRepository UserPreferenceRepository { get; }
+        INotificationRepository NotificationRepository { get; }
 
         Task Commit();
     }
