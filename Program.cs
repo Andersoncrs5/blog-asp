@@ -143,6 +143,15 @@ builder.Services.AddRateLimiter(RateLimiterOptions =>
         options.QueueLimit = 0;
     });
 
+    RateLimiterOptions.AddSlidingWindowLimiter("AdmSystemPolicy", options => 
+    {
+        options.PermitLimit = 30;
+        options.Window = TimeSpan.FromSeconds(10);
+        options.SegmentsPerWindow = 2;
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = 0;
+    });
+
     RateLimiterOptions.AddSlidingWindowLimiter("CheckExistsPolicy", options => 
     {
         options.PermitLimit = 30;
@@ -252,7 +261,6 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 builder.Services.AddOpenApi();
 
-
 WebApplication? app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -260,12 +268,16 @@ using (var scope = app.Services.CreateScope())
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-    string[] roleNames = { "UserRole", "AdminRole", "SuperAdminRole" };
+    var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
-    const string superAdminRole = "SuperAdminRole";
-    const string systemUserName = "system";
-    const string systemUserEmail = "system@gmail.com"; 
-    const string systemUserPassword = "1492$1500R!An"; 
+    var datasSystemSection = configuration.GetSection("DatasSystem");
+
+    string superAdminRole = datasSystemSection["SuperAdminRole"] ?? throw new InvalidOperationException("SuperAdminRole configuration is missing.");
+    string systemUserName = datasSystemSection["System"] ?? throw new InvalidOperationException("System user name configuration is missing.");
+    string systemUserEmail = datasSystemSection["systemUserEmail"] ?? throw new InvalidOperationException("System user email configuration is missing.");
+    string systemUserPassword = datasSystemSection["SystemUserPassword"] ?? throw new InvalidOperationException("System user password configuration is missing.");
+
+    string[] roleNames = { "UserRole", "AdminRole", "SuperAdminRole" };
 
     foreach (var roleName in roleNames)
     {
