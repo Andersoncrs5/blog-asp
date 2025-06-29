@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using blog.SetRepositories.IRepositories;
 using Blog.SetRepositories.IRepositories;
 using Blog.SetServices.IServices;
+using Microsoft.AspNetCore.Identity;
 
 namespace Blog.SetUnitOfWork
 {

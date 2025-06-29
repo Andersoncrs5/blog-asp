@@ -39,7 +39,7 @@ namespace Blog.SetUnitOfWork
         private IUserConfigRepository _userConfigRepository;
         private IUserPreferenceRepository _userPreferenceRepository;
         private INotificationRepository _notificationRepository;
-        private IConfiguration configuration;
+        public IConfiguration configuration;
 
         public UnitOfWork(
             AppDbContext context,
