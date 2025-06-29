@@ -73,7 +73,6 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -255,6 +254,77 @@ builder.Services.AddOpenApi();
 
 
 WebApplication? app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+    string[] roleNames = { "UserRole", "AdminRole", "SuperAdminRole" };
+
+    const string superAdminRole = "SuperAdminRole";
+    const string systemUserName = "system";
+    const string systemUserEmail = "system@gmail.com"; 
+    const string systemUserPassword = "1492$1500R!An"; 
+
+    foreach (var roleName in roleNames)
+    {
+        if (!await roleManager.RoleExistsAsync(roleName))
+        {
+            await roleManager.CreateAsync(new IdentityRole(roleName));
+            Console.WriteLine($"Role '{roleName}' created.");
+        }
+        else
+        {
+            Console.WriteLine($"Role '{roleName}' already exists.");
+        }
+    }
+
+    ApplicationUser? systemUser = await userManager.FindByNameAsync(systemUserName);
+    if (systemUser == null)
+    {
+        systemUser = new ApplicationUser
+        {
+            UserName = systemUserName,
+            Email = systemUserEmail,
+            EmailConfirmed = true 
+        };
+
+        var createUserResult = await userManager.CreateAsync(systemUser, systemUserPassword);
+        if (createUserResult.Succeeded)
+        {
+            var addRoleResult = await userManager.AddToRoleAsync(systemUser, superAdminRole);
+            if (addRoleResult.Succeeded)
+            {
+                Console.WriteLine($"User '{systemUserName}' added to role '{superAdminRole}'.");
+            }
+            else
+            {
+                Console.WriteLine($"Error adding user '{systemUserName}' to role '{superAdminRole}': {string.Join(", ", addRoleResult.Errors.Select(e => e.Description))}");
+            }
+        }
+        else
+        {
+            Console.WriteLine($"Error creating user '{systemUserName}': {string.Join(", ", createUserResult.Errors.Select(e => e.Description))}");
+        }
+    }
+    else
+    {
+        Console.WriteLine($"User '{systemUserName}' already exists.");
+        if (!await userManager.IsInRoleAsync(systemUser, superAdminRole))
+        {
+            var addRoleResult = await userManager.AddToRoleAsync(systemUser, superAdminRole);
+            if (addRoleResult.Succeeded)
+            {
+                Console.WriteLine($"User '{systemUserName}' added to role '{superAdminRole}'.");
+            }
+            else
+            {
+                Console.WriteLine($"Error adding existing user '{systemUserName}' to role '{superAdminRole}': {string.Join(", ", addRoleResult.Errors.Select(e => e.Description))}");
+            }
+        }
+    }
+}
 
 if (app.Environment.IsDevelopment())
 {
