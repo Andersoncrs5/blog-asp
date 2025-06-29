@@ -112,6 +112,14 @@ namespace Blog.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            IdentityRole? roleUser = await _roleManager.FindByNameAsync("UserRole");
+
+            if (roleUser == null)
+                return StatusCode(500,new ResponseException("Role user not found", 500));
+
+            if (string.IsNullOrEmpty(roleUser.Name) || string.IsNullOrWhiteSpace(roleUser.Name))
+                return StatusCode(500,new ResponseException("Role user not found", 500));
+
             string email = model.Email.Trim().ToLower();
 
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(model.Password))
@@ -142,6 +150,22 @@ namespace Blog.Controllers
             }
 
             await _uow.UserMetricRepository.Create(user.Id);
+
+            ApplicationUser userCreated = await _uow.UserRepository.Get(user.Id);
+
+            var addRoleResult = await _userManager.AddToRoleAsync(userCreated, roleUser.Name);
+
+            if (!addRoleResult.Succeeded)
+            {
+                var errors = result.Errors.Select(e => e.Description);
+                await _uow.UserRepository.Delete(userCreated);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseException(
+                    "Error the set role to user",
+                    StatusCodes.Status500InternalServerError,
+                    "fail",
+                    errors
+                ));
+            }
 
             // await this._uow.EmailService.SendWelcomeEmailAsync(user.Email, user.UserName);
 
