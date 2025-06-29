@@ -48,6 +48,7 @@ namespace blog.SetRepositories.Repositories
         {
             if (recipientUser == null || string.IsNullOrEmpty(recipientUser.Id))
                 throw new ResponseException("Recipient user is required.", 400);
+
             if (dto == null)
                 throw new ResponseException("Notification DTO cannot be null.", 400);
 
@@ -130,7 +131,7 @@ namespace blog.SetRepositories.Repositories
             return notificationsToUpdate.Count;
         }
 
-        public async Task<PaginatedList<NotificationEntity>> GetUserNotificationsPaginatedAsync(string userId, int pageNumber, int pageSize, bool? isRead = null)
+        public async Task<PaginatedList<NotificationEntity>> GetUserNotificationsPaginatedAsync(string? userId, int pageNumber, int pageSize, bool? isRead = null)
         {
             if (string.IsNullOrEmpty(userId))
                 throw new ResponseException("User ID is required to get notifications.", 400);
@@ -149,7 +150,7 @@ namespace blog.SetRepositories.Repositories
             return await PaginatedList<NotificationEntity>.CreateAsync(query, pageNumber, pageSize);
         }
 
-        public async Task<int> GetUnreadNotificationsCountAsync(string userId)
+        public async Task<int> GetUnreadNotificationsCountAsync(string? userId)
         {
             if (string.IsNullOrEmpty(userId))
                 throw new ResponseException("User ID is required to get unread notifications count.", 400);

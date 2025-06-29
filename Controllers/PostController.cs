@@ -81,6 +81,8 @@ namespace Blog.Controllers
 
             await _uow.PostMetricRepository.Create(postCreated);
 
+            await _uow.NotificationRepository.SendNotificationToFollowersAboutNewPost(user, postCreated);
+
             return Ok(new Response(
                 "success",
                 "Post created with successfully",

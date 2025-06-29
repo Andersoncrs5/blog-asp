@@ -16,7 +16,7 @@ namespace blog.SetRepositories.IRepositories
         Task<NotificationEntity> SendNotification(CreateNotificationDTO dto, ApplicationUser recipientUser, string? senderUserId);
         Task SendNotificationToFollowersAboutNewPost(ApplicationUser postAuthor, PostEntity newPost);
         Task<int> MarkNotificationsAsReadAsync(List<long> notificationIds, string userId);
-        Task<PaginatedList<NotificationEntity>> GetUserNotificationsPaginatedAsync(string userId, int pageNumber, int pageSize, bool? isRead = null);
-        Task<int> GetUnreadNotificationsCountAsync(string userId);
+        Task<PaginatedList<NotificationEntity>> GetUserNotificationsPaginatedAsync(string? userId, int pageNumber, int pageSize, bool? isRead = null);
+        Task<int> GetUnreadNotificationsCountAsync(string? userId);
     }
 }
