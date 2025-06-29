@@ -236,6 +236,8 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 builder.Services.AddOpenApi();
 
+
+
 WebApplication? app = builder.Build();
 
 if (app.Environment.IsDevelopment())
