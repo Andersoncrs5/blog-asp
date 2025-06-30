@@ -25,7 +25,6 @@ namespace blog.utils.Filters.FiltersDTO
         public ulong? ViewsCountBefore { get; set; }
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;
-        
         public bool IncludeRelationsUser { get; set; } = false;
         public bool IncludeRelationsMetric { get; set; } = false;
         
