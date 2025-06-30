@@ -142,8 +142,9 @@ namespace Blog.Controllers
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> GetAll([FromQuery] PostFilterDTO filter, bool canFilter = false)
         {    
-            IQueryable<PostEntity> query = _uow.PostRepository.GetAllPaginated();
+            IQueryable<PostEntity> query = _uow.PostRepository.GetAll();
 
+            filter.IsActived = true;
             if (canFilter == true){query = PostQueryFilter.ApplyFilters(query, filter);}
 
             PaginatedList<PostEntity> result = await PaginatedList<PostEntity>.CreateAsync(query, filter.PageNumber, filter.PageSize);   

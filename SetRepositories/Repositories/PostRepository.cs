@@ -114,7 +114,7 @@ namespace Blog.SetRepositories.Repositories
             return combinedQuery;
         }
 
-        public IQueryable<PostEntity> GetAllPaginated()
+        public IQueryable<PostEntity> GetAll()
         {
             IQueryable<PostEntity> query = _context.PostEntities
                 .AsNoTracking()

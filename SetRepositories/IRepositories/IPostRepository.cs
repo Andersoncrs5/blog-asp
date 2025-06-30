@@ -14,7 +14,7 @@ namespace Blog.SetRepositories.IRepositories
         Task<PostEntity> Delete(PostEntity post, ApplicationUser user);
         Task<PostEntity> Create(ApplicationUser user, PostEntity post, CategoryEntity category);
         IQueryable<PostEntity> GetAllOfUser(ApplicationUser user, bool IsActived = true);
-        IQueryable<PostEntity> GetAllPaginated();
+        IQueryable<PostEntity> GetAll();
         Task<PostEntity> Update(PostEntity postExist, UpdatePostDTO dto, ApplicationUser user);
         Task<PostEntity> ChangeStatusActive(PostEntity post, ApplicationUser user);
         Task<IQueryable<PostEntity>> GetAllToMe(ApplicationUser currentUser, bool includeRelations = true);
