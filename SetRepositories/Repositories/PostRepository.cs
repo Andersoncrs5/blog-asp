@@ -73,7 +73,7 @@ namespace Blog.SetRepositories.Repositories
             return query;
         }
 
-        public async Task<PaginatedList<PostEntity>> GetAllToMePaginated( ApplicationUser currentUser,int pageNumber,int pageSize,bool includeRelations = true)
+        public async Task<IQueryable<PostEntity>> GetAllToMe(ApplicationUser currentUser, bool includeRelations = true)
         {
             List<string> followedUserIds = await _context.FollowsEntities
                 .AsNoTracking()
@@ -103,8 +103,6 @@ namespace Blog.SetRepositories.Repositories
                                                     .Union(preferredPostsQuery)
                                                     .Union(generalPostsQuery);
 
-            combinedQuery = combinedQuery.OrderByDescending(p => p.CreatedAt);
-
             if (includeRelations)
             {
                 combinedQuery = combinedQuery
@@ -113,16 +111,16 @@ namespace Blog.SetRepositories.Repositories
                     .Include(p => p.Category);       
             }
 
-            return await PaginatedList<PostEntity>.CreateAsync(combinedQuery, pageNumber, pageSize);
+            return combinedQuery;
         }
 
-        public async Task<PaginatedList<PostEntity>> GetAllPaginated(int pageNumber, int pageSize)
+        public IQueryable<PostEntity> GetAllPaginated()
         {
             IQueryable<PostEntity> query = _context.PostEntities
                 .AsNoTracking()
                 .Where(p => p.IsActived == true);
 
-            return await PaginatedList<PostEntity>.CreateAsync(query, pageNumber, pageSize);
+            return query;
         }
 
         public async Task<PostEntity> Update(PostEntity postExist, UpdatePostDTO dto, ApplicationUser user) 

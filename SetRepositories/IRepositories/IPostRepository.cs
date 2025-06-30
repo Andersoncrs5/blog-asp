@@ -14,10 +14,10 @@ namespace Blog.SetRepositories.IRepositories
         Task<PostEntity> Delete(PostEntity post, ApplicationUser user);
         Task<PostEntity> Create(ApplicationUser user, PostEntity post, CategoryEntity category);
         IQueryable<PostEntity> GetAllOfUser(ApplicationUser user, bool IsActived = true);
-        Task<PaginatedList<PostEntity>> GetAllPaginated(int pageNumber, int pageSize);
+        IQueryable<PostEntity> GetAllPaginated();
         Task<PostEntity> Update(PostEntity postExist, UpdatePostDTO dto, ApplicationUser user);
         Task<PostEntity> ChangeStatusActive(PostEntity post, ApplicationUser user);
-        Task<PaginatedList<PostEntity>> GetAllToMePaginated( ApplicationUser currentUser,int pageNumber,int pageSize,bool includeRelations = true);
+        Task<IQueryable<PostEntity>> GetAllToMe(ApplicationUser currentUser, bool includeRelations = true);
         Task CalculateEngagementScore(PostEntity post, PostMetricEntity metric);
     }
 }
