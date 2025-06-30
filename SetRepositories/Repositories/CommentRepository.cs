@@ -57,33 +57,19 @@ namespace Blog.SetRepositories.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<PaginatedList<CommentEntity>> GetAllOfUserPaginatedList(ApplicationUser user, int pageNumber, int pageSize, bool includeRelated = false, bool includeMetric = false)
+        public IQueryable<CommentEntity> GetAllOfUser(ApplicationUser user)
         {
             IQueryable<CommentEntity> query = _context.CommentEntities
                 .AsNoTracking()
                 .Where(c => c.ApplicationUserId == user.Id);
 
-            if (includeRelated) 
-            {
-                query = query.Include(c => c.ApplicationUser).Include(c => c.Post);
-            }
-            
-            if (includeMetric)
-            {
-                query = query
-                    .Include(c => c.CommentMetric);
-            }
-
-            return await PaginatedList<CommentEntity>.CreateAsync(query, pageNumber, pageSize);
+            return query;
         }
 
-        public async Task<PaginatedList<CommentEntity>> GetAllOfPostPaginatedList(PostEntity post, int pageNumber, int pageSize)
+        public IQueryable<CommentEntity> GetAllOfPost(PostEntity post)
         {
-            IQueryable<CommentEntity> query = _context.CommentEntities.AsNoTracking()
-                .Include(c => c.ApplicationUser)
+            return _context.CommentEntities.AsNoTracking()
                 .Where(c => c.PostId == post.Id && c.ParentId == null);
-
-            return await PaginatedList<CommentEntity>.CreateAsync(query, pageNumber, pageSize);
         }
 
         public async Task<CommentEntity> Create(ApplicationUser user, PostEntity post, CreateCommentDTO dto, ulong? parentId = null) 

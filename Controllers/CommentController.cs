@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using blog.utils.Filters.FiltersDTO;
+using blog.utils.Filters.FiltersQuerys;
 using Blog.DTOs.Comment;
 using Blog.entities;
 using Blog.SetUnitOfWork;
@@ -65,24 +67,35 @@ namespace blog.Controllers
             ));
         }
 
-        [HttpGet("get-all-user/{includeRelated:bool?}/{includeMetric:bool?}")]
+        [HttpGet("get-all-user/{canFilter:bool?}")]
         [EnableRateLimiting("DeleteItemPolicy")]
-        public async Task<IActionResult> GetAllOfUserPaginatedList([FromQuery] int pageNumber, [FromQuery] int pageSize, bool includeMetric, bool includeRelated)
+        public async Task<IActionResult> GetAllOfUserPaginatedList([FromQuery] CommentFilterDTO filter, bool canFilter = false)
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser user = await _uow.UserRepository.Get(userId);
-            PaginatedList<CommentEntity> result = await _uow.CommentRepository.GetAllOfUserPaginatedList(user, pageNumber, pageSize, includeRelated,includeMetric);
+            IQueryable<CommentEntity> query = _uow.CommentRepository.GetAllOfUser(user);
+
+            if (canFilter == true)
+                query = CommentQueryFilter.ApplyFilters(query, filter);
+
+            PaginatedList<CommentEntity> result = await PaginatedList<CommentEntity>.CreateAsync(query, filter.PageNumber, filter.PageSize);
 
             result.Code = 200;
             return Ok(result);
         }
 
-        [HttpGet("{postId:required}/get-all-post")]
+        [HttpGet("{postId:required}/get-all-post/{canFilter:bool?}")]
         [EnableRateLimiting("DeleteItemPolicy")]
-        public async Task<IActionResult> GetAllOfUserPaginatedList(long postId, [FromQuery] int pageNumber, [FromQuery] int pageSize)
+        public async Task<IActionResult> GetAllOfUserPaginatedList(long postId, [FromQuery] CommentFilterDTO filter, bool canFilter = false)
         {
             PostEntity post = await _uow.PostRepository.Get(postId);
-            PaginatedList<CommentEntity> result = await _uow.CommentRepository.GetAllOfPostPaginatedList(post, pageNumber, pageSize);
+
+            IQueryable<CommentEntity> query = _uow.CommentRepository.GetAllOfPost(post);
+
+            if (canFilter == true)
+                query = CommentQueryFilter.ApplyFilters(query, filter);
+
+            PaginatedList<CommentEntity> result = await PaginatedList<CommentEntity>.CreateAsync(query, filter.PageNumber, filter.PageSize);
 
             result.Code = 200;
             return Ok(result);
