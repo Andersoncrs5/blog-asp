@@ -121,24 +121,33 @@ namespace Blog.Controllers
             return Ok(result);
         }
         
-        [HttpGet("get-all-to-me-paginated")] 
+        [HttpGet("get-all-to-me-paginated/{canFilter:bool?}")] 
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllToMePaginated([FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllToMePaginated([FromQuery] PostFilterDTO filter, bool canFilter = false)
         { 
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser user = await _uow.UserRepository.Get(userId);
 
-            PaginatedList<PostEntity> result = await _uow.PostRepository.GetAllToMePaginated(user, pageNumber, pageSize);
+            IQueryable<PostEntity> query = await _uow.PostRepository.GetAllToMe(user);
+
+            if (canFilter == true){query = PostQueryFilter.ApplyFilters(query, filter);}
+
+            PaginatedList<PostEntity> result = await PaginatedList<PostEntity>.CreateAsync(query, filter.PageNumber, filter.PageSize);   
             
             result.Code = 200;
             return Ok(result);
         }
 
-        [HttpGet("get-all")]
+        [HttpGet("get-all/{canFilter:bool?}")] 
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAll([FromQuery] PostFilterDTO filter, bool canFilter = false)
         {    
-            PaginatedList<PostEntity> result = await _uow.PostRepository.GetAllPaginated(pageNumber, pageSize);
+            IQueryable<PostEntity> query = _uow.PostRepository.GetAllPaginated();
+
+            if (canFilter == true){query = PostQueryFilter.ApplyFilters(query, filter);}
+
+            PaginatedList<PostEntity> result = await PaginatedList<PostEntity>.CreateAsync(query, filter.PageNumber, filter.PageSize);   
+            
             result.Code = 200;
             return Ok(result);
         }
