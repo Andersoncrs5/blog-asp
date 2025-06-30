@@ -62,7 +62,7 @@ namespace Blog.Controllers
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> GetAll()
         {
-            List<CategoryEntity>? categories = await _uow.CategoryRepository.GetAll();
+            List<CategoryEntity> categories = await _uow.CategoryRepository.GetAll(true);
 
             return Ok(new Response(
                 "success",

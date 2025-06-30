@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using blog.utils.Filters.FiltersDTO;
+using blog.utils.Filters.FiltersQuerys;
 using Blog.entities;
 using Blog.SetUnitOfWork;
 using Blog.utils;
@@ -174,6 +176,19 @@ namespace blog.Controllers
             ));
         }
 
+        [HttpGet("get-all-category/{canFilter:bool?}")]
+        [Authorize(Roles = "AdminRole, SuperAdminRole")]
+        public async Task<IActionResult> GetAllCategory([FromQuery] CategoryFilterDTO filter, bool canFilter = false)
+        {
+            IQueryable<CategoryEntity> query = _uow.CategoryRepository.GetAll();
+
+            if (canFilter == true)
+                query = CategoryQueryFilter.ApplyFilters(query, filter);
+
+            PaginatedList<CategoryEntity> result = await PaginatedList<CategoryEntity>.CreateAsync(query, filter.PageNumber, filter.PageSize);
+
+            return Ok(result);
+        }
 
     }
 }
