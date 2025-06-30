@@ -42,7 +42,7 @@ namespace Blog.Controllers
             ));
         }
 
-        [HttpGet("{userId:required}/{includeMetric:bool?}")]
+        [HttpGet("{userId:required}/{includeMetric:bool}")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> GetUser(string userId, bool includeMetric = false)
         {

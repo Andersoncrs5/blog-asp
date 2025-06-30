@@ -38,7 +38,6 @@ namespace blog.Controllers
 
             if (noti.ApplicationUserId != currentUserId)
                 return BadRequest(new Response("fail", "You do not have permission to access this notification.", 403, null));
-            
 
             return Ok(new Response(
                 "success",
@@ -69,6 +68,7 @@ namespace blog.Controllers
 
         [HttpPost("send/{recipientUserId:required}")]
         [EnableRateLimiting("CreateItemPolicy")]
+        [Authorize(Roles = "AdminRole, SuperAdminRole")]
         public async Task<IActionResult> SendNotification([FromBody] CreateNotificationDTO dto, string recipientUserId)
         {
             string? senderUserId = User.FindFirst(ClaimTypes.Sid)?.Value;

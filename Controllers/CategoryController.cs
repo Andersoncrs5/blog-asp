@@ -42,6 +42,7 @@ namespace Blog.Controllers
 
         [HttpPost]
         [EnableRateLimiting("CreateItemPolicy")]
+        [Authorize(Roles = "AdminRole, SuperAdminRole")]
         public async Task<IActionResult> Create([FromBody] CreateCategoryDTO dto)
         {
             if (!ModelState.IsValid)
@@ -74,6 +75,7 @@ namespace Blog.Controllers
         
         [HttpDelete("{Id:long}")]
         [EnableRateLimiting("DeleteItemPolicy")]
+        [Authorize(Roles = "AdminRole, SuperAdminRole")]
         public async Task<IActionResult> Delete(long Id)
         {
             CategoryEntity category = await _uow.CategoryRepository.Get(Id);
@@ -89,6 +91,7 @@ namespace Blog.Controllers
 
         [HttpPut("{Id:long}")]
         [EnableRateLimiting("UpdateItemPolicy")]
+        [Authorize(Roles = "AdminRole, SuperAdminRole")]
         public async Task<IActionResult> Update([FromBody] UpdateCategoryDTO dto, long Id)
         {
             if (!ModelState.IsValid)
@@ -107,6 +110,7 @@ namespace Blog.Controllers
         
         [HttpGet("change-status/{Id:long}")]
         [EnableRateLimiting("UpdateItemPolicy")]
+        [Authorize(Roles = "AdminRole, SuperAdminRole")]
         public async Task<IActionResult> ChangeStatusActive(long Id)
         {
             CategoryEntity category = await _uow.CategoryRepository.Get(Id);

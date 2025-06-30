@@ -100,9 +100,9 @@ namespace blog.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{postId:required}/get-all-post/{canFilter:bool?}")]
+        [HttpGet("{postId:required}/get-all-post/{canFilter:bool}")]
         [EnableRateLimiting("DeleteItemPolicy")]
-        public async Task<IActionResult> GetAllOfUserPaginatedList(long postId, [FromQuery] CommentFilterDTO filter, bool canFilter = false)
+        public async Task<IActionResult> GetAllOfPostPaginatedList(long postId, [FromQuery] CommentFilterDTO filter, bool canFilter = false)
         {
             PostEntity post = await _uow.PostRepository.Get(postId);
 

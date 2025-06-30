@@ -93,7 +93,7 @@ namespace Blog.Controllers
             ));
         }
 
-        [HttpGet("get-all-user-paginated/{canFilter:bool?}")] 
+        [HttpGet("get-all-user-paginated/{canFilter:bool}")] 
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> GetAllOfUserPaginated([FromQuery] PostFilterDTO filter, bool canFilter = false)
         {
@@ -138,7 +138,7 @@ namespace Blog.Controllers
             return Ok(result);
         }
 
-        [HttpGet("get-all/{canFilter:bool?}")] 
+        [HttpGet("get-all/{canFilter:bool}")] 
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> GetAll([FromQuery] PostFilterDTO filter, bool canFilter = false)
         {    
