@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using blog.utils.Filters.FiltersDTO;
+using blog.utils.Filters.FiltersQuerys;
 using Blog.DTOs.Playlist;
 using Blog.entities;
 using Blog.SetUnitOfWork;
@@ -118,15 +120,39 @@ namespace blog.Controllers
             ));
         }
 
-        [HttpGet("get-all-user-paginated")] 
+        [HttpGet("get-all-user-paginated/{canFilter:bool}")] 
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfUserPaginated([FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllOfUserPaginated([FromQuery] PlaylistFilterDTO filter, bool canFilter = false)
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value; 
             ApplicationUser user = await _uow.UserRepository.Get(userId);
 
-            PaginatedList<PlaylistEntity> result = await _uow.PlaylistRepository.GetAllOfUserPaginated(user, pageNumber, pageSize);
-            
+            IQueryable<PlaylistEntity> query = _uow.PlaylistRepository.GetAllOfUserQuery(user);
+
+            if (canFilter == true)
+                query = PlaylistQueryFilter.ApplyFilters(query, filter);
+
+            PaginatedList<PlaylistEntity> result = await PaginatedList<PlaylistEntity>.CreateAsync(query, filter.PageNumber, filter.PageSize);
+
+            result.Code = 200;
+            return Ok(result);
+        }
+
+        [HttpGet("get-all-user-paginated/{userId:required}/{canFilter:bool}")] 
+        [EnableRateLimiting("SlidingWindowLimiterPolicy")]
+        public async Task<IActionResult> GetAllOfUserPaginated(string userId, [FromQuery] PlaylistFilterDTO filter, bool canFilter = false)
+        {
+            ApplicationUser user = await _uow.UserRepository.Get(userId);
+
+            IQueryable<PlaylistEntity> query = _uow.PlaylistRepository.GetAllOfUserQuery(user);
+
+            if (canFilter == true)
+                query = PlaylistQueryFilter.ApplyFilters(query, filter);
+
+            query = query.Where(c => c.IsPublic == true);
+
+            PaginatedList<PlaylistEntity> result = await PaginatedList<PlaylistEntity>.CreateAsync(query, filter.PageNumber, filter.PageSize);
+
             result.Code = 200;
             return Ok(result);
         }
