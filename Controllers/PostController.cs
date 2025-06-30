@@ -7,6 +7,8 @@ using Blog.DTOs.Post;
 using Blog.entities;
 using Blog.SetUnitOfWork;
 using Blog.utils;
+using Blog.utils.Filters.FiltersDTO;
+using Blog.utils.Filters.FiltersQuerys;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -91,15 +93,18 @@ namespace Blog.Controllers
             ));
         }
 
-        [HttpGet("get-all-user-paginated")] 
+        [HttpGet("get-all-user-paginated/{canFilter:bool?}")] 
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfUserPaginated([FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllOfUserPaginated([FromQuery] PostFilterDTO filter, bool canFilter = false)
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value; 
             ApplicationUser user = await _uow.UserRepository.Get(userId);
 
-            PaginatedList<PostEntity> result = await _uow.PostRepository.GetAllOfUserPaginated(user, pageNumber, pageSize);
-            
+            IQueryable<PostEntity> query = _uow.PostRepository.GetAllOfUser(user, filter.IsActived);
+
+            if (canFilter == true){query = PostQueryFilter.ApplyFilters(query, filter);}
+
+            var result = await PaginatedList<PostEntity>.CreateAsync(query, filter.PageNumber, filter.PageSize);            
             result.Code = 200;
             return Ok(result);
         }
@@ -109,16 +114,16 @@ namespace Blog.Controllers
         public async Task<IActionResult> GetAllOfAnotherUserPaginated(string userId, [FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
         { 
             ApplicationUser user = await _uow.UserRepository.Get(userId);
-
-            PaginatedList<PostEntity> result = await _uow.PostRepository.GetAllOfUserPaginated(user, pageNumber, pageSize);
             
+            IQueryable<PostEntity> query = _uow.PostRepository.GetAllOfUser(user);
+            var result = await PaginatedList<PostEntity>.CreateAsync(query, pageNumber, pageSize);            
             result.Code = 200;
             return Ok(result);
         }
         
         [HttpGet("get-all-to-me-paginated")] 
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfAnotherUserPaginated([FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllToMePaginated([FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
         { 
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser user = await _uow.UserRepository.Get(userId);

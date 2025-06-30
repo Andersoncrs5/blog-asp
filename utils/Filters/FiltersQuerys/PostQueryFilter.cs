@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Blog.entities;
 using Blog.utils.Filters.FiltersDTO;
+using Microsoft.EntityFrameworkCore;
 
 namespace Blog.utils.Filters.FiltersQuerys
 {
@@ -34,17 +35,94 @@ namespace Blog.utils.Filters.FiltersQuerys
                 query = query.Where(c => c.CreatedAt.ToUniversalTime() <= filter.CreatedBefore.Value.ToUniversalTime());
             }
 
+            if (filter.CategoryId.HasValue)
+            {
+                query = query.Where(c => c.CategoryId == filter.CategoryId);
+            }
+
+            if (filter.ReadTimesAfter.HasValue)
+            {
+                query = query.Where(c => c.ReadTimes >= filter.ReadTimesAfter.Value);
+            }
+
+            if (filter.ReadTimesBefore.HasValue)
+            {
+                query = query.Where(c => c.ReadTimes <= filter.ReadTimesBefore.Value);
+            }
+
+            if (filter.EngagementScoreAfter.HasValue)
+            {
+                query = query.Where(c => c.EngagementScore >= filter.EngagementScoreAfter.Value);
+            }
+
+            if (filter.EngagementScoreBefore.HasValue)
+            {
+                query = query.Where(c => c.EngagementScore <= filter.EngagementScoreBefore.Value);
+            }
+
+            if (filter.IncludeMetric == true){ query = query.Include(p => p.PostMetricEntity); }
+
+            if (filter.LikesAfter.HasValue && filter.IncludeMetric == true )
+            {
+                query = query.Where(m => m.PostMetricEntity != null && m.PostMetricEntity.Likes >= filter.LikesAfter.Value);
+            }
+
+            if (filter.LikesBefore.HasValue && filter.IncludeMetric == true )
+            {
+                query = query.Where(m => m.PostMetricEntity != null && m.PostMetricEntity.Likes <= filter.LikesBefore.Value);
+            }
+
+            if (filter.DisLikesAfter.HasValue && filter.IncludeMetric == true )
+            {
+                query = query.Where(m => m.PostMetricEntity != null && m.PostMetricEntity.DisLikes >= filter.DisLikesAfter.Value);
+            }
+
+            if (filter.DisLikesBefore.HasValue && filter.IncludeMetric == true )
+            {
+                query = query.Where(m => m.PostMetricEntity != null && m.PostMetricEntity.DisLikes <= filter.DisLikesBefore.Value);
+            }
+
+            if (filter.CommentCountAfter.HasValue && filter.IncludeMetric == true )
+            {
+                query = query.Where(m => m.PostMetricEntity != null && m.PostMetricEntity.CommentCount >= filter.CommentCountAfter.Value);
+            }
+
+            if (filter.CommentCountBefore.HasValue && filter.IncludeMetric == true )
+            {
+                query = query.Where(m => m.PostMetricEntity != null && m.PostMetricEntity.CommentCount <= filter.CommentCountBefore.Value);
+            }
+
+            if (filter.FavoriteCountAfter.HasValue && filter.IncludeMetric == true )
+            {
+                query = query.Where(m => m.PostMetricEntity != null && m.PostMetricEntity.FavoriteCount >= filter.FavoriteCountAfter.Value);
+            }
+
+            if (filter.FavoriteCountBefore.HasValue && filter.IncludeMetric == true )
+            {
+                query = query.Where(m => m.PostMetricEntity != null && m.PostMetricEntity.FavoriteCount <= filter.FavoriteCountBefore.Value);
+            }
+
+            if (filter.MediaCountAfter.HasValue && filter.IncludeMetric == true )
+            {
+                query = query.Where(m => m.PostMetricEntity != null && m.PostMetricEntity.MediaCount >= filter.MediaCountAfter.Value);
+            }
+
+            if (filter.MediaCountBefore.HasValue && filter.IncludeMetric == true )
+            {
+                query = query.Where(m => m.PostMetricEntity != null && m.PostMetricEntity.MediaCount <= filter.MediaCountBefore.Value);
+            }
+
             return query;
         }
 
-        public static IQueryable<CategoryEntity> ApplyPagination(
-            this IQueryable<CategoryEntity> query, int pageNumber, int pageSize)
+        public static IQueryable<PostEntity> ApplyPagination(
+            this IQueryable<PostEntity> query, int pageNumber, int pageSize)
         {
             return query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
         }
 
-        public static IQueryable<CategoryEntity> ApplySorting(
-            this IQueryable<CategoryEntity> query, string? sortBy, bool ascending)
+        public static IQueryable<PostEntity> ApplySorting(
+            this IQueryable<PostEntity> query, string? sortBy, bool ascending)
         {
             if (string.IsNullOrWhiteSpace(sortBy))
             {
@@ -54,7 +132,7 @@ namespace Blog.utils.Filters.FiltersQuerys
             switch (sortBy.ToLowerInvariant())
             {
                 case "name":
-                    query = ascending ? query.OrderBy(c => c.Name) : query.OrderByDescending(c => c.Name);
+                    query = ascending ? query.OrderBy(c => c.Title) : query.OrderByDescending(c => c.Title);
                     break;
                 case "createdat":
                     query = ascending ? query.OrderBy(c => c.CreatedAt) : query.OrderByDescending(c => c.CreatedAt);

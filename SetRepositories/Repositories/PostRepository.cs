@@ -64,13 +64,13 @@ namespace Blog.SetRepositories.Repositories
             return post;
         }
 
-        public async Task<PaginatedList<PostEntity>> GetAllOfUserPaginated(ApplicationUser user, int pageNumber, int pageSize, bool IsActived = true)
+        public IQueryable<PostEntity> GetAllOfUser(ApplicationUser user, bool IsActived = true)
         {
             IQueryable<PostEntity> query = _context.PostEntities
                 .AsNoTracking()
                 .Where(p => p.ApplicationUserId == user.Id && p.IsActived == IsActived);
 
-            return await PaginatedList<PostEntity>.CreateAsync(query, pageNumber, pageSize);
+            return query;
         }
 
         public async Task<PaginatedList<PostEntity>> GetAllToMePaginated( ApplicationUser currentUser,int pageNumber,int pageSize,bool includeRelations = true)
