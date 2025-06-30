@@ -84,6 +84,22 @@ namespace blog.Controllers
             return Ok(result);
         }
 
+        [HttpGet("get-all-user/{userId:required}/{canFilter:bool?}")]
+        [EnableRateLimiting("DeleteItemPolicy")]
+        public async Task<IActionResult> GetAllOfAnotherUserPaginatedList(string userId, [FromQuery] CommentFilterDTO filter, bool canFilter = false)
+        {
+            ApplicationUser user = await _uow.UserRepository.Get(userId);
+            IQueryable<CommentEntity> query = _uow.CommentRepository.GetAllOfUser(user);
+
+            if (canFilter == true)
+                query = CommentQueryFilter.ApplyFilters(query, filter);
+
+            PaginatedList<CommentEntity> result = await PaginatedList<CommentEntity>.CreateAsync(query, filter.PageNumber, filter.PageSize);
+
+            result.Code = 200;
+            return Ok(result);
+        }
+
         [HttpGet("{postId:required}/get-all-post/{canFilter:bool?}")]
         [EnableRateLimiting("DeleteItemPolicy")]
         public async Task<IActionResult> GetAllOfUserPaginatedList(long postId, [FromQuery] CommentFilterDTO filter, bool canFilter = false)
