@@ -30,13 +30,5 @@ namespace Blog.utils.Filters.FiltersDTO
         public ulong? FavoriteCountBefore { get; set; }
         public ulong? MediaCountAfter { get; set; }
         public ulong? MediaCountBefore { get; set; }
-
-
-
-
-
-        
-
-
     }
 }
