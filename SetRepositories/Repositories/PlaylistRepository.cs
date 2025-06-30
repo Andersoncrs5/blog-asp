@@ -119,5 +119,10 @@ namespace Blog.SetRepositories.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public IQueryable<PlaylistEntity> GetAllOfUserQuery(ApplicationUser user)
+        {
+            return _context.PlaylistEntities.AsNoTracking().Where(p => p.ApplicationUserId == user.Id);
+        }
+
     }
 }

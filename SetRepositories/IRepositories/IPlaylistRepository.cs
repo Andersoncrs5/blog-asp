@@ -16,6 +16,7 @@ namespace Blog.SetRepositories.IRepositories
         Task<PlaylistEntity> Update(PlaylistEntity play, UpdatePlaylistDTO dto);
         Task Delete(PlaylistEntity play);
         Task<PaginatedList<PlaylistEntity>> GetAllOfUserPaginated(ApplicationUser user, int pageNumber, int pageSize, bool showPublic = false);
+        IQueryable<PlaylistEntity> GetAllOfUserQuery(ApplicationUser user);
         Task<PlaylistEntity> ChangeStatusIsPublic(PlaylistEntity play);
         Task SumOrReduceItemCount(PlaylistEntity play, SumOrRedEnum action);
     }
