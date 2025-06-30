@@ -47,6 +47,11 @@ namespace Blog.SetRepositories.Repositories
                 .ToListAsync();
         }
 
+        public IQueryable<CategoryEntity> GetAll()
+        {
+            return _context.CategoryEntities.AsNoTracking();
+        }
+
         public async Task<CategoryEntity> Create(CreateCategoryDTO dto, ApplicationUser user)
         {
             CategoryEntity category = dto.toCategoryEntity();
