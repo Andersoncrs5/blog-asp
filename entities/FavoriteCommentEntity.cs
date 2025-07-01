@@ -17,11 +17,15 @@ namespace Blog.entities
 
         [Required] public string ApplicationUserId { get; set; } = string.Empty;
 
-        [JsonIgnore] public virtual ApplicationUser? ApplicationUser { get; set; } 
+        [JsonIgnore] 
+        [ForeignKey(nameof(ApplicationUserId))] 
+        public virtual ApplicationUser? ApplicationUser { get; set; } 
 
         [Required] public ulong CommentId { get; set; }        
         
-        [JsonIgnore] public virtual CommentEntity? Comment { get; set; } 
+        [JsonIgnore]
+        [ForeignKey(nameof(CommentId))] 
+        public virtual CommentEntity? Comment { get; set; } 
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

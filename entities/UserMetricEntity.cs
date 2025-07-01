@@ -10,8 +10,7 @@ namespace Blog.entities
     [Table("user_metric")]
     public class UserMetricEntity
     {
-        [Key] 
-        public string ApplicationUserId { get; set; } = string.Empty;
+        [Key] public string ApplicationUserId { get; set; } = string.Empty;
 
         [Column("likes_given_count_in_comment")]
         [Required] 
@@ -84,8 +83,6 @@ namespace Blog.entities
         [Required] 
         [Column("preference_count")] 
         public long PreferenceCount { get; set; } = 0;
-
-        [Timestamp] public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 
         public DateTime? LastLogin { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

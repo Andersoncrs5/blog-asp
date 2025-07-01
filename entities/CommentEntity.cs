@@ -23,9 +23,6 @@ namespace Blog.entities
 
         public ulong? ParentId { get; set; }
 
-        [Timestamp]
-        public byte[] RowVersion { get; set; } = Array.Empty<byte>();
-
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
 

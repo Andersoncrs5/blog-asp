@@ -19,10 +19,6 @@ namespace Blog.entities
         public string Name { get; set; } = string.Empty;
         public bool IsActived { get; set; } = true;
         [Required] public string ApplicationUserId { get; set; } = string.Empty;
-
-        [Timestamp]
-        public byte[] RowVersion { get; set; } = Array.Empty<byte>();
-
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
 

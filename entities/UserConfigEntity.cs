@@ -34,7 +34,6 @@ namespace blog.entities
         public string? TimeZone { get; set; } 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
-        [Timestamp] public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 
         [JsonIgnore]
         [ForeignKey(nameof(ApplicationUserId))]

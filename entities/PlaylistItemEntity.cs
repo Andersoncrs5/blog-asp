@@ -21,7 +21,7 @@ namespace Blog.entities
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        [JsonIgnore] public virtual PlaylistEntity? Playlist { get; set; }
-        [JsonIgnore] public virtual PostEntity? Post { get; set; }
+        [JsonIgnore] [ForeignKey(nameof(PlaylistId))] public virtual PlaylistEntity? Playlist { get; set; }
+        [JsonIgnore] [ForeignKey(nameof(PostId))] public virtual PostEntity? Post { get; set; }
     }
 }

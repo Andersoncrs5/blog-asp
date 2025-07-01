@@ -18,8 +18,8 @@ namespace Blog.entities
         [Required] public string ApplicationUserId { get; set; } = string.Empty;
         [Required] public long PostId { get; set; }
         public LikeOrDislike Reaction  { get; set; }
-        [JsonIgnore] public virtual ApplicationUser? ApplicationUser { get; set; } 
-        [JsonIgnore] public virtual PostEntity? Post { get; set; } 
+        [JsonIgnore] [ForeignKey(nameof(ApplicationUserId))] public virtual ApplicationUser? ApplicationUser { get; set; } 
+        [JsonIgnore] [ForeignKey(nameof(PostId))] public virtual PostEntity? Post { get; set; } 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

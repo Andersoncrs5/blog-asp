@@ -27,7 +27,6 @@ namespace blog.entities
         public string? SenderUserId { get; set; }
         public string ApplicationUserId { get; set; } = string.Empty;
         
-        [Timestamp] public byte[] RowVersion { get; set; } = Array.Empty<byte>();
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
 

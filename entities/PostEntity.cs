@@ -27,8 +27,6 @@ namespace Blog.entities
 
         public double EngagementScore { get; set; } = 0.0;
 
-        [Timestamp] public byte[] RowVersion { get; set; } = Array.Empty<byte>();
-
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
 

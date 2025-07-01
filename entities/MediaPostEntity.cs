@@ -23,13 +23,11 @@ namespace Blog.entities
         public string? Description { get; set; }
         public int? Order { get; set; }
 
-        [Timestamp]
-        public byte[] RowVersion { get; set; } = Array.Empty<byte>();
-
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
         
         [JsonIgnore] 
+        [ForeignKey(nameof(PostId))]
         public virtual PostEntity? Post { get; set; }
     }
 }

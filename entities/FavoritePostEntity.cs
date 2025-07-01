@@ -17,14 +17,11 @@ namespace Blog.entities
 
         [Required] public string ApplicationUserId { get; set; } = string.Empty;
 
-        [JsonIgnore]
-        public virtual ApplicationUser? ApplicationUser { get; set; } 
+        [JsonIgnore] public virtual ApplicationUser? ApplicationUser { get; set; } 
 
-        [Required]
-        public long PostId { get; set; }        
+        [Required] public long PostId { get; set; }        
         
-        [JsonIgnore]
-        public virtual PostEntity? Post { get; set; } 
+        [JsonIgnore] [ForeignKey(nameof(PostId))] public virtual PostEntity? Post { get; set; } 
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

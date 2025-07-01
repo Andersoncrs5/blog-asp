@@ -21,7 +21,6 @@ namespace Blog.entities
         public ulong ReportsReceivedCount { get; set; } = 0;
         public ulong EditedCount { get; set; } = 0;
         public ulong MediaCount { get; set; } = 0;
-        [Timestamp] public byte[] RowVersion { get; set; } = Array.Empty<byte>();
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
 

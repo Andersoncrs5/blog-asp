@@ -61,7 +61,6 @@ namespace Blog.Context
                 entity.Property(uc => uc.BorderSize).HasMaxLength(50).IsRequired(false);
                 entity.Property(uc => uc.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
                 entity.Property(uc => uc.UpdatedAt).IsRequired(false);
-                entity.Property(uc => uc.RowVersion).IsRowVersion();
             });
 
             builder.Entity<UserPreferenceEntity>(entity =>
@@ -125,7 +124,6 @@ namespace Blog.Context
                 entity.Property(e => e.Description).IsRequired(false).HasMaxLength(600);
                 entity.Property(e => e.Order).IsRequired(false).HasColumnType("smallint");
                 entity.Property(e => e.MediaType).IsRequired(true).HasDefaultValue(MediaTypeEnum.IMAGE);
-                entity.Property(e => e.RowVersion).IsRowVersion();
                 entity.Property(e => e.UpdatedAt).IsRequired(false);
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
             });
@@ -161,8 +159,7 @@ namespace Blog.Context
                 entity.Property(e => e.Id).HasColumnType("bigint");
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
                 entity.Property(e => e.UpdatedAt).IsRequired(false);
-                entity.Property(e => e.ImageUrl).IsRequired(false).HasMaxLength(1000);
-                entity.Property(e => e.RowVersion).IsRowVersion();
+                entity.Property(e => e.ImageUrl).IsRequired(false).HasMaxLength(2000);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(150);
                 entity.Property(e => e.Description).IsRequired(false).HasMaxLength(1000);
                 entity.Property(e => e.IsPublic).IsRequired().HasDefaultValue(false);
@@ -283,7 +280,6 @@ namespace Blog.Context
             builder.Entity<CategoryEntity>(entity =>
             {
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
-                entity.Property(u => u.RowVersion).IsRowVersion();
                 entity.Property(e => e.UpdatedAt).IsRequired(false);
                 entity.HasIndex(e => e.Name).IsUnique();
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(150);
@@ -311,7 +307,6 @@ namespace Blog.Context
             builder.Entity<PostMetricEntity>(entity =>
             {
                 entity.HasKey(p => p.PostId);
-                entity.Property(p => p.RowVersion).IsRowVersion();
                 entity.Property(p => p.UpdatedAt).IsRequired(false);
                 entity.Property(p => p.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
                 entity.Property(e => e.Likes).HasColumnType("bigint").IsRequired(true).HasDefaultValue(0);
@@ -328,7 +323,6 @@ namespace Blog.Context
 
             builder.Entity<PostEntity>(entity =>
             {
-                entity.Property(u => u.RowVersion).IsRowVersion();
                 entity.Property(e => e.UpdatedAt).IsRequired(false);
                 entity.Property(u => u.Id).HasColumnType("bigint"); 
                 entity.Property(e => e.Content).HasColumnType("text"); 
@@ -368,7 +362,6 @@ namespace Blog.Context
                 entity.Property(c => c.ViewsCount).HasColumnType("bigint").IsRequired().HasDefaultValue(0);
                 entity.Property(c => c.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
                 entity.Property(c => c.UpdatedAt).IsRequired(false);
-                entity.Property(c => c.RowVersion).IsRowVersion();
             });
 
             builder.Entity<ReactionCommentEntity>(entity => 
@@ -401,19 +394,9 @@ namespace Blog.Context
                       .IsRequired(false)
                       .OnDelete(DeleteBehavior.Restrict);
 
-                entity.Property(e => e.CreatedAt)
-                      .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                      .ValueGeneratedOnAdd();
-
-                entity.Property(e => e.UpdatedAt)
-                      .IsRequired(false);
-
-                entity.Property(e => e.RowVersion)
-                      .IsRowVersion();
-
-                entity.Property(e => e.Content)
-                      .IsRequired()
-                      .HasMaxLength(800);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
+                entity.Property(e => e.UpdatedAt).IsRequired(false);
+                entity.Property(e => e.Content).IsRequired().HasMaxLength(800);
             });
 
             builder.Entity<ApplicationUser>()
@@ -427,14 +410,13 @@ namespace Blog.Context
                 entity.HasKey(n => n.Id);
                 entity.Property(n => n.Title).IsRequired().HasMaxLength(200);
                 entity.Property(n => n.Content).IsRequired().HasMaxLength(1000);
-                entity.Property(n => n.LinkUrl).IsRequired(false).HasMaxLength(1000);
+                entity.Property(n => n.LinkUrl).IsRequired(false).HasMaxLength(2000);
                 entity.Property(n => n.IconCssClass).IsRequired(false).HasMaxLength(200);
                 entity.Property(n => n.NotificationType).IsRequired();
                 entity.Property(e => e.IsRead).IsRequired().HasDefaultValue(false);
                 entity.Property(e => e.RelatedEntityId).IsRequired(false);
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
                 entity.Property(e => e.UpdatedAt).IsRequired(false);
-                entity.Property(e => e.RowVersion).IsRowVersion();
             });
 
             builder.Entity<ApplicationUser>().ToTable("app_users");

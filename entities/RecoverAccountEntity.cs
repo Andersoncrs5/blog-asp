@@ -22,11 +22,8 @@ namespace Blog.entities
         public int FailedAttempts { get; set; } = 0;
         public string? RequestIpAddress { get; set; }
         public string? RequestUserAgent { get; set; }
-
         [Required] public RecoveryMethodEnum Method { get; set; } = RecoveryMethodEnum.Email;
-
         [Required] public RecoveryReasonEnum Reason { get; set; } = RecoveryReasonEnum.ForgotPassword; 
-
-        [JsonIgnore] public virtual ApplicationUser? User { get; set; }
+        [JsonIgnore] [ForeignKey(nameof(ApplicationUserId))] public virtual ApplicationUser? User { get; set; }
     }
 }
