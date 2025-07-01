@@ -27,8 +27,7 @@ namespace Blog.SetRepositories.Repositories
                 throw new ResponseException("User id is required", 400, "fail");
 
             UserMetricEntity? metric = await this._context.UserMetrics.AsNoTracking()
-            .FirstOrDefaultAsync(
-                u => u.ApplicationUserId == userId);
+            .FirstOrDefaultAsync(u => u.ApplicationUserId == userId);
 
             if (metric == null)
                 throw new ResponseException("User metric not found", 404, "fail");
@@ -319,7 +318,7 @@ namespace Blog.SetRepositories.Repositories
     
         public async Task<UserMetricEntity> SetLastLogin(UserMetricEntity metric)
         {
-            metric.LastLogin = DateTime.Now;
+            metric.LastLogin = DateTime.UtcNow;
 
             _context.Entry(metric).State = EntityState.Modified;
             await _context.SaveChangesAsync();

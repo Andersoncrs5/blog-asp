@@ -267,6 +267,7 @@ using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var _context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
     var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
@@ -299,12 +300,24 @@ using (var scope = app.Services.CreateScope())
         {
             UserName = systemUserName,
             Email = systemUserEmail,
-            EmailConfirmed = true 
+            EmailConfirmed = true
         };
 
         var createUserResult = await userManager.CreateAsync(systemUser, systemUserPassword);
+
         if (createUserResult.Succeeded)
         {
+            UserMetricEntity metric = new UserMetricEntity
+            {
+                ApplicationUserId = systemUser.Id,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _context.UserMetrics.AddAsync(metric);
+            await _context.SaveChangesAsync();
+
+            Console.WriteLine($"User metric for '{systemUserName}' created.");
+
             var addRoleResult = await userManager.AddToRoleAsync(systemUser, superAdminRole);
             if (addRoleResult.Succeeded)
             {
@@ -334,6 +347,19 @@ using (var scope = app.Services.CreateScope())
             {
                 Console.WriteLine($"Error adding existing user '{systemUserName}' to role '{superAdminRole}': {string.Join(", ", addRoleResult.Errors.Select(e => e.Description))}");
             }
+        }
+        
+        UserMetricEntity? existingMetric = await _context.UserMetrics.AsNoTracking().FirstOrDefaultAsync(m => m.ApplicationUserId == systemUser.Id);
+        if (existingMetric == null)
+        {
+            UserMetricEntity metric = new UserMetricEntity
+            {
+                ApplicationUserId = systemUser.Id,
+                CreatedAt = DateTime.UtcNow
+            };
+            await _context.UserMetrics.AddAsync(metric);
+            await _context.SaveChangesAsync();
+            Console.WriteLine($"User metric for existing user '{systemUserName}' created.");
         }
     }
 }

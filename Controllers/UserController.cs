@@ -34,11 +34,13 @@ namespace Blog.Controllers
             string? id = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser user = await _uow.UserRepository.Get(id);
 
+            var response = new UserResponseDTO(user.Id, user.UserName!, user.Email!, null);
+
             return Ok(new Response(
                 "success",
                 "User found",
                 200,
-                new UserResponseDTO(user.Id, user.UserName!,user.Email!)
+                response
             ));
         }
 
@@ -51,11 +53,15 @@ namespace Blog.Controllers
             UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
             await _uow.UserMetricRepository.SumOrRedProfileViews(metric, utils.enums.SumOrRedEnum.SUM);
 
+            var response = new UserResponseDTO(user.Id, user.UserName!, user.Email!, null);
+            if (includeMetric)
+                response.Metric = metric;
+
             return Ok(new Response(
                 "success",
                 "User found",
                 200,
-                new UserResponseDTO(user.Id, user.UserName!,user.Email!)
+                response
             ));
         }
 
@@ -94,7 +100,7 @@ namespace Blog.Controllers
                 "success",
                 "User updated with success",
                 200,
-                new UserResponseDTO(result.Id, result.UserName!,result.Email!)
+                new UserResponseDTO(result.Id, result.UserName!,result.Email!, null)
             ));
         }
 
