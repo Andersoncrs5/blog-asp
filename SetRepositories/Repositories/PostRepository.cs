@@ -22,7 +22,7 @@ namespace Blog.SetRepositories.Repositories
 
         public async Task<PostEntity> Get(long Id) 
         {
-            if(long.IsNegative(Id)) 
+            if(long.IsNegative(Id) || Id == 0) 
                 throw new ResponseException("Id is required");
 
             PostEntity? post = await _context.PostEntities.AsNoTracking()
@@ -37,7 +37,7 @@ namespace Blog.SetRepositories.Repositories
     
         public async Task<PostEntity> Delete(PostEntity post, ApplicationUser user) 
         {
-            if (post.ApplicationUserId == user.Id)
+            if (post.ApplicationUserId != user.Id)
                 throw new ResponseException("You cannot to delete this post!!", 403);
 
             _context.PostEntities.Remove(post);
@@ -49,7 +49,8 @@ namespace Blog.SetRepositories.Repositories
         {
             post.ApplicationUserId = user.Id;
             post.CategoryId = category.Id;
-            
+
+            post.IsActived = true;
             var result = await _context.PostEntities.AddAsync(post);
             await _context.SaveChangesAsync();
 
@@ -68,7 +69,7 @@ namespace Blog.SetRepositories.Repositories
         {
             IQueryable<PostEntity> query = _context.PostEntities
                 .AsNoTracking()
-                .Where(p => p.ApplicationUserId == user.Id && p.IsActived == IsActived);
+                .Where(p => p.ApplicationUserId.Contains(user.Id) && p.IsActived == IsActived);
 
             return query;
         }
@@ -77,13 +78,13 @@ namespace Blog.SetRepositories.Repositories
         {
             List<string> followedUserIds = await _context.FollowsEntities
                 .AsNoTracking()
-                .Where(f => f.FollowerId == currentUser.Id)
+                .Where(f => f.FollowerId.Contains(currentUser.Id))
                 .Select(f => f.FollowedId)
                 .ToListAsync();
 
             List<long> preferredCategoryIds = await _context.UserPreferenceEntities
                 .AsNoTracking()
-                .Where(up => up.ApplicationUserId == currentUser.Id)
+                .Where(up => up.ApplicationUserId.Contains(currentUser.Id))
                 .Select(up => up.CategoryId)
                 .ToListAsync();
 
@@ -125,7 +126,7 @@ namespace Blog.SetRepositories.Repositories
 
         public async Task<PostEntity> Update(PostEntity postExist, UpdatePostDTO dto, ApplicationUser user) 
         {
-            if (postExist.ApplicationUserId == user.Id)
+            if (postExist.ApplicationUserId != user.Id)
                 throw new ResponseException("You cannot to update this post!!", 403);
 
             postExist.Title = dto.Title;

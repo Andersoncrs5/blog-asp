@@ -78,11 +78,11 @@ namespace blog.SetRepositories.Repositories
                 .Where(f => f.FollowedId == postAuthor.Id && f.ReceiveNotifications == true)
                 .ToListAsync();
 
-            string? frontendPostBaseUrl = _configuration["FrontendSettings:PostBaseUrl"];
-            if (string.IsNullOrEmpty(frontendPostBaseUrl))
-            {
-                Console.WriteLine("Warning: 'FrontendSettings:PostBaseUrl' is not configured. Notifications will not have direct links.");
-            }
+            // string? frontendPostBaseUrl = _configuration["FrontendSettings:PostBaseUrl"] ?? "no url";
+            // if (string.IsNullOrEmpty(frontendPostBaseUrl) || string.IsNullOrWhiteSpace(frontendPostBaseUrl) )
+            // {    
+            //     Console.WriteLine("Warning: 'FrontendSettings:PostBaseUrl' is not configured. Notifications will not have direct links.");
+            // }
 
             List<NotificationEntity> notificationsToSend = new List<NotificationEntity>();
 
@@ -91,13 +91,13 @@ namespace blog.SetRepositories.Repositories
                 NotificationEntity noti = new NotificationEntity
                 {
                     ApplicationUserId = item.FollowerId, 
-                    Title = $"Novo post de {postAuthor.UserName ?? postAuthor.Id}!",
+                    Title = $"Novo post de {postAuthor.UserName}!",
                     NotificationType = NotificationTypeEnum.NewPostFromFollowed,
                     RelatedEntityId = newPost.Id.ToString(),
-                    LinkUrl = string.IsNullOrEmpty(frontendPostBaseUrl) ? null : $"{frontendPostBaseUrl}/{newPost.Id}",
+                    LinkUrl = "http://localhost/3000",
                     IconCssClass = "fa-newspaper", 
                     SenderUserId = postAuthor.Id,
-                    Content = $"O usuário que você segue, {postAuthor.UserName ?? postAuthor.Id}, publicou um novo post: \"{newPost.Title}\"", // Conteúdo dinâmico
+                    Content = $"O usuário que você segue, {postAuthor.UserName}, publicou um novo post: \"{newPost.Title}\"", 
                     CreatedAt = DateTime.UtcNow,
                     IsRead = false
                 };

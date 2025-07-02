@@ -14,11 +14,9 @@ namespace Blog.DTOs.Post
         public string Title { get; set; } = string.Empty; 
 
         [Required(ErrorMessage = "Field is required")]
-        [EmailAddress(ErrorMessage = "Invalid Email")]
         [StringLength(3000, ErrorMessage = "Max size of 3000", MinimumLength = 200)]
         public string Content { get; set; } = string.Empty;
 
-        [MaxLength(120)]
         [Required] public long ReadTimes { get; set; } = 5;
 
         [Required]

@@ -54,6 +54,12 @@ namespace Blog.SetRepositories.Repositories
 
         public async Task<CategoryEntity> Create(CreateCategoryDTO dto, ApplicationUser user)
         {
+            var check = _context.CategoryEntities.AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Name.Contains(dto.Name));
+
+            if (check != null)
+                throw new ResponseException("category name exists!!", StatusCodes.Status409Conflict);
+
             CategoryEntity category = dto.toCategoryEntity();
 
             category.ApplicationUserId = user.Id;

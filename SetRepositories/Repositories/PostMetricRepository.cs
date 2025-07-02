@@ -29,6 +29,7 @@ namespace Blog.SetRepositories.Repositories
             };
 
             var result = await _context.PostMetricEntities.AddAsync(metric);
+            await _context.SaveChangesAsync();
             return result.Entity;
         }
 
