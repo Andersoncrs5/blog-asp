@@ -63,7 +63,7 @@ namespace blog.Controllers
             return Ok(result);
         }
 
-        [HttpPost("{postId:required:long}/save-remove")]
+        [HttpPost("{postId:required:long}/save")]
         [EnableRateLimiting("SaveOrRemoveFavoriteItemPolicy")]
         public async Task<IActionResult> Save(long postId)
         {
@@ -112,7 +112,7 @@ namespace blog.Controllers
                 "success",
                 "Favorite removed!",
                 200,
-                save
+                null
             ));
         }
 

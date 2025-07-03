@@ -29,7 +29,6 @@ namespace Blog.entities
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
-
         public virtual PostMetricEntity? PostMetricEntity { get; set; }
         [JsonIgnore] public virtual ICollection<FavoritePostEntity>? FavoritePosts { get; set; }
         [JsonIgnore] [ForeignKey(nameof(ApplicationUserId))] public virtual ApplicationUser? ApplicationUser { get; set; }

@@ -23,9 +23,7 @@ namespace Blog.entities
 
         [Required] public ulong CommentId { get; set; }        
         
-        [JsonIgnore]
-        [ForeignKey(nameof(CommentId))] 
-        public virtual CommentEntity? Comment { get; set; } 
+        [ForeignKey(nameof(CommentId))] public virtual CommentEntity? Comment { get; set; } 
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
