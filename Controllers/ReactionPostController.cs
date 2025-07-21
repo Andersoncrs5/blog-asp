@@ -49,13 +49,13 @@ namespace blog.Controllers
         }
 
         [HttpPost]
-        [EnableRateLimiting("createItemPolicy")]
+        [EnableRateLimiting("CreateItemPolicy")]
         public async Task<IActionResult> ToggleReaction([FromBody] ReactionPostDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser? user = await _uow.UserRepository.Get(userId);
 
             PostEntity post = await _uow.PostRepository.Get(dto.PostId);
@@ -122,7 +122,7 @@ namespace blog.Controllers
         }
 
         [HttpDelete("{PostId:required}")]
-        [EnableRateLimiting("RemoveItemPolicy")]
+        [EnableRateLimiting("DeleteItemPolicy")]
         public async Task<IActionResult> Remove(long PostId)
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;

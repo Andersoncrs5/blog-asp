@@ -83,6 +83,7 @@ namespace blog.Controllers
                 
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value; 
             ApplicationUser user = await _uow.UserRepository.Get(userId);
+            await _uow.CategoryRepository.Get(dto.CategoryId);
             UserPreferenceEntity prefer = await _uow.UserPreferenceRepository.SaveAsync(dto, user);
 
             UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);

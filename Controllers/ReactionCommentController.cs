@@ -36,7 +36,7 @@ namespace blog.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             
-            string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value; 
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value; 
 
             ApplicationUser user = await _uow.UserRepository.Get(userId);
             CommentEntity comment = await _uow.CommentRepository.Get(dto.CommentId);
@@ -89,11 +89,11 @@ namespace blog.Controllers
             ));
         }
 
-        [HttpDelete("Id:required")]
+        [HttpDelete("{Id:required}")]
         [EnableRateLimiting("DeleteItemPolicy")]
         public async Task<IActionResult> Remove(ulong Id)
         {
-            string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value; 
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value; 
 
             ApplicationUser user = await _uow.UserRepository.Get(userId);
 

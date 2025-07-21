@@ -25,7 +25,7 @@ namespace Blog.SetRepositories.Repositories
         public async Task<ApplicationUser> Get(string? id, bool includeMetric = false) 
         {
             if (string.IsNullOrWhiteSpace(id))
-                throw new ResponseException("Id is required", 400, "fail");
+                throw new ResponseException("User Id is required", 400, "fail");
 
             ApplicationUser? user = await _userManager.FindByIdAsync(id);
 

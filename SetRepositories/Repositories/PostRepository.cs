@@ -23,7 +23,7 @@ namespace Blog.SetRepositories.Repositories
         public async Task<PostEntity> Get(long Id) 
         {
             if(long.IsNegative(Id) || Id == 0) 
-                throw new ResponseException("Id is required");
+                throw new ResponseException("Post id is required");
 
             PostEntity? post = await _context.PostEntities.AsNoTracking()
                 .Include(p => p.PostMetricEntity)

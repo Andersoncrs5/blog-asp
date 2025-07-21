@@ -22,11 +22,9 @@ namespace blog.entities
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
-        [JsonIgnore]
         [ForeignKey(nameof(ApplicationUserId))]
         public virtual ApplicationUser? ApplicationUser { get; set; }
 
-        [JsonIgnore]
         [ForeignKey(nameof(CategoryId))]
         public virtual CategoryEntity? Category { get; set; }
     }

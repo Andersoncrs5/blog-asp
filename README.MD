@@ -1,7 +1,5 @@
 # Blog API Project
 
-Status: OnGoing
-
 This is an API project for a blog application, developed using ASP.NET Core .NET 9. The API is designed to provide robust and scalable backend services for managing blog content, user interactions, and administrative functionalities.
 
 ## Key Features include:
@@ -47,3 +45,5 @@ This is an API project for a blog application, developed using ASP.NET Core .NET
     API Documentation: OpenAPI/Swagger
 
 Start Date: June 15th, 2024
+
+End Date July 21th, 2024

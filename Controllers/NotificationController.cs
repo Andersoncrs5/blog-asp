@@ -131,10 +131,8 @@ namespace blog.Controllers
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             
             if (notificationIds == null || !notificationIds.Any())
-            {
                 return BadRequest(new Response("fail", "No notification IDs provided.", 400, null));
-            }
-
+            
             int updatedCount = await _uow.NotificationRepository.MarkNotificationsAsReadAsync(notificationIds, userId);
 
             return Ok(new Response(

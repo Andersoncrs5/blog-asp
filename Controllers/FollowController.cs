@@ -88,7 +88,7 @@ namespace blog.Controllers
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> GetMyFollowingAsync([FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
         {
-            string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             ApplicationUser user = await _uow.UserRepository.Get(userId);
 
             PaginatedList<FollowEntity> result = await _uow.FollowRepository.GetFollowingAsync(user, pageNumber, pageSize);
@@ -113,7 +113,7 @@ namespace blog.Controllers
         public async Task<IActionResult> ToggleNotificationStatus(string followedUserId)
         {
             
-            string? followerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            string? followerId = User.FindFirst(ClaimTypes.Sid)?.Value;
 
             FollowEntity result = await _uow.FollowRepository.ChangeStatusReceiveNotifications(followerId, followedUserId);
 

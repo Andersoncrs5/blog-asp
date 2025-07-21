@@ -19,7 +19,7 @@ namespace Blog.entities
         [Required] public long PostId { get; set; }
         public LikeOrDislike Reaction  { get; set; }
         [JsonIgnore] [ForeignKey(nameof(ApplicationUserId))] public virtual ApplicationUser? ApplicationUser { get; set; } 
-        [JsonIgnore] [ForeignKey(nameof(PostId))] public virtual PostEntity? Post { get; set; } 
+        [ForeignKey(nameof(PostId))] public virtual PostEntity? Post { get; set; } 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

@@ -21,6 +21,7 @@ namespace Blog.SetRepositories.Repositories
         {
             _context = context;
         }
+
         public async Task<ReactionPostResponse> ToggleReaction(ApplicationUser user, PostEntity post, LikeOrDislike newAction)
         {
             ReactionPostEntity? existingReaction = await _context.ReactionPostEntities 

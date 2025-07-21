@@ -64,6 +64,7 @@ namespace blog.SetRepositories.Repositories
 
             UserPreferenceEntity prefer = new UserPreferenceEntity
             {
+                ApplicationUserId = user.Id,
                 CategoryId = dto.CategoryId,
                 CreatedAt = DateTime.UtcNow
             };

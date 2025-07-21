@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace blog.Controllers
 {
@@ -128,9 +129,13 @@ namespace blog.Controllers
             return Ok(result);
         }
 
-        [HttpPost("{postId:required}/{parentId?}")]
+        [HttpPost("{postId:required}")]
         [EnableRateLimiting("CreateItemPolicy")]
-        public async Task<IActionResult> Create([FromBody] CreateCommentDTO dto, long postId, ulong? parentId)
+        [SwaggerOperation(Summary = "Creates a new comment for a post, optionally as a reply to another comment.")]
+        public async Task<IActionResult> Create(
+            [FromBody] CreateCommentDTO dto, 
+            long postId, 
+            [FromQuery] ulong? parentId)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -146,6 +151,8 @@ namespace blog.Controllers
 
             PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
             await _uow.PostMetricRepository.SumOrRedCommentCount(postMetric, Blog.utils.enums.SumOrRedEnum.SUM);
+
+            await _uow.CommentMetricRepository.Create(comment);
 
             return Ok(new Response(
                 "success",

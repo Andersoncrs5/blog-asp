@@ -16,6 +16,6 @@ namespace Blog.DTOs.Playlist
         public string? Description { get; set; } = string.Empty;
 
         [StringLength(maximumLength:1000)]
-        [Url] public string? ImageUrl { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; } = string.Empty;
     }
 }
