@@ -21,14 +21,14 @@ namespace Blog.SetRepositories.Repositories
             _context = context;
         }
 
-        public async Task<CommentMetricEntity> Get(CommentEntity comment)
+        public async Task<CommentMetricEntity?> Get(CommentEntity comment)
         {
             CommentMetricEntity? metric = await _context.CommentMetricEntities .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.CommentId == comment.Id);
 
             if (metric is null)
-                throw new ResponseException("Metric not found", 404);
-            
+                return null;
+
             return metric;
         }
     
