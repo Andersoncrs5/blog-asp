@@ -14,6 +14,7 @@ namespace Blog.SetRepositories.IRepositories
         Task<CategoryEntity> Create(CreateCategoryDTO dto, ApplicationUser user);
         Task<List<CategoryEntity>> GetAll(bool IsActived = true);
         IQueryable<CategoryEntity> GetAll();
+        Task<bool> ExistsByName(string name);
         Task Delete(CategoryEntity category);
         Task<CategoryEntity> Update(CategoryEntity category, UpdateCategoryDTO dto);
         Task<CategoryEntity> ChangeStatusActive(CategoryEntity category);

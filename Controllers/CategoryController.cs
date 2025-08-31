@@ -32,7 +32,32 @@ namespace Blog.Controllers
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> Get(long Id)
         {
-            CategoryEntity category = await _uow.CategoryRepository.Get(Id);
+            if (Id <= 0)
+            {
+                return BadRequest(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 400,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "Category Id is required",
+                    Status = false
+                });
+            }
+
+            CategoryEntity? category = await _uow.CategoryRepository.Get(Id);
+
+            if (category == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "Category not found",
+                    Status = false
+                });
+            }
+
             return Ok(new Response(
                 "success",
                 "Category found with successfully!",
@@ -64,7 +89,8 @@ namespace Blog.Controllers
 
             ApplicationUser? user = await _uow.UserRepository.Get(userId);
 
-            if (user == null) {
+            if (user == null) 
+            {
                 return NotFound(new ResponseBody<string>
                 {
                     Body = null,
@@ -74,7 +100,21 @@ namespace Blog.Controllers
                     Datetime = DateTimeOffset.Now
                 });
             }
-            
+
+            bool checkName = await _uow.CategoryRepository.ExistsByName(dto.Name);
+
+            if (checkName == true) 
+            {
+                return Conflict(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 409,
+                    Message = "Name exists",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             CategoryEntity categoryCreated = await _uow.CategoryRepository.Create(dto, user);
 
             return Ok(new Response(
@@ -104,7 +144,32 @@ namespace Blog.Controllers
         [Authorize(Roles = "AdminRole, SuperAdminRole")]
         public async Task<IActionResult> Delete(long Id)
         {
-            CategoryEntity category = await _uow.CategoryRepository.Get(Id);
+            if (Id <= 0)
+            {
+                return BadRequest(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 400,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "Category Id is required",
+                    Status = false
+                });
+            }
+
+            CategoryEntity? category = await _uow.CategoryRepository.Get(Id);
+
+            if (category == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "Category not found",
+                    Status = false
+                });
+            }
+
             await _uow.CategoryRepository.Delete(category);
 
             return Ok(new Response(
@@ -123,7 +188,32 @@ namespace Blog.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            CategoryEntity category = await _uow.CategoryRepository.Get(Id);
+            if (Id <= 0)
+            {
+                return BadRequest(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 400,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "Category Id is required",
+                    Status = false
+                });
+            }
+
+            CategoryEntity? category = await _uow.CategoryRepository.Get(Id);
+
+            if (category == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "Category not found",
+                    Status = false
+                });
+            }
+
             CategoryEntity result = await _uow.CategoryRepository.Update(category, dto);
 
             return Ok(new Response(
@@ -139,7 +229,32 @@ namespace Blog.Controllers
         [Authorize(Roles = "AdminRole, SuperAdminRole")]
         public async Task<IActionResult> ChangeStatusActive(long Id)
         {
-            CategoryEntity category = await _uow.CategoryRepository.Get(Id);
+            if (Id <= 0)
+            {
+                return BadRequest(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 400,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "Category Id is required",
+                    Status = false
+                });
+            }
+
+            CategoryEntity? category = await _uow.CategoryRepository.Get(Id);
+
+            if (category == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "Category not found",
+                    Status = false
+                });
+            }
+
             CategoryEntity result = await _uow.CategoryRepository.ChangeStatusActive(category);
 
             return Ok(new Response(
