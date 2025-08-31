@@ -20,29 +20,29 @@ namespace Blog.SetRepositories.Repositories
             _context = context;
         }
 
-        public async Task<CategoryEntity> Get(long Id)
+        public async Task<CategoryEntity?> Get(long Id)
         {
             if(long.IsNegative(Id))
-                throw new ResponseException("Id is required");
+                throw new ArgumentNullException(nameof(Id));
 
             CategoryEntity? category = await _context.CategoryEntities.AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id.Equals(Id));
             
-            if (category == null) 
-                throw new ResponseException("Category not found", 404);
-            
+            if (category == null)
+                return null;
+
             return category;
         }
 
         public async Task Delete(CategoryEntity category)
         {
-            this._context.Remove(category);
-            await this._context.SaveChangesAsync();
+            _context.Remove(category);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<List<CategoryEntity>> GetAll(bool IsActived = true) 
         {
-            return await this._context.CategoryEntities.AsNoTracking()
+            return await _context.CategoryEntities.AsNoTracking()
                 .Where(u => u.IsActived == IsActived)
                 .ToListAsync();
         }

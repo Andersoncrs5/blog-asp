@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using blog.utils.Responses;
 using Blog.DTOs.Category;
 using Blog.entities;
 using Blog.SetUnitOfWork;
@@ -47,8 +48,33 @@ namespace Blog.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            string? id = User.FindFirst(ClaimTypes.Sid)?.Value;
-            ApplicationUser user = await _uow.UserRepository.Get(id);
+
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userId)) {
+                return BadRequest(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 400,
+                    Message = "Id is required",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+
+            if (user == null) {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+            
             CategoryEntity categoryCreated = await _uow.CategoryRepository.Create(dto, user);
 
             return Ok(new Response(
