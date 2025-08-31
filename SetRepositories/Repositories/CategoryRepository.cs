@@ -52,21 +52,22 @@ namespace Blog.SetRepositories.Repositories
             return _context.CategoryEntities.AsNoTracking();
         }
 
+        public async Task<bool> ExistsByName(string name)
+        {
+            return await _context.CategoryEntities
+                .AsNoTracking()
+                .AnyAsync(c => c.Name.Contains(name));
+        }
+
         public async Task<CategoryEntity> Create(CreateCategoryDTO dto, ApplicationUser user)
         {
-            var check = _context.CategoryEntities.AsNoTracking()
-                .FirstOrDefaultAsync(c => c.Name.Contains(dto.Name));
-
-            if (check != null)
-                throw new ResponseException("category name exists!!", StatusCodes.Status409Conflict);
-
             CategoryEntity category = dto.toCategoryEntity();
 
             category.ApplicationUserId = user.Id;
 
-            var created = await this._context.CategoryEntities.AddAsync(category);
+            var created = await _context.CategoryEntities.AddAsync(category);
 
-            await this._context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             return created.Entity;
         }
 
@@ -76,7 +77,7 @@ namespace Blog.SetRepositories.Repositories
 
             _context.Entry(category).State = EntityState.Modified;
 
-            await this._context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             return category;
         }
 
@@ -85,7 +86,7 @@ namespace Blog.SetRepositories.Repositories
             category.IsActived = !category.IsActived;
 
             _context.Entry(category).State = EntityState.Modified;
-            await this._context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             return category;
         }
