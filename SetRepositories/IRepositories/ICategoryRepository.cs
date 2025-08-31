@@ -10,7 +10,7 @@ namespace Blog.SetRepositories.IRepositories
 {
     public interface ICategoryRepository
     {
-        Task<CategoryEntity> Get(long Id);
+        Task<CategoryEntity?> Get(long Id);
         Task<CategoryEntity> Create(CreateCategoryDTO dto, ApplicationUser user);
         Task<List<CategoryEntity>> GetAll(bool IsActived = true);
         IQueryable<CategoryEntity> GetAll();
