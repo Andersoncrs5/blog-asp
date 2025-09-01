@@ -9,7 +9,8 @@ namespace Blog.SetRepositories.IRepositories
 {
     public interface IFavoriteCommentRepository
     {
-        Task<FavoriteCommentEntity> Get(ulong Id);
+        Task<FavoriteCommentEntity?> Get(ulong Id);
+        Task<bool> CheckExistsCommentWithFavorite(string userId, ulong commentId);
         Task<PaginatedList<FavoriteCommentEntity>> GetAllOfUserPaginated(ApplicationUser user, int pageNumber, int pageSize);
         Task<PaginatedList<FavoriteCommentEntity>> GetAllOfCommentPaginated(CommentEntity comment, int pageNumber, int pageSize);
         Task<FavoriteCommentEntity> Save(ApplicationUser user, CommentEntity comment);
