@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Blog.SetRepositories.Repositories
 {
-    public class FavoriteCommentRepository: IFavoriteCommentRepository
+    public class FavoriteCommentRepository : IFavoriteCommentRepository
     {
         private readonly AppDbContext _context;
 
@@ -19,13 +19,13 @@ namespace Blog.SetRepositories.Repositories
             _context = context;
         }
 
-        public async Task<FavoriteCommentEntity> Get(ulong Id)
+        public async Task<FavoriteCommentEntity?> Get(ulong Id)
         {
             FavoriteCommentEntity? favorite = await _context.FavoriteCommentEntities.AsNoTracking()
                 .FirstOrDefaultAsync(e => e.Id == Id);
 
             if (favorite is null)
-                throw new ResponseException("Favorite not found");
+                return null;
 
             return favorite;
         }
@@ -50,21 +50,22 @@ namespace Blog.SetRepositories.Repositories
             return await PaginatedList<FavoriteCommentEntity>.CreateAsync(query, pageNumber, pageSize);
         }
 
+        public async Task<bool> CheckExistsCommentWithFavorite(string userId, ulong commentId)
+        {
+            return await _context.FavoriteCommentEntities
+                .AsNoTracking()
+                .AnyAsync(f => f.ApplicationUserId.Contains(userId) && f.CommentId == commentId);
+        }
+
         public async Task<FavoriteCommentEntity> Save(ApplicationUser user, CommentEntity comment)
         {
-            FavoriteCommentEntity? check = await _context.FavoriteCommentEntities.AsNoTracking()
-                .FirstOrDefaultAsync(f => f.ApplicationUserId == user.Id && f.CommentId == comment.Id);
-
-            if (check is not null)
-                throw new ResponseException("Comment already are favorited");
-
             FavoriteCommentEntity save = new FavoriteCommentEntity
             {
                 ApplicationUserId = user.Id,
                 CommentId = comment.Id,
                 CreatedAt = DateTime.UtcNow
             };
-            
+
             var result = await _context.FavoriteCommentEntities.AddAsync(save);
             await _context.SaveChangesAsync();
             return result.Entity;
