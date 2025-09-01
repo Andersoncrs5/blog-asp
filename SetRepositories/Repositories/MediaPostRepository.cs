@@ -20,16 +20,16 @@ namespace Blog.SetRepositories.Repositories
             _context = context;
         }
 
-        public async Task<MediaPostEntity> GetAsync(ulong Id)
+        public async Task<MediaPostEntity?> GetAsync(ulong Id)
         {
-            if (Id == 0)
-                throw new ResponseException("Media ID is required and must be positive.", 400);
+            if (Id <= 0)
+                throw new ArgumentNullException(nameof(Id));
 
             MediaPostEntity? media = await _context.MediaPostEntities.AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == Id);
 
             if (media is null)
-                throw new ResponseException("Media not found");
+                return null;
 
             return media;
         }
@@ -50,14 +50,14 @@ namespace Blog.SetRepositories.Repositories
             return await PaginatedList<MediaPostEntity>.CreateAsync(query, pageNumber, pageSize);
         }
 
+        public async Task<int> CheckAmountMediaByPost(long postId) 
+        {
+            return await _context.MediaPostEntities.AsNoTracking()
+                .CountAsync(e => e.PostId == postId);
+        }
+
         public async Task<MediaPostEntity> CreateAsync(PostEntity post, CreateMediaDTO dto)
         {
-            int count = await _context.MediaPostEntities.AsNoTracking()
-                .CountAsync(e => e.PostId == post.Id);
-
-            if (count >= 10)
-                throw new ResponseException("Limit max to media numbers!");
-
             MediaPostEntity media = new MediaPostEntity()
             {
                 Description = dto.Description,
