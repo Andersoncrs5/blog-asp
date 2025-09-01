@@ -21,13 +21,13 @@ namespace blog.SetRepositories.Repositories
             _context = context;
         }
 
-        public async Task<UserConfigEntity> GetAsync(ApplicationUser user, bool includeRelations = false)
+        public async Task<UserConfigEntity?> GetAsync(ApplicationUser user)
         {
             UserConfigEntity? config = await _context.UserConfigEntities.AsNoTracking()
                 .FirstOrDefaultAsync(c => c.ApplicationUserId == user.Id);
 
             if (config is null)
-                throw new ResponseException("Config not found", 404);
+                return null;
 
             return config;
         }
@@ -38,12 +38,13 @@ namespace blog.SetRepositories.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<UserConfigEntity> CreateAsync(CreateUserConfigDTO dto, ApplicationUser user)
+        public async Task<bool> Exists(string userId)
         {
-            bool exists = await _context.UserConfigEntities.AnyAsync(uc => uc.ApplicationUserId == user.Id);
-            if (exists)
-                throw new ResponseException("User config already exists for this user.", 409);
-                
+            return await _context.UserConfigEntities.AnyAsync(uc => uc.ApplicationUserId == userId);
+        }
+
+        public async Task<UserConfigEntity> CreateAsync(CreateUserConfigDTO dto, ApplicationUser user)
+        {       
             UserConfigEntity newConfig = new UserConfigEntity
             {
                 ApplicationUserId = user.Id,
@@ -57,14 +58,8 @@ namespace blog.SetRepositories.Repositories
             return result.Entity;
         }
 
-        public async Task<UserConfigEntity> UpdateAsync(UpdateUserConfigDTO dto ,ApplicationUser user)
+        public async Task<UserConfigEntity> UpdateAsync(UpdateUserConfigDTO dto ,ApplicationUser user, UserConfigEntity config)
         {
-            UserConfigEntity? config = await _context.UserConfigEntities
-                .FirstOrDefaultAsync(c => c.ApplicationUserId == user.Id);
-
-            if (config is null)
-                throw new ResponseException("Config not found", 404);
-
             _context.Entry(config).CurrentValues.SetValues(dto);
             config.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
