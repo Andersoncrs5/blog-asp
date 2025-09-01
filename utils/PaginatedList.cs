@@ -14,8 +14,6 @@ namespace Blog.utils
         public long TotalCount { get; set; }
         public bool HasPreviousPage => PageIndex > 1;
         public bool HasNextPage => PageIndex < TotalPages;
-        public int? Code { get; set; }
-        public List<Link>? _links { get; set; }
 
         private PaginatedList(IEnumerable<T> items, long count, int pageIndex, int pageSize, int? code = 200)
         {
@@ -23,8 +21,6 @@ namespace Blog.utils
             TotalCount = count;
             PageIndex = pageIndex;
             TotalPages = (int)Math.Ceiling(count / (double)pageSize);
-            _links = new List<Link>();
-            Code = code;
         }
 
         public static async Task<PaginatedList<T>> CreateAsync(
