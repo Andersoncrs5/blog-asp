@@ -39,14 +39,15 @@ namespace Blog.SetRepositories.Repositories
             return await PaginatedList<FavoritePostEntity>.CreateAsync(query, pageNumber, pageSize);
         }
 
-        public async Task<FavoritePostEntity> Save(ApplicationUser user, PostEntity post) 
+        public async Task<bool> CheckExistsPostWithFavorite(string userId, long postId)
         {
-            FavoritePostEntity? check = await _context.FavoritePostEntities
-                .AsNoTracking().FirstOrDefaultAsync(f => f.ApplicationUserId == user.Id && f.PostId == post.Id);
+            return await _context.FavoritePostEntities
+                .AsNoTracking()
+                .AnyAsync(f => f.ApplicationUserId == userId && f.PostId == postId);
+        }
 
-            if (check is not null)
-                throw new ResponseException("Post already are saved!!!!", 400);
-            
+        public async Task<FavoritePostEntity> Save(ApplicationUser user, PostEntity post) 
+        {   
             FavoritePostEntity save = new FavoritePostEntity()
             {
                 ApplicationUserId = user.Id,
@@ -65,16 +66,13 @@ namespace Blog.SetRepositories.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<FavoritePostEntity> Get(long Id)
+        public async Task<FavoritePostEntity?> Get(long Id)
         {
-            if(long.IsNegative(Id))
-                throw new ResponseException("Id is required");
-
             FavoritePostEntity? save = await _context.FavoritePostEntities
                 .AsNoTracking().FirstOrDefaultAsync(f => f.Id == Id);
 
             if (save is null)
-                throw new ResponseException("Favorite not found");
+                return null;
 
             return save;
         }
