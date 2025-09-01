@@ -19,14 +19,14 @@ namespace Blog.SetRepositories.Repositories
             _context = context;
         }
 
+        public async Task<bool> Exists(ulong playlistId, long postId) 
+        {
+            return await _context.PlaylistItemEntities.AsNoTracking()
+                .AnyAsync(pi => pi.PlaylistId == playlistId && pi.PostId == postId);
+        }
+
         public async Task<PlaylistItemEntity> AddPostToPlaylist(PlaylistEntity playlist, PostEntity post, int? order = null)
         {
-            bool exists = await _context.PlaylistItemEntities.AsNoTracking()
-                .AnyAsync(pi => pi.PlaylistId == playlist.Id && pi.PostId == post.Id);
-
-            if (exists)
-                throw new ResponseException("This post is already in the playlist", 400);
-
             PlaylistItemEntity newPlaylistItem = new PlaylistItemEntity
             {
                 PlaylistId = playlist.Id,
@@ -46,10 +46,10 @@ namespace Blog.SetRepositories.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<PlaylistItemEntity> Get(ulong Id)
+        public async Task<PlaylistItemEntity?> Get(ulong Id)
         {
             if (Id == 0)
-                throw new ResponseException("PlaylistItem ID is required and must be positive.", 400);
+                throw new ArgumentNullException(nameof(Id));
 
             PlaylistItemEntity? playlistItem = await _context.PlaylistItemEntities.AsNoTracking()
                 .Include(pi => pi.Playlist)
@@ -57,7 +57,7 @@ namespace Blog.SetRepositories.Repositories
                 .FirstOrDefaultAsync(pi => pi.Id == Id);
 
             if (playlistItem is null)
-                throw new ResponseException("PlaylistItem not found", 404);
+                return null;
 
             return playlistItem;
         }
