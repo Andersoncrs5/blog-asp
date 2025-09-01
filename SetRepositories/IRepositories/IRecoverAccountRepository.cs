@@ -9,8 +9,9 @@ namespace Blog.SetRepositories.IRepositories
 {
     public interface IRecoverAccountRepository
     {
-        Task<RecoverAccountEntity> RequestPasswordResetTokenAsync(RequestPasswordResetDto requestDto, string callbackUrl);
-        Task<bool> ValidateAndResetPasswordAsync(ResetPasswordDto resetDto);
+        Task<RecoverAccountEntity> RequestPasswordResetTokenAsync(RequestPasswordResetDto requestDto, string callbackUrl, ApplicationUser user);
+        Task<bool> ValidateAndResetPasswordAsync(ResetPasswordDto resetDto, ApplicationUser user,RecoverAccountEntity recoveryEntry);
         Task SendWelcomeEmailAsync(WelcomeEmailDto welcomeDto);
+        Task<RecoverAccountEntity?> GetAsync(ApplicationUser user);
     }
 }
