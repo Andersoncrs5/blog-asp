@@ -10,7 +10,7 @@ namespace Blog.SetRepositories.IRepositories
 {
     public interface ICommentRepository
     {
-        Task<CommentEntity> Get(ulong Id, bool includeRelated = false, bool includeMetric = false);
+        Task<CommentEntity?> Get(ulong Id, bool includeRelated = false, bool includeMetric = false);
         Task Delete(CommentEntity comment);
         IQueryable<CommentEntity> GetAllOfUser(ApplicationUser user);
         IQueryable<CommentEntity> GetAllOfPost(PostEntity post);
