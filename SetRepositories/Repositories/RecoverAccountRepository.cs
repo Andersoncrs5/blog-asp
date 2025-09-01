@@ -31,14 +31,21 @@ namespace Blog.SetRepositories.Repositories
             _emailService = emailService;
         }
 
-        public async Task<RecoverAccountEntity> RequestPasswordResetTokenAsync(RequestPasswordResetDto requestDto, string callbackUrl)
+        public async Task<RecoverAccountEntity?> GetAsync(ApplicationUser user)
+        {
+            RecoverAccountEntity? recoveryEntry = await _context.RecoverAccountEntities
+                .FirstOrDefaultAsync(ra => ra.ApplicationUserId == user.Id);
+
+            if (recoveryEntry == null) 
+                return null;
+
+            return recoveryEntry;
+        }
+
+        public async Task<RecoverAccountEntity> RequestPasswordResetTokenAsync(RequestPasswordResetDto requestDto, string callbackUrl, ApplicationUser user)
         {
             if (!new EmailAddressAttribute().IsValid(requestDto.Email))
-                throw new ResponseException("Invalid email format.", 400);
-
-            ApplicationUser? user = await _userManager.FindByEmailAsync(requestDto.Email);
-            if (user is null)
-                throw new ResponseException("User not found for the provided email.", 404);
+                throw new ArgumentNullException();
 
             string token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
@@ -62,7 +69,6 @@ namespace Blog.SetRepositories.Repositories
             }
             else
             {
-                // Create new record
                 existingRecovery = new RecoverAccountEntity
                 {
                     ApplicationUserId = user.Id,
@@ -87,18 +93,12 @@ namespace Blog.SetRepositories.Repositories
             return existingRecovery;
         }
 
-        public async Task<bool> ValidateAndResetPasswordAsync(ResetPasswordDto resetDto)
+        public async Task<bool> ValidateAndResetPasswordAsync(
+            ResetPasswordDto resetDto, 
+            ApplicationUser user,
+            RecoverAccountEntity recoveryEntry
+            )
         {
-            ApplicationUser? user = await _userManager.FindByIdAsync(resetDto.UserId);
-            if (user is null)
-                throw new ResponseException("Invalid user ID.", 404);
-
-            RecoverAccountEntity? recoveryEntry = await _context.RecoverAccountEntities
-                .FirstOrDefaultAsync(ra => ra.ApplicationUserId == user.Id);
-
-            if (recoveryEntry is null)
-                throw new ResponseException("No password reset request found for this user.", 404);
-
             if (recoveryEntry.BlockedAt != null && recoveryEntry.BlockedAt > DateTime.UtcNow)
             {
                 recoveryEntry.FailedAttempts++;
@@ -138,7 +138,7 @@ namespace Blog.SetRepositories.Repositories
             }
 
             if (resetDto.NewPassword != resetDto.ConfirmPassword)
-                throw new ResponseException("New password and confirmation password do not match.", 400);
+                throw new ArgumentException("New password and confirmation password do not match.");
 
             IdentityResult result = await _userManager.ResetPasswordAsync(user, resetDto.Token, resetDto.NewPassword);
 
@@ -155,7 +155,7 @@ namespace Blog.SetRepositories.Repositories
                 recoveryEntry.FailedAttempts++;
                 _context.RecoverAccountEntities.Update(recoveryEntry);
                 await _context.SaveChangesAsync();
-                throw new ResponseException($"Password reset failed: {errors}", 400);
+                throw new Exception($"Password reset failed: {errors}");
             }
         }
 
