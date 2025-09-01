@@ -11,7 +11,8 @@ namespace blog.SetRepositories.IRepositories
 {
     public interface IUserPreferenceRepository
     {
-        Task<UserPreferenceEntity> GetAsync(long Id);
+        Task<UserPreferenceEntity?> GetAsync(long Id);
+        Task<bool> Exists(long CategoryId);
         Task RemoveAsync(UserPreferenceEntity prefer);
         Task<PaginatedList<UserPreferenceEntity>> GetAllOfUserPaginatedAsync(ApplicationUser user, int pageNumber, int pageSize, bool includeRelations = true);
         Task<UserPreferenceEntity> SaveAsync(CreatePreferenceDTO dto, ApplicationUser user);
