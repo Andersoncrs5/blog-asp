@@ -21,16 +21,16 @@ namespace blog.SetRepositories.Repositories
             _context = context;
         }
 
-        public async Task<UserPreferenceEntity> GetAsync(long Id)
+        public async Task<UserPreferenceEntity?> GetAsync(long Id)
         {
             if (long.IsNegative(Id) || Id == 0)
-                throw new ResponseException("Preference id is required!!!");
+                throw new ArgumentNullException(nameof(Id));
 
             UserPreferenceEntity? prefer = await _context.UserPreferenceEntities.AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == Id);
 
             if (prefer is null)
-                throw new ResponseException("Preference not found!!!", 404);
+                return null;
 
             return prefer;
         }
@@ -54,14 +54,14 @@ namespace blog.SetRepositories.Repositories
             return await PaginatedList<UserPreferenceEntity>.CreateAsync(query, pageNumber, pageSize);
         }
 
+        public async Task<bool> Exists(long CategoryId)
+        {
+            return await _context.UserPreferenceEntities.AsNoTracking()
+                .AnyAsync(u => u.CategoryId == CategoryId);
+        }
+
         public async Task<UserPreferenceEntity> SaveAsync(CreatePreferenceDTO dto, ApplicationUser user)
         {
-            int check = await _context.UserPreferenceEntities.AsNoTracking()
-                .CountAsync(u => u.CategoryId == dto.CategoryId);
-
-            if (check > 0)
-                throw new ResponseException("This category already was added!!", 409);
-
             UserPreferenceEntity prefer = new UserPreferenceEntity
             {
                 ApplicationUserId = user.Id,

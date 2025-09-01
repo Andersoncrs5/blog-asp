@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Blog.SetRepositories.Repositories
 {
-    public class UserRepository: IUserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly AppDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -22,32 +22,30 @@ namespace Blog.SetRepositories.Repositories
             _userManager = userManager;
         }
 
-        public async Task<ApplicationUser> Get(string? id, bool includeMetric = false) 
+        public async Task<ApplicationUser?> Get(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
-                throw new ResponseException("User Id is required", 400, "fail");
+                throw new ArgumentNullException(nameof(id));
 
             ApplicationUser? user = await _userManager.FindByIdAsync(id);
 
             if (user == null)
-                throw new ResponseException("User not found", 404, "fail");
+                return null;
 
             return user;
         }
 
-        public async Task Delete(ApplicationUser user) 
+        public async Task Delete(ApplicationUser user)
         {
             await _userManager.DeleteAsync(user);
         }
 
-        public async Task<ApplicationUser> Update(ApplicationUser? user, UpdateUserDto dto) 
+        public async Task<ApplicationUser> Update(ApplicationUser user, UpdateUserDto dto)
         {
-            if (user == null)
-                throw new ResponseException("User is required", 400, "fail");
 
             user.UserName = dto.Name.Trim();
 
-            if(!string.IsNullOrWhiteSpace(dto.Password)) 
+            if (!string.IsNullOrWhiteSpace(dto.Password))
             {
                 PasswordHasher<ApplicationUser>? passwordHasher = new PasswordHasher<ApplicationUser>();
                 user.PasswordHash = passwordHasher.HashPassword(user, dto.Password);

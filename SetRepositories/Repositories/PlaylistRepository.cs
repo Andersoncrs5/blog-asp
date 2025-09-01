@@ -43,16 +43,16 @@ namespace Blog.SetRepositories.Repositories
             return result.Entity;
         }
 
-        public async Task<PlaylistEntity> Get(ulong Id)
+        public async Task<PlaylistEntity?> Get(ulong Id)
         {
             if (Id == 0) 
-                throw new ResponseException("Playlist ID is required and must be positive.", 400);
+                throw new ArgumentNullException(nameof(Id));
 
             PlaylistEntity? play = await _context.PlaylistEntities.AsNoTracking() 
                 .FirstOrDefaultAsync(p => p.Id == Id);
 
             if (play is null)
-                throw new ResponseException("Playlist not found", 404);
+                return null;
 
             return play;
         }

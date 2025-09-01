@@ -18,22 +18,25 @@ namespace blog.SetRepositories.Repositories
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
 
-        public NotificationRepository(AppDbContext context, IConfiguration configuration)
+        public NotificationRepository(
+            AppDbContext context, 
+            IConfiguration configuration
+            )
         {
             _context = context;
             _configuration = configuration;
         }
 
-        public async Task<NotificationEntity> GetAsync(long Id)
+        public async Task<NotificationEntity?> GetAsync(long Id)
         {
             if (Id <= 0) 
-                throw new ResponseException("Notification ID is required and must be positive.", 400);
+                throw new ArgumentNullException(nameof(Id));
 
             NotificationEntity? noti = await _context.NotificationEntities.AsNoTracking()
                 .FirstOrDefaultAsync(n => n.Id == Id);
 
             if (noti is null)
-                throw new ResponseException("Notification not found", 404);
+                return null;
 
             return noti;
         }
@@ -46,11 +49,8 @@ namespace blog.SetRepositories.Repositories
 
         public async Task<NotificationEntity> SendNotification(CreateNotificationDTO dto, ApplicationUser recipientUser, string? senderUserId)
         {
-            if (recipientUser == null || string.IsNullOrEmpty(recipientUser.Id))
-                throw new ResponseException("Recipient user is required.", 400);
-
-            if (dto == null)
-                throw new ResponseException("Notification DTO cannot be null.", 400);
+            if (string.IsNullOrEmpty(recipientUser.Id))
+                throw new ArgumentNullException(nameof(recipientUser));
 
             NotificationEntity noti = new NotificationEntity
             {
@@ -78,11 +78,12 @@ namespace blog.SetRepositories.Repositories
                 .Where(f => f.FollowedId == postAuthor.Id && f.ReceiveNotifications == true)
                 .ToListAsync();
 
-            // string? frontendPostBaseUrl = _configuration["FrontendSettings:PostBaseUrl"] ?? "no url";
-            // if (string.IsNullOrEmpty(frontendPostBaseUrl) || string.IsNullOrWhiteSpace(frontendPostBaseUrl) )
-            // {    
-            //     Console.WriteLine("Warning: 'FrontendSettings:PostBaseUrl' is not configured. Notifications will not have direct links.");
-            // }
+            string? frontendPostBaseUrl = _configuration["FrontendSettings:PostBaseUrl"] ?? "no url";
+            if (string.IsNullOrEmpty(frontendPostBaseUrl) || string.IsNullOrWhiteSpace(frontendPostBaseUrl) )
+            {
+                Console.WriteLine("Warning: 'FrontendSettings:PostBaseUrl' is not configured. Notifications will not have direct links.");
+                throw new ArgumentNullException(nameof(frontendPostBaseUrl));
+            }
 
             List<NotificationEntity> notificationsToSend = new List<NotificationEntity>();
 
@@ -94,7 +95,7 @@ namespace blog.SetRepositories.Repositories
                     Title = $"Novo post de {postAuthor.UserName}!",
                     NotificationType = NotificationTypeEnum.NewPostFromFollowed,
                     RelatedEntityId = newPost.Id.ToString(),
-                    LinkUrl = "http://localhost/3000",
+                    LinkUrl = frontendPostBaseUrl,
                     IconCssClass = "fa-newspaper", 
                     SenderUserId = postAuthor.Id,
                     Content = $"O usuário que você segue, {postAuthor.UserName}, publicou um novo post: \"{newPost.Title}\"", 
@@ -115,7 +116,8 @@ namespace blog.SetRepositories.Repositories
         public async Task<int> MarkNotificationsAsReadAsync(List<long> notificationIds, string userId)
         {
             if (notificationIds == null || !notificationIds.Any()) return 0;
-            if (string.IsNullOrEmpty(userId)) throw new ResponseException("User ID is required.", 400);
+
+            if (string.IsNullOrEmpty(userId)) throw new ArgumentNullException(nameof(userId));
 
             List<NotificationEntity> notificationsToUpdate = await _context.NotificationEntities
                 .Where(n => notificationIds.Contains(n.Id) && n.ApplicationUserId == userId && n.IsRead == false)
@@ -134,7 +136,7 @@ namespace blog.SetRepositories.Repositories
         public async Task<PaginatedList<NotificationEntity>> GetUserNotificationsPaginatedAsync(string? userId, int pageNumber, int pageSize, bool? isRead = null)
         {
             if (string.IsNullOrEmpty(userId))
-                throw new ResponseException("User ID is required to get notifications.", 400);
+                throw new ArgumentNullException(nameof(userId));
 
             IQueryable<NotificationEntity> query = _context.NotificationEntities
                 .AsNoTracking()
@@ -153,7 +155,7 @@ namespace blog.SetRepositories.Repositories
         public async Task<int> GetUnreadNotificationsCountAsync(string? userId)
         {
             if (string.IsNullOrEmpty(userId))
-                throw new ResponseException("User ID is required to get unread notifications count.", 400);
+                throw new ArgumentNullException(nameof(userId));
 
             return await _context.NotificationEntities
                 .AsNoTracking()

@@ -20,17 +20,17 @@ namespace Blog.SetRepositories.Repositories
             _context = context;
         }
 
-        public async Task<PostEntity> Get(long Id) 
+        public async Task<PostEntity?> Get(long Id) 
         {
-            if(long.IsNegative(Id) || Id == 0) 
-                throw new ResponseException("Post id is required");
+            if(long.IsNegative(Id) || Id == 0)
+                throw new ArgumentNullException(nameof(Id));
 
             PostEntity? post = await _context.PostEntities.AsNoTracking()
                 .Include(p => p.PostMetricEntity)
                 .FirstOrDefaultAsync(u => u.Id == Id);
 
-            if (post is null) 
-                throw new ResponseException("Post not found", 404);
+            if (post is null)
+                return null;
 
             return post;
         }

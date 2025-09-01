@@ -21,16 +21,16 @@ namespace Blog.SetRepositories.Repositories
             _context = context;
         }
         
-        public async Task<UserMetricEntity> Get(string? userId) 
+        public async Task<UserMetricEntity?> Get(string? userId) 
         {
             if(string.IsNullOrWhiteSpace(userId))
-                throw new ResponseException("User id is required", 400, "fail");
+                throw new ArgumentNullException(nameof(userId));
 
-            UserMetricEntity? metric = await this._context.UserMetrics.AsNoTracking()
-            .FirstOrDefaultAsync(u => u.ApplicationUserId == userId);
+            UserMetricEntity? metric = await _context.UserMetrics.AsNoTracking()
+                .FirstOrDefaultAsync(u => u.ApplicationUserId == userId);
 
             if (metric == null)
-                throw new ResponseException("User metric not found", 404, "fail");
+                return null;
 
             return metric;
         }
@@ -38,12 +38,11 @@ namespace Blog.SetRepositories.Repositories
         public async Task<UserMetricEntity> Create(string userId) 
         {
             if(string.IsNullOrWhiteSpace(userId))
-                throw new ResponseException("User id is required", 400, "fail");
+                throw new ArgumentNullException(nameof(userId));
 
-            UserMetricEntity metric = new UserMetricEntity();
-            metric.ApplicationUserId = userId;
+            UserMetricEntity metric = new UserMetricEntity{ ApplicationUserId = userId };
 
-            var metricCreated = await this._context.UserMetrics.AddAsync(metric);
+            var metricCreated = await _context.UserMetrics.AddAsync(metric);
 
             return metricCreated.Entity;
         }

@@ -77,19 +77,19 @@ namespace Blog.SetRepositories.Repositories
                 };
             }
 
-            throw new ResponseException("Erro inesperado ao processar a reação no comentário.", 500);
+            throw new InvalidOperationException("Erro inesperado ao processar a reação no comentário.");
         }
 
-        public async Task<ReactionCommentEntity> Remove(ulong Id)
+        public async Task<ReactionCommentEntity?> Remove(ulong Id)
         {
             if (Id == 0)
-                throw new ResponseException("Reaction ID is required and must be positive.");
+                throw new ArgumentNullException(nameof(Id));
 
             ReactionCommentEntity? reaction = await _context.ReactionCommentEntities
                 .FirstOrDefaultAsync(rc => rc.Id == Id);
 
             if (reaction == null)
-                throw new ResponseException("Reaction not found", 404);
+                return null;
 
             _context.ReactionCommentEntities.Remove(reaction);
             await _context.SaveChangesAsync();
