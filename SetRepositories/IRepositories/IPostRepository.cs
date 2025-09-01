@@ -10,7 +10,7 @@ namespace Blog.SetRepositories.IRepositories
 {
     public interface IPostRepository
     {
-        Task<PostEntity> Get(long Id);
+        Task<PostEntity?> Get(long Id);
         Task<PostEntity> Delete(PostEntity post, ApplicationUser user);
         Task<PostEntity> Create(ApplicationUser user, PostEntity post, CategoryEntity category);
         IQueryable<PostEntity> GetAllOfUser(ApplicationUser user, bool IsActived = true);

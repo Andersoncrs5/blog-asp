@@ -10,7 +10,7 @@ namespace Blog.SetRepositories.IRepositories
 {
     public interface IUserMetricRepository
     {
-        Task<UserMetricEntity> Get(string? userId);
+        Task<UserMetricEntity?> Get(string? userId);
         Task<UserMetricEntity> Create(string userId);
         Task<UserMetricEntity> SumOrRedLikesOrDislikeGivenCountInComment(UserMetricEntity metric, SumOrRedEnum action, LikeOrDislike l);
         Task<UserMetricEntity> SumOrRedLikesOrDislikeGivenCountInPost(UserMetricEntity metric, SumOrRedEnum action, LikeOrDislike l); 

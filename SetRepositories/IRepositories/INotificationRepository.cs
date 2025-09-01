@@ -11,7 +11,7 @@ namespace blog.SetRepositories.IRepositories
 {
     public interface INotificationRepository
     {
-        Task<NotificationEntity> GetAsync(long Id);
+        Task<NotificationEntity?> GetAsync(long Id);
         Task RemoveAsync(NotificationEntity noti);
         Task<NotificationEntity> SendNotification(CreateNotificationDTO dto, ApplicationUser recipientUser, string? senderUserId);
         Task SendNotificationToFollowersAboutNewPost(ApplicationUser postAuthor, PostEntity newPost);
