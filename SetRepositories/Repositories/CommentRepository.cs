@@ -20,7 +20,7 @@ namespace Blog.SetRepositories.Repositories
             _context = context;
         }
 
-        public async Task<CommentEntity> Get(ulong Id, bool includeRelated = false, bool includeMetric = false)
+        public async Task<CommentEntity?> Get(ulong Id, bool includeRelated = false, bool includeMetric = false)
         {
 
             IQueryable<CommentEntity> query = _context.CommentEntities.AsNoTracking();
@@ -41,7 +41,7 @@ namespace Blog.SetRepositories.Repositories
             CommentEntity? comment = await query.FirstOrDefaultAsync(c => c.Id == Id);
 
             if (comment is null)
-                throw new ResponseException("Comment not found", 404);
+                return null;
 
             return comment;
         }
