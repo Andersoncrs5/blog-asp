@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using blog.utils.Responses;
 using Blog.DTOs.User;
 using Blog.entities;
 using Blog.SetUnitOfWork;
@@ -31,107 +32,283 @@ namespace Blog.Controllers
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> Me()
         {
-            string? id = User.FindFirst(ClaimTypes.Sid)?.Value;
-            ApplicationUser user = await _uow.UserRepository.Get(id);
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            var response = new UserResponseDTO(user.Id, user.UserName!, user.Email!, null);
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            return Ok(new Response(
-                "success",
-                "User found",
-                200,
-                response
-            ));
+            UserResponseDTO response = new UserResponseDTO(user.Id, user.UserName!, user.Email!, null);
+
+            return Ok(new ResponseBody<UserResponseDTO>
+            {
+                Body = response,
+                Code = 200,
+                Datetime = DateTimeOffset.Now,
+                Message = "User found with successfully",
+                Status = true,
+            });
         }
 
-        [HttpGet("{userId:required}/{includeMetric:bool}")]
+        [HttpGet("{userId:required}")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetUser(string userId, bool includeMetric = false)
+        public async Task<IActionResult> GetUser(string userId)
         {
-            ApplicationUser user = await _uow.UserRepository.Get(userId, includeMetric);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            UserMetricEntity? metric = await _uow.UserMetricRepository.Get(user.Id);
+            if (metric == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "User metric not found",
+                    Status = false
+                });
+            }
+
             await _uow.UserMetricRepository.SumOrRedProfileViews(metric, utils.enums.SumOrRedEnum.SUM);
 
-            var response = new UserResponseDTO(user.Id, user.UserName!, user.Email!, null);
-            if (includeMetric)
-                response.Metric = metric;
+            UserResponseDTO response = new UserResponseDTO(user.Id, user.UserName!, user.Email!, null);
 
-            return Ok(new Response(
-                "success",
-                "User found",
-                200,
-                response
-            ));
+            return Ok(new ResponseBody<UserResponseDTO>
+            {
+                Body = response,
+                Code = 200,
+                Datetime = DateTimeOffset.Now,
+                Message = "User found",
+                Status = true,
+            });
         }
 
         [HttpDelete]
         [EnableRateLimiting("DeleteItemPolicy")]
         public async Task<IActionResult> Delete()
         {
-            string? id = User.FindFirst(ClaimTypes.Sid)?.Value;
-            ApplicationUser user = await _uow.UserRepository.Get(id);
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
             await _uow.UserRepository.Delete(user);
 
-            return Ok(new Response(
-                "success",
-                "User deleted with success",
-                200,
-                null
-            ));
+            return Ok(new ResponseBody<string>
+            {
+                Body = null,
+                Code = 200,
+                Datetime = DateTimeOffset.Now,
+                Message = "User deleted with successfully",
+                Status = true,
+            });
         }
 
         [HttpPut]
         [EnableRateLimiting("UpdateItemPolicy")]
-        public async Task<ActionResult> Update([FromBody] UpdateUserDto userDto) 
+        public async Task<ActionResult> Update([FromBody] UpdateUserDto userDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            string? id = User.FindFirst(ClaimTypes.Sid)?.Value;
-            ApplicationUser user = await _uow.UserRepository.Get(id);
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             ApplicationUser result = await _uow.UserRepository.Update(user, userDto);
 
-            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            UserMetricEntity? metric = await _uow.UserMetricRepository.Get(user.Id);
+            if (metric == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "User metric not found",
+                    Status = false
+                });
+            }
+
             await _uow.UserMetricRepository.SumOrRedEditedCount(metric, utils.enums.SumOrRedEnum.SUM);
 
-            return Ok(new Response(
-                "success",
-                "User updated with success",
-                200,
-                new UserResponseDTO(result.Id, result.UserName!,result.Email!, null)
-            ));
+            return Ok(new ResponseBody<UserResponseDTO>
+            {
+                Body = new UserResponseDTO(result.Id, result.UserName!, result.Email!, null),
+                Code = 200,
+                Datetime = DateTimeOffset.Now,
+                Message = "User found",
+                Status = true,
+            });
         }
 
         [HttpGet("get-metric")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> GetMetric()
         {
-            string? id = User.FindFirst(ClaimTypes.Sid)?.Value;
-            ApplicationUser user = await _uow.UserRepository.Get(id);
-            UserMetricEntity metric = await this._uow.UserMetricRepository.Get(user.Id);
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            return Ok(new Response(
-                "success",
-                "User metric found",
-                200,
-                metric
-            ));
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            UserMetricEntity? metric = await _uow.UserMetricRepository.Get(user.Id);
+            if (metric == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "User metric not found",
+                    Status = false
+                });
+            }
+
+            return Ok(new ResponseBody<UserMetricEntity>
+            {
+                Body = metric,
+                Code = 200,
+                Datetime = DateTimeOffset.Now,
+                Message = "User metric found",
+                Status = true,
+            });
         }
 
         [HttpGet("{userId:required}/get-metric")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> GetMetric(string userId)
         {
-            UserMetricEntity metric = await this._uow.UserMetricRepository.Get(userId);
+            UserMetricEntity? metric = await this._uow.UserMetricRepository.Get(userId);
+            if (metric == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "User metric not found",
+                    Status = false
+                });
+            }
 
-            return Ok(new Response(
-                "success",
-                "User metric found",
-                200,
-                metric
-            ));
+            return Ok(new ResponseBody<UserMetricEntity>
+            {
+                Body = metric,
+                Code = 200,
+                Datetime = DateTimeOffset.Now,
+                Message = "User metric found",
+                Status = true,
+            });
         }
 
     }

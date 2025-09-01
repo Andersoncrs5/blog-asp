@@ -58,12 +58,14 @@ namespace Blog.Controllers
                 });
             }
 
-            return Ok(new Response(
-                "success",
-                "Category found with successfully!",
-                200,
-                category
-            ));
+            return Ok(new ResponseBody<CategoryEntity>
+            {
+                Message = "Category found with successfully!",
+                Body = category,
+                Code = 200,
+                Datetime = DateTimeOffset.Now,
+                Status = true
+            });
         }
 
         [HttpPost]
@@ -75,8 +77,8 @@ namespace Blog.Controllers
                 return BadRequest(ModelState);
 
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
-
-            if (string.IsNullOrWhiteSpace(userId)) {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
                 return BadRequest(new ResponseBody<string>
                 {
                     Body = null,
@@ -88,8 +90,7 @@ namespace Blog.Controllers
             }
 
             ApplicationUser? user = await _uow.UserRepository.Get(userId);
-
-            if (user == null) 
+            if (user == null)
             {
                 return NotFound(new ResponseBody<string>
                 {
@@ -102,8 +103,7 @@ namespace Blog.Controllers
             }
 
             bool checkName = await _uow.CategoryRepository.ExistsByName(dto.Name);
-
-            if (checkName == true) 
+            if (checkName == true)
             {
                 return Conflict(new ResponseBody<string>
                 {
@@ -117,12 +117,14 @@ namespace Blog.Controllers
 
             CategoryEntity categoryCreated = await _uow.CategoryRepository.Create(dto, user);
 
-            return Ok(new Response(
-                "success",
-                "Category created with successfully!",
-                201,
-                categoryCreated
-            ));
+            return Ok(new ResponseBody<CategoryEntity>
+            {
+                Status = true,
+                Message = "Category created with successfully!",
+                Code = 201,
+                Body = categoryCreated,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpGet]
@@ -131,14 +133,16 @@ namespace Blog.Controllers
         {
             List<CategoryEntity> categories = await _uow.CategoryRepository.GetAll(true);
 
-            return Ok(new Response(
-                "success",
-                "All category listed with successfully",
-                200,
-                categories
-            ));
+            return Ok(new ResponseBody<List<CategoryEntity>>
+            {
+                Status = true,
+                Message = "All category listed with successfully",
+                Code = 200,
+                Body = categories,
+                Datetime = DateTimeOffset.Now
+            });
         }
-        
+
         [HttpDelete("{Id:long}")]
         [EnableRateLimiting("DeleteItemPolicy")]
         [Authorize(Roles = "AdminRole, SuperAdminRole")]
@@ -172,12 +176,14 @@ namespace Blog.Controllers
 
             await _uow.CategoryRepository.Delete(category);
 
-            return Ok(new Response(
-                "success",
-                "Category deleted with successfully!",
-                200,
-                null
-            ));
+            return Ok(new ResponseBody<string>
+            {
+                Status = true,
+                Message = "Category deleted with successfully!",
+                Code = 200,
+                Body = null,
+                Datetime = DateTimeOffset.Now,
+            });
         }
 
         [HttpPut("{Id:long}")]
@@ -216,14 +222,16 @@ namespace Blog.Controllers
 
             CategoryEntity result = await _uow.CategoryRepository.Update(category, dto);
 
-            return Ok(new Response(
-                "success",
-                "Category updated!!",
-                200,
-                result
-            ));
+            return Ok(new ResponseBody<CategoryEntity>
+            {
+                Status = true,
+                Message = "Category updated with successfully!",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now,
+            });
         }
-        
+
         [HttpGet("change-status/{Id:long}")]
         [EnableRateLimiting("UpdateItemPolicy")]
         [Authorize(Roles = "AdminRole, SuperAdminRole")]
@@ -257,12 +265,14 @@ namespace Blog.Controllers
 
             CategoryEntity result = await _uow.CategoryRepository.ChangeStatusActive(category);
 
-            return Ok(new Response(
-                "success",
-                "Status changed!",
-                200,
-                result
-            ));
+            return Ok(new ResponseBody<CategoryEntity>
+            {
+                Status = true,
+                Message = "Category status changed with successfully!",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now,
+            });
         }
 
     }

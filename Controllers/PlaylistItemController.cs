@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using blog.utils.Responses;
 using Blog.DTOs.PlaylistItem;
 using Blog.entities;
 using Blog.SetUnitOfWork;
@@ -34,47 +35,130 @@ namespace blog.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            PlaylistEntity play = await _uow.PlaylistRepository.Get(dto.Playlist);
-            PostEntity post = await _uow.PostRepository.Get(dto.PostId);
+            bool check = await _uow.PlaylistItemRepository.Exists(dto.Playlist, dto.PostId);
+            if (check)
+            {
+                return Conflict(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 409,
+                    Message = "This post is already in the playlist",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            PlaylistEntity? play = await _uow.PlaylistRepository.Get(dto.Playlist);
+            if (play == null)
+            {
+                return StatusCode(404, new ResponseBody<PlaylistEntity>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Play list not found!!",
+                    Status = true,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            PostEntity? post = await _uow.PostRepository.Get(dto.PostId);
+            if (post == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Post not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             PlaylistItemEntity result = await _uow.PlaylistItemRepository.AddPostToPlaylist(play, post, dto.Order);
 
             await _uow.PlaylistRepository.SumOrReduceItemCount(play, Blog.utils.enums.SumOrRedEnum.SUM);
 
-            return Ok(new Response(
-                "success",
-                "Post added in play list: " + play.Name,
-                201,
-                result
-            ));
+            return StatusCode(201, new ResponseBody<PlaylistItemEntity>
+            {
+                Body = result,
+                Code = 201,
+                Message = "Post added in play list: " + play.Name,
+                Status = true,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpDelete("itemId:required")]
         [EnableRateLimiting("DeleteItemPolicy")]
         public async Task<IActionResult> RemovePostFromPlaylist(ulong itemId)
         {
-            PlaylistItemEntity item = await _uow.PlaylistItemRepository.Get(itemId);
+            PlaylistItemEntity? item = await _uow.PlaylistItemRepository.Get(itemId);
+            if (item == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Playlist Item not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             await _uow.PlaylistItemRepository.RemovePostFromPlaylist(item);
 
-            PlaylistEntity play = await _uow.PlaylistRepository.Get(item.PlaylistId);
+            PlaylistEntity? play = await _uow.PlaylistRepository.Get(item.PlaylistId);
+            if (play == null)
+            {
+                return StatusCode(404, new ResponseBody<PlaylistEntity>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Play list not found!!",
+                    Status = true,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             await _uow.PlaylistRepository.SumOrReduceItemCount(play, Blog.utils.enums.SumOrRedEnum.REDUCE);
 
-            return Ok(new Response(
-                "success",
-                "Post removed!!!",
-                201,
-                null
-            ));
+            return StatusCode(200, new ResponseBody<PlaylistItemEntity>
+            {
+                Body = null,
+                Code = 200,
+                Message = "Post removed!!!",
+                Status = true,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpGet("{playId:required}")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfPlaylistPaginated(ulong playId , [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllOfPlaylistPaginated(ulong playId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            PlaylistEntity play = await _uow.PlaylistRepository.Get(playId);
-            PaginatedList<PlaylistItemEntity> result = await _uow.PlaylistItemRepository.GetAllOfPlaylistPaginated(play, pageNumber, pageSize);
-            result.Code = 200;
+            PlaylistEntity? play = await _uow.PlaylistRepository.Get(playId);
+            if (play == null)
+            {
+                return StatusCode(404, new ResponseBody<PlaylistEntity>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Play list not found!!",
+                    Status = true,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            return Ok(result);
+            PaginatedList<PlaylistItemEntity> result = await _uow.PlaylistItemRepository.GetAllOfPlaylistPaginated(play, pageNumber, pageSize);
+
+            return Ok(new ResponseBody<PaginatedList<PlaylistItemEntity>>
+            {
+                Status = true,
+                Message = "All Play list item",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpPut]
@@ -83,15 +167,30 @@ namespace blog.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            PlaylistItemEntity item = await _uow.PlaylistItemRepository.Get(dto.PlaylistItem);
+
+            PlaylistItemEntity? item = await _uow.PlaylistItemRepository.Get(dto.PlaylistItem);
+            if (item == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Playlist Item not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             PlaylistItemEntity update = await _uow.PlaylistItemRepository.UpdateOrder(item, dto.Order);
 
-            return Ok(new Response(
-                "success",
-                "Play list item updated!!!",
-                200,
-                update
-            ));
+            return StatusCode(200, new ResponseBody<PlaylistItemEntity>
+            {
+                Body = null,
+                Code = 200,
+                Message = "Play list item updated!!!",
+                Status = true,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
     }

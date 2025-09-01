@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using blog.DTOs.ReactionPost;
 using blog.utils.enums;
+using blog.utils.Responses;
 using blog.utils.Responses.ReactionPost;
 using Blog.entities;
 using Blog.SetUnitOfWork;
@@ -34,18 +35,66 @@ namespace blog.Controllers
         [EnableRateLimiting("CheckExistsPolicy")]
         public async Task<IActionResult> Exists(long postId)
         {
-            string? id = User.FindFirst(ClaimTypes.Sid)?.Value;
-            ApplicationUser user = await _uow.UserRepository.Get(id);
-            PostEntity post = await _uow.PostRepository.Get(postId);
+            if (postId <= 0) 
+            {
+                return BadRequest(new ResponseBody<string> 
+                { 
+                    Body = null,
+                    Code = 400,
+                    Message = "Post id is required",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            if (string.IsNullOrWhiteSpace(userId)) {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null) 
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            PostEntity? post = await _uow.PostRepository.Get(postId);
+            if (post == null) 
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Post not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
             bool exists = await _uow.ReactionPostRepository.Exists(user, post);
             
-            return Ok(new Response(
-                "success",
-                exists? "Reaction already exists!": "Reaction are not exists!",
-                200,
-                exists
-            ));
+            return Ok(new ResponseBody<bool>
+            {
+                Status = true,
+                Message = exists? "Reaction already exists!": "Reaction are not exists!",
+                Code = 200,
+                Body = exists,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpPost]
@@ -56,13 +105,58 @@ namespace blog.Controllers
                 return BadRequest(ModelState);
 
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
-            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (string.IsNullOrWhiteSpace(userId)) {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            PostEntity post = await _uow.PostRepository.Get(dto.PostId);
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null) 
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            PostEntity? post = await _uow.PostRepository.Get(dto.PostId);
+            if (post == null) 
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Post not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
             
             ReactionPostResponse reactionResult = await _uow.ReactionPostRepository.ToggleReaction(user, post, dto.Action);
 
-            UserMetricEntity userMetric = await _uow.UserMetricRepository.Get(user.Id);
+            UserMetricEntity? userMetric = await _uow.UserMetricRepository.Get(user.Id);
+            if (userMetric == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "User metric not found",
+                    Status = false
+                });
+            }
+
             PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
             
             switch (reactionResult.ChangeType)
@@ -113,12 +207,14 @@ namespace blog.Controllers
                 _ => "Reaction processed."
             };
 
-            return Ok(new Response( 
-                "success",
-                responseMessage,
-                200, 
-                reactionResult.ReactionEntity 
-            ));
+            return Ok(new ResponseBody<ReactionPostEntity>
+            {
+                Status = true,
+                Message = responseMessage,
+                Code = 200,
+                Body = reactionResult.ReactionEntity,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpDelete("{PostId:required}")]
@@ -126,8 +222,55 @@ namespace blog.Controllers
         public async Task<IActionResult> Remove(long PostId)
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
-            ApplicationUser user = await _uow.UserRepository.Get(userId);
-            PostEntity post = await _uow.PostRepository.Get(PostId);
+            if (PostId <= 0) 
+            {
+                return BadRequest(new ResponseBody<string> 
+                { 
+                    Body = null,
+                    Code = 400,
+                    Message = "Post id is required",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            if (string.IsNullOrWhiteSpace(userId)) {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null) 
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            PostEntity? post = await _uow.PostRepository.Get(PostId);
+            if (post == null) 
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Post not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+            
             PostMetricEntity metric = await _uow.PostMetricRepository.Get(post);
             ReactionPostEntity reaction = await _uow.ReactionPostRepository.Remove(user, post);
 
@@ -135,46 +278,136 @@ namespace blog.Controllers
 
             await _uow.PostRepository.CalculateEngagementScore(post, metricUpdate);
 
-            return Ok(new Response(
-                "success",
-                "Reaction removed",
-                200,
-                null
-            ));
+            return Ok(new ResponseBody<ReactionPostEntity>
+            {
+                Status = true,
+                Message = "Reaction removed",
+                Code = 200,
+                Body = null,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpGet("get-all-user")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> GetAllOfUserPaginated([FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
         {
-            string? id = User.FindFirst(ClaimTypes.Sid)?.Value;
-            ApplicationUser user = await _uow.UserRepository.Get(id);
-            PaginatedList<ReactionPostEntity> result = await _uow.ReactionPostRepository.GetAllOfUserPaginated(user, pageNumber, pageSize);
-            result.Code = 200;
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            if (string.IsNullOrWhiteSpace(userId)) {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            return Ok(result);
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null) 
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            PaginatedList<ReactionPostEntity> result = await _uow.ReactionPostRepository.GetAllOfUserPaginated(user, pageNumber, pageSize);
+            
+            return Ok(new ResponseBody<PaginatedList<ReactionPostEntity>>
+            {
+                Status = true,
+                Message = "All Reaction Post",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpGet("{postId:required}/get-all-post")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> GetAllOfPostPaginated(long postId, [FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
         {
-            PostEntity post = await _uow.PostRepository.Get(postId);
-            PaginatedList<ReactionPostEntity> result = await _uow.ReactionPostRepository.GetAllOfPostPaginated(post, pageNumber, pageSize);
-            result.Code = 200;
+            if (postId <= 0) 
+            {
+                return BadRequest(new ResponseBody<string> 
+                { 
+                    Body = null,
+                    Code = 400,
+                    Message = "Post id is required",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            PostEntity? post = await _uow.PostRepository.Get(postId);
+            if (post == null) 
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Post not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
             
-            return Ok(result);
+            PaginatedList<ReactionPostEntity> result = await _uow.ReactionPostRepository.GetAllOfPostPaginated(post, pageNumber, pageSize);
+            
+            return Ok(new ResponseBody<PaginatedList<ReactionPostEntity>>
+            {
+                Status = true,
+                Message = "All Reaction Post",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpGet("{userId:required}/get-all-user")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> GetAllOfUserPaginated(string userId, [FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
         {
-            ApplicationUser user = await _uow.UserRepository.Get(userId!);
-            PaginatedList<ReactionPostEntity> result = await _uow.ReactionPostRepository.GetAllOfUserPaginated(user, pageNumber, pageSize);
-            result.Code = 200;
+            if (string.IsNullOrWhiteSpace(userId)) {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            return Ok(result);
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null) 
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            PaginatedList<ReactionPostEntity> result = await _uow.ReactionPostRepository.GetAllOfUserPaginated(user, pageNumber, pageSize);
+            
+            return Ok(new ResponseBody<PaginatedList<ReactionPostEntity>>
+            {
+                Status = true,
+                Message = "All Reaction Post",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
 

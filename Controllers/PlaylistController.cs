@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using blog.utils.Filters.FiltersDTO;
 using blog.utils.Filters.FiltersQuerys;
+using blog.utils.Responses;
 using Blog.DTOs.Playlist;
 using Blog.entities;
 using Blog.SetUnitOfWork;
@@ -31,142 +32,355 @@ namespace blog.Controllers
 
         [HttpPost]
         [EnableRateLimiting("CreateItemPolicy")]
-        public async Task<IActionResult> Create([FromBody] CreatePlaylistDTO dto )
+        public async Task<IActionResult> Create([FromBody] CreatePlaylistDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            
+
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
-            ApplicationUser user = await _uow.UserRepository.Get(userId);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
             PlaylistEntity result = await _uow.PlaylistRepository.Create(user, dto);
 
-            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            UserMetricEntity? metric = await _uow.UserMetricRepository.Get(user.Id);
+            if (metric == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "User metric not found",
+                    Status = false
+                });
+            }
+
             await _uow.UserMetricRepository.SumOrRedPlaylistCount(metric, Blog.utils.enums.SumOrRedEnum.SUM);
 
-            return Ok(new Response(
-                "success",
-                "Play list created!!",
-                201,
-                result
-            ));
+            return StatusCode(201, new ResponseBody<PlaylistEntity>
+            {
+                Body = result,
+                Code = 201,
+                Message = "Play list created!!",
+                Status = true,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpGet("{Id:required}")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> Get(ulong Id)
+        public async Task<ActionResult<PlaylistEntity?>> Get(ulong Id)
         {
-            PlaylistEntity play = await _uow.PlaylistRepository.Get(Id);
+            PlaylistEntity? play = await _uow.PlaylistRepository.Get(Id);
+            if (play == null)
+            {
+                return StatusCode(404, new ResponseBody<PlaylistEntity>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Play list not found!!",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            return Ok(new Response(
-                "success",
-                "Play list founded!!",
-                200,
-                play
-            ));
+            return StatusCode(200, new ResponseBody<PlaylistEntity>
+            {
+                Body = play,
+                Code = 200,
+                Message = "Play list found!!",
+                Status = true,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpPut("{Id:required}")]
         [EnableRateLimiting("UpdateItemPolicy")]
-        public async Task<IActionResult> Update(ulong Id, [FromBody] UpdatePlaylistDTO dto )
+        public async Task<ActionResult<PlaylistEntity?>> Update(ulong Id, [FromBody] UpdatePlaylistDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-                
-            PlaylistEntity play = await _uow.PlaylistRepository.Get(Id);
+
+            PlaylistEntity? play = await _uow.PlaylistRepository.Get(Id);
+            if (play == null)
+            {
+                return StatusCode(404, new ResponseBody<PlaylistEntity>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Play list not found!!",
+                    Status = true,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             PlaylistEntity result = await _uow.PlaylistRepository.Update(play, dto);
 
-            return Ok(new Response(
-                "success",
-                "Play list updated!!",
-                200,
-                result
-            ));
+            return StatusCode(200, new ResponseBody<PlaylistEntity>
+            {
+                Body = result,
+                Code = 200,
+                Message = "Play list updated!!",
+                Status = true,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpDelete("{Id:required}")]
         [EnableRateLimiting("DeleteItemPolicy")]
-        public async Task<IActionResult> Delete(ulong Id)
+        public async Task<ActionResult<PlaylistEntity?>> Delete(ulong Id)
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
-            ApplicationUser user = await _uow.UserRepository.Get(userId);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<PlaylistEntity>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            PlaylistEntity play = await _uow.PlaylistRepository.Get(Id);
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<PlaylistEntity>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            PlaylistEntity? play = await _uow.PlaylistRepository.Get(Id);
+            if (play == null)
+            {
+                return StatusCode(404, new ResponseBody<PlaylistEntity>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Play list not found!!",
+                    Status = true,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             await _uow.PlaylistRepository.Delete(play);
 
-            UserMetricEntity metric = await _uow.UserMetricRepository.Get(user.Id);
+            UserMetricEntity? metric = await _uow.UserMetricRepository.Get(user.Id);
+            if (metric == null)
+            {
+                return NotFound(new ResponseBody<PlaylistEntity>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "User metric not found",
+                    Status = false
+                });
+            }
+
             await _uow.UserMetricRepository.SumOrRedPlaylistCount(metric, Blog.utils.enums.SumOrRedEnum.REDUCE);
 
-            return Ok(new Response(
-                "success",
-                "Play list deleted!!",
-                200,
-                play
-            ));
+            return StatusCode(200, new ResponseBody<PlaylistEntity>
+            {
+                Body = null,
+                Code = 200,
+                Message = "Play list deleted!!",
+                Status = true,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpPatch("{Id:required}/change-status-public")]
         [EnableRateLimiting("UpdateItemPolicy")]
         public async Task<IActionResult> ChangeStatusIsPublic(ulong Id)
         {
-            PlaylistEntity play = await _uow.PlaylistRepository.Get(Id);
+            PlaylistEntity? play = await _uow.PlaylistRepository.Get(Id);
+            if (play == null)
+            {
+                return StatusCode(404, new ResponseBody<PlaylistEntity>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Play list not found!!",
+                    Status = true,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             PlaylistEntity result = await _uow.PlaylistRepository.ChangeStatusIsPublic(play);
 
-            return Ok(new Response(
-                "success",
-                "Status play list changed!!",
-                200,
-                result
-            ));
+            return StatusCode(200, new ResponseBody<PlaylistEntity>
+            {
+                Body = result,
+                Code = 200,
+                Message = "Status play list changed!!",
+                Status = true,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
-        [HttpGet("get-all-user-paginated/{canFilter:bool}")] 
+        [HttpGet("get-all-user-paginated")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfUserPaginated([FromQuery] PlaylistFilterDTO filter, bool canFilter = false)
+        public async Task<IActionResult> GetAllOfUserPaginated([FromQuery] PlaylistFilterDTO filter)
         {
-            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value; 
-            ApplicationUser user = await _uow.UserRepository.Get(userId);
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
             IQueryable<PlaylistEntity> query = _uow.PlaylistRepository.GetAllOfUserQuery(user);
 
-            if (canFilter == true)
-                query = PlaylistQueryFilter.ApplyFilters(query, filter);
+            query = PlaylistQueryFilter.ApplyFilters(query, filter);
 
             PaginatedList<PlaylistEntity> result = await PaginatedList<PlaylistEntity>.CreateAsync(query, filter.PageNumber, filter.PageSize);
 
-            result.Code = 200;
-            return Ok(result);
+            return Ok(new ResponseBody<PaginatedList<PlaylistEntity>>
+            {
+                Status = true,
+                Message = "All Play list",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
-        [HttpGet("get-all-user-paginated/{userId:required}/{canFilter:bool}")] 
+        [HttpGet("{userId:required}/get-all-user-paginated")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfUserPaginated(string userId, [FromQuery] PlaylistFilterDTO filter, bool canFilter = false)
+        public async Task<IActionResult> GetAllOfUserPaginated(string userId, [FromQuery] PlaylistFilterDTO filter)
         {
-            ApplicationUser user = await _uow.UserRepository.Get(userId);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
             IQueryable<PlaylistEntity> query = _uow.PlaylistRepository.GetAllOfUserQuery(user);
 
-            if (canFilter == true)
-                query = PlaylistQueryFilter.ApplyFilters(query, filter);
+            query = PlaylistQueryFilter.ApplyFilters(query, filter);
 
             query = query.Where(c => c.IsPublic == true);
 
             PaginatedList<PlaylistEntity> result = await PaginatedList<PlaylistEntity>.CreateAsync(query, filter.PageNumber, filter.PageSize);
 
-            result.Code = 200;
-            return Ok(result);
+            return Ok(new ResponseBody<PaginatedList<PlaylistEntity>>
+            {
+                Status = true,
+                Message = "All Play list",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
-        [HttpGet("get-all-user-paginated/{userId:required}")] 
+        [HttpGet("get-all-user-paginated/{userId:required}")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfUserPaginated(string userId, [FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllOfUserPaginated(string userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            ApplicationUser user = await _uow.UserRepository.Get(userId);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
             PaginatedList<PlaylistEntity> result = await _uow.PlaylistRepository.GetAllOfUserPaginated(user, pageNumber, pageSize, true);
-            
-            result.Code = 200;
-            return Ok(result);
+
+            return Ok(new ResponseBody<PaginatedList<PlaylistEntity>>
+            {
+                Status = true,
+                Message = "All Play list",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
 

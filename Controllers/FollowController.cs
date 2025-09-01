@@ -34,6 +34,7 @@ namespace blog.Controllers
             string? followerId = User.FindFirst(ClaimTypes.Sid)?.Value;
 
             ApplicationUser follower = await _uow.UserRepository.Get(followerId);
+
             ApplicationUser followed = await _uow.UserRepository.Get(followedUserId);
 
             FollowEntity result = await _uow.FollowRepository.FollowAsync(follower, followed);
@@ -89,7 +90,18 @@ namespace blog.Controllers
         public async Task<IActionResult> GetMyFollowingAsync([FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
-            ApplicationUser user = await _uow.UserRepository.Get(userId);
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "User metric not found",
+                    Status = false
+                });
+            }
 
             PaginatedList<FollowEntity> result = await _uow.FollowRepository.GetFollowingAsync(user, pageNumber, pageSize);
 
@@ -102,6 +114,18 @@ namespace blog.Controllers
         public async Task<IActionResult> GetFollowingForUserAsync(string userId, [FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
         {
             ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "User not found",
+                    Status = false
+                });
+            }
+            
             PaginatedList<FollowEntity> result = await _uow.FollowRepository.GetFollowingAsync(user, pageNumber, pageSize);
 
             result.Code = 200;

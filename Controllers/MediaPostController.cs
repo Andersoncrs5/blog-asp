@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using blog.utils.Responses;
 using Blog.DTOs.Media;
 using Blog.entities;
 using Blog.SetUnitOfWork;
@@ -30,56 +31,165 @@ namespace blog.Controllers
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
         public async Task<IActionResult> GetAsync(ulong Id)
         {
-            MediaPostEntity media = await _uow.MediaPostRepository.GetAsync(Id);
+            MediaPostEntity? media = await _uow.MediaPostRepository.GetAsync(Id);
+            if (media == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "Media not found",
+                    Status = false
+                });
+            }
 
-            return Ok(new Response(
-                "success",
-                "Media founded with successfully",
-                200,
-                media
-            ));
+            return Ok(new ResponseBody<MediaPostEntity>
+            {
+                Status = true,
+                Message = "Media founded with successfully",
+                Code = 200,
+                Body = media,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpDelete("{Id:required}")]
         [EnableRateLimiting("DeleteItemPolicy")]
         public async Task<IActionResult> Delete(ulong Id)
         {
-            MediaPostEntity media = await _uow.MediaPostRepository.GetAsync(Id);
+            MediaPostEntity? media = await _uow.MediaPostRepository.GetAsync(Id);
+            if (media == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "Media not found",
+                    Status = false
+                });
+            }
+
             await _uow.MediaPostRepository.DeleteAsync(media);
 
-            PostEntity post = await _uow.PostRepository.Get(media.PostId);
+            PostEntity? post = await _uow.PostRepository.Get(media.PostId);
+            if (post == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Post not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
             PostMetricEntity metricUpdate = await _uow.PostMetricRepository.SumOrRedMediaCount(postMetric, Blog.utils.enums.SumOrRedEnum.REDUCE);
 
             await _uow.PostRepository.CalculateEngagementScore(post, metricUpdate);
 
-            return Ok(new Response(
-                "success",
-                "Media deleted",
-                200,
-                media
-            ));
+            return Ok(new ResponseBody<string>
+            {
+                Status = true,
+                Message = "Media deleted with successfully",
+                Code = 200,
+                Body = null,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpGet("{postId:required}/get-all-post")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfPost(long postId,[FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllOfPost(long postId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            PostEntity post = await _uow.PostRepository.Get(postId);
+            if (postId <= 0)
+            {
+                return BadRequest(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 400,
+                    Message = "Post id is required",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            PostEntity? post = await _uow.PostRepository.Get(postId);
+
+            if (post == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Post not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             PaginatedList<MediaPostEntity> result = await _uow.MediaPostRepository.GetAllOfPostPaginatedListAsync(post, pageNumber, pageSize);
-            result.Code = 200;
             
-            return Ok(result);
+            return Ok(new ResponseBody<PaginatedList<MediaPostEntity>>
+            {
+                Status = true,
+                Message = "Medias found",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpPost("{postId:required}")]
         [EnableRateLimiting("CreateItemPolicy")]
-        public async Task<IActionResult> Create(long postId, [FromBody] CreateMediaDTO dto )
+        public async Task<IActionResult> Create(long postId, [FromBody] CreateMediaDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            PostEntity post = await _uow.PostRepository.Get(postId);
+            if (postId <= 0)
+            {
+                return BadRequest(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 400,
+                    Message = "Post id is required",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            int amount = await _uow.MediaPostRepository.CheckAmountMediaByPost(postId);
+            
+            if (amount > 10) 
+            {
+                return BadRequest(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 400,
+                    Message = "Media limit by post is 10",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+            
+            PostEntity? post = await _uow.PostRepository.Get(postId);
+
+            if (post == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Post not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+            
             MediaPostEntity media = await _uow.MediaPostRepository.CreateAsync(post, dto);
 
             PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
@@ -87,12 +197,14 @@ namespace blog.Controllers
 
             await _uow.PostRepository.CalculateEngagementScore(post, metricUpdate);
 
-            return Ok(new Response(
-                "success",
-                "Media created with successfully",
-                200,
-                media
-            ));
+            return StatusCode(201, new ResponseBody<MediaPostEntity>
+            {
+                Status = true,
+                Message = "Media created with successfully",
+                Code = 201,
+                Body = media,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpPut("{Id:required}")]
@@ -102,15 +214,29 @@ namespace blog.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            MediaPostEntity media = await _uow.MediaPostRepository.GetAsync(Id);
+            MediaPostEntity? media = await _uow.MediaPostRepository.GetAsync(Id);
+            if (media == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "Media not found",
+                    Status = false
+                });
+            }
+
             MediaPostEntity result = await _uow.MediaPostRepository.UpdateAsync(media, dto);
 
-            return Ok(new Response(
-                "success",
-                "Media updated with successfully",
-                200,
-                result
-            ));
+            return StatusCode(200, new ResponseBody<MediaPostEntity>
+            {
+                Status = true,
+                Message = "Media updated with successfully",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
     }

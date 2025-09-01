@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using blog.DTOs.ReactionComment;
 using blog.utils.enums;
+using blog.utils.Responses;
 using blog.utils.Responses.ReactionComment;
 using Blog.entities;
 using Blog.SetUnitOfWork;
@@ -35,15 +36,60 @@ namespace blog.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-            
-            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value; 
 
-            ApplicationUser user = await _uow.UserRepository.Get(userId);
-            CommentEntity comment = await _uow.CommentRepository.Get(dto.CommentId);
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            CommentEntity? comment = await _uow.CommentRepository.Get(dto.CommentId);
+            if (comment == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Comment not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
             ReactionCommentResponse reactionResult = await _uow.ReactionCommentRepository.Reaction(comment, user, dto.Action);
 
-            UserMetricEntity userMetric = await _uow.UserMetricRepository.Get(user.Id);
+            UserMetricEntity? userMetric = await _uow.UserMetricRepository.Get(user.Id);
+            if (userMetric == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "User metric not found",
+                    Status = false
+                });
+            }
 
             switch (reactionResult.ChangeType)
             {
@@ -81,85 +127,255 @@ namespace blog.Controllers
                 _ => "Reaction processed."
             };
 
-            return Ok(new Response( 
-                "success",
-                responseMessage,
-                200, 
-                reactionResult.ReactionEntity 
-            ));
+
+            return Ok(new ResponseBody<ReactionCommentEntity>
+            {
+                Status = true,
+                Message = responseMessage,
+                Code = 200,
+                Body = reactionResult.ReactionEntity,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpDelete("{Id:required}")]
         [EnableRateLimiting("DeleteItemPolicy")]
         public async Task<IActionResult> Remove(ulong Id)
         {
-            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value; 
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
 
-            ApplicationUser user = await _uow.UserRepository.Get(userId);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            UserMetricEntity userMetric = await _uow.UserMetricRepository.Get(user.Id);
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
 
-            var result = await _uow.ReactionCommentRepository.Remove(Id);
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            UserMetricEntity? userMetric = await _uow.UserMetricRepository.Get(user.Id);
+            if (userMetric == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Datetime = DateTimeOffset.Now,
+                    Message = "User metric not found",
+                    Status = false
+                });
+            }
+
+            ReactionCommentEntity? result = await _uow.ReactionCommentRepository.Remove(Id);
+            if (result == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Reaction Comment not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             await _uow.UserMetricRepository.SumOrRedLikesOrDislikeGivenCountInComment(userMetric, SumOrRedEnum.REDUCE, result.Reaction);
 
-            return Ok(new Response(
-                "success",
-                "Reaction removed",
-                200,
-                null
-            ));
+            return Ok(new ResponseBody<ReactionCommentEntity>
+            {
+                Status = true,
+                Message = "Reaction removed",
+                Code = 200,
+                Body = null,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpGet("exists/{commentId:required:long}")]
         [EnableRateLimiting("CheckExistsPolicy")]
         public async Task<IActionResult> Exists(ulong commentId)
         {
-            string? id = User.FindFirst(ClaimTypes.Sid)?.Value;
-            ApplicationUser user = await _uow.UserRepository.Get(id);
-            CommentEntity comment = await _uow.CommentRepository.Get(commentId);
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            CommentEntity? comment = await _uow.CommentRepository.Get(commentId);
+
+            if (comment == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Comment not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
             bool exists = await _uow.ReactionCommentRepository.Exists(user, comment);
-            
-            return Ok(new Response(
-                "success",
-                exists? "Reaction already exists!": "Reaction are not exists!",
-                200,
-                exists
-            ));
+
+            return Ok(new ResponseBody<bool>
+            {
+                Status = true,
+                Message = exists ? "Reaction already exists!" : "Reaction are not exists!",
+                Code = 200,
+                Body = exists,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpGet("get-all-user")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfUserPaginated([FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllOfUserPaginated([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            string? id = User.FindFirst(ClaimTypes.Sid)?.Value;
-            ApplicationUser user = await _uow.UserRepository.Get(id);
-            PaginatedList<ReactionCommentEntity> result = await _uow.ReactionCommentRepository.GetAllOfUserPaginated(user, pageNumber, pageSize);
-            result.Code = 200;
+            string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            return Ok(result);
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            PaginatedList<ReactionCommentEntity> result = await _uow.ReactionCommentRepository.GetAllOfUserPaginated(user, pageNumber, pageSize);
+
+            return Ok(new ResponseBody<PaginatedList<ReactionCommentEntity>>
+            {
+                Status = true,
+                Message = "All Reaction Comment",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpGet("{userId:required}/get-all-user")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfUserAnotherPaginated(string userId, [FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllOfUserAnotherPaginated(string userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            ApplicationUser user = await _uow.UserRepository.Get(userId);
-            PaginatedList<ReactionCommentEntity> result = await _uow.ReactionCommentRepository.GetAllOfUserPaginated(user, pageNumber, pageSize);
-            result.Code = 200;
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            return Ok(result);
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            PaginatedList<ReactionCommentEntity> result = await _uow.ReactionCommentRepository.GetAllOfUserPaginated(user, pageNumber, pageSize);
+
+            return Ok(new ResponseBody<PaginatedList<ReactionCommentEntity>>
+            {
+                Status = true,
+                Message = "All Reaction Comment",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpGet("{commentId:required}/get-all-comment")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfCommentPaginated(ulong commentId, [FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllOfCommentPaginated(ulong commentId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            CommentEntity comment = await _uow.CommentRepository.Get(commentId);
+            CommentEntity? comment = await _uow.CommentRepository.Get(commentId);
+            if (comment == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Comment not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             PaginatedList<ReactionCommentEntity> result = await _uow.ReactionCommentRepository.GetAllOfCommentPaginated(comment, pageNumber, pageSize);
-            result.Code = 200;
-            
-            return Ok(result);
+
+            return Ok(new ResponseBody<PaginatedList<ReactionCommentEntity>>
+            {
+                Status = true,
+                Message = "All Reaction Comment",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
     }
