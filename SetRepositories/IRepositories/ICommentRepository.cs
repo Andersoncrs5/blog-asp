@@ -14,7 +14,7 @@ namespace Blog.SetRepositories.IRepositories
         Task Delete(CommentEntity comment);
         IQueryable<CommentEntity> GetAllOfUser(ApplicationUser user);
         IQueryable<CommentEntity> GetAllOfPost(PostEntity post);
-        Task<PaginatedList<CommentEntity>> GetAllCommentOnCommentPaginatedList(CommentEntity comment, int pageNumber, int pageSize, bool includeRelated = false, bool includeMetric = false);
+        IQueryable<CommentEntity> GetAllCommentOnCommentPaginatedList(CommentEntity comment, bool includeRelated = false, bool includeMetric = false);
         Task<CommentEntity> Create(ApplicationUser user, PostEntity post, CreateCommentDTO dto, ulong? parentId);
         Task<CommentEntity> Update(CommentEntity comment, UpdateCommentDTO dto);
 
