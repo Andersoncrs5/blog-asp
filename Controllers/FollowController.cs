@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using blog.entities;
+using blog.utils.Responses;
 using Blog.entities;
 using Blog.SetUnitOfWork;
 using Blog.utils;
@@ -27,24 +28,84 @@ namespace blog.Controllers
             _uow = uow;
         }
 
-        [HttpPost("{followedUserId:required}")] 
+        [HttpPost("{followedUserId:required}")]
         [EnableRateLimiting("FollowOrUnfollowPolicy")]
         public async Task<IActionResult> FollowAsync(string followedUserId)
         {
             string? followerId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            if (string.IsNullOrWhiteSpace(followerId))
+            {
+                return Unauthorized(new ResponseBody<ApplicationUser>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            ApplicationUser follower = await _uow.UserRepository.Get(followerId);
+            if (followerId == followedUserId)
+            {
+                return StatusCode(StatusCodes.Status409Conflict, new ResponseBody<FollowEntity>
+                {
+                    Status = true,
+                    Message = $"You cannot following yourself",
+                    Code = 200,
+                    Body = null,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            ApplicationUser followed = await _uow.UserRepository.Get(followedUserId);
+            bool check = await _uow.FollowRepository.Exists(followerId, followedUserId);
+            if (check)
+            {
+                return Conflict(new ResponseBody<FollowEntity>
+                {
+                    Status = false,
+                    Message = $"You are already following user",
+                    Code = 409,
+                    Body = null,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            ApplicationUser? follower = await _uow.UserRepository.Get(followerId);
+            if (follower == null)
+            {
+                return NotFound(new ResponseBody<ApplicationUser>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "follower not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            ApplicationUser? followed = await _uow.UserRepository.Get(followedUserId);
+            if (followed == null)
+            {
+                return NotFound(new ResponseBody<ApplicationUser>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "followed not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
             FollowEntity result = await _uow.FollowRepository.FollowAsync(follower, followed);
 
-            return Ok(new Response(
-                "success",
-                $"You are now following user: {followed.UserName ?? followed.Id}",
-                200,
-                result
-            ));
+            return Ok(new ResponseBody<FollowEntity>
+            {
+                Status = true,
+                Message = $"You are now following user: {followed.UserName ?? followed.Id}",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpDelete("{followedUserId:required}")]
@@ -52,44 +113,169 @@ namespace blog.Controllers
         public async Task<IActionResult> UnfollowAsync(string followedUserId)
         {
             string? followerId = User.FindFirst(ClaimTypes.Sid)?.Value;
-            ApplicationUser follower = await _uow.UserRepository.Get(followerId);
-            ApplicationUser followed = await _uow.UserRepository.Get(followedUserId);
+            if (string.IsNullOrWhiteSpace(followerId))
+            {
+                return Unauthorized(new ResponseBody<ApplicationUser>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            await _uow.FollowRepository.UnfollowAsync(follower, followed);
+            ApplicationUser? follower = await _uow.UserRepository.Get(followerId);
+            if (follower == null)
+            {
+                return NotFound(new ResponseBody<ApplicationUser>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "follower not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            return NoContent(); 
+            ApplicationUser? followed = await _uow.UserRepository.Get(followedUserId);
+            if (followed == null)
+            {
+                return NotFound(new ResponseBody<ApplicationUser>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "followed not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            FollowEntity? follow = await _uow.FollowRepository.GetAsync(followerId, followedUserId);
+            if (follow == null)
+            {
+                return NotFound(new ResponseBody<ApplicationUser>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = $"You are not following user: {followed.UserName}.",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            await _uow.FollowRepository.UnfollowAsync(follow);
+
+            return Ok(new ResponseBody<string>
+            {
+                Status = true,
+                Message = $"You are now not following user: {followed.UserName ?? followed.Id}",
+                Code = 200,
+                Body = null,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpGet("get-my-followers")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetMyFollowersAsync([FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetMyFollowersAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
-            ApplicationUser user = await _uow.UserRepository.Get(userId);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<ApplicationUser>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<ApplicationUser>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
             PaginatedList<FollowEntity> result = await _uow.FollowRepository.GetFollowersAsync(user, pageNumber, pageSize);
 
-            result.Code = 200;
-            return Ok(result);
+            return Ok(new ResponseBody<PaginatedList<FollowEntity>>
+            {
+                Status = true,
+                Message = "All follower",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpGet("{userId:required}/followers")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetFollowersForUserAsync(string userId, [FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetFollowersForUserAsync(string userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            ApplicationUser user = await _uow.UserRepository.Get(userId);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<ApplicationUser>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "User id is required",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null)
+            {
+                return NotFound(new ResponseBody<ApplicationUser>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
             PaginatedList<FollowEntity> result = await _uow.FollowRepository.GetFollowersAsync(user, pageNumber, pageSize);
 
-            result.Code = 200;
-            return Ok(result);
+            return Ok(new ResponseBody<PaginatedList<FollowEntity>>
+            {
+                Status = true,
+                Message = "All follower",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpGet("get-my-following")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetMyFollowingAsync([FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetMyFollowingAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<ApplicationUser>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             ApplicationUser? user = await _uow.UserRepository.Get(userId);
             if (user == null)
             {
@@ -105,14 +291,32 @@ namespace blog.Controllers
 
             PaginatedList<FollowEntity> result = await _uow.FollowRepository.GetFollowingAsync(user, pageNumber, pageSize);
 
-            result.Code = 200;
-            return Ok(result);
+            return Ok(new ResponseBody<PaginatedList<FollowEntity>>
+            {
+                Status = true,
+                Message = "All follower",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
-        [HttpGet("{userId:required}/following")] 
+        [HttpGet("{userId:required}/following")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetFollowingForUserAsync(string userId, [FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetFollowingForUserAsync(string userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new ResponseBody<ApplicationUser>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "User id is required",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             ApplicationUser? user = await _uow.UserRepository.Get(userId);
             if (user == null)
             {
@@ -125,32 +329,63 @@ namespace blog.Controllers
                     Status = false
                 });
             }
-            
+
             PaginatedList<FollowEntity> result = await _uow.FollowRepository.GetFollowingAsync(user, pageNumber, pageSize);
 
-            result.Code = 200;
-            return Ok(result);
+            return Ok(new ResponseBody<PaginatedList<FollowEntity>>
+            {
+                Status = true,
+                Message = "All follower",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
-        [HttpPut("toggle-notifications/{followedUserId:required}")] 
+        [HttpPut("toggle-notifications/{followedUserId:required}")]
         [EnableRateLimiting("fixedWindowLimiterPolicy")]
         public async Task<IActionResult> ToggleNotificationStatus(string followedUserId)
         {
-            
             string? followerId = User.FindFirst(ClaimTypes.Sid)?.Value;
+            if (string.IsNullOrWhiteSpace(followerId))
+            {
+                return Unauthorized(new ResponseBody<ApplicationUser>
+                {
+                    Body = null,
+                    Code = 401,
+                    Message = "You are not authorizetion",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
-            FollowEntity result = await _uow.FollowRepository.ChangeStatusReceiveNotifications(followerId, followedUserId);
+            FollowEntity? follow = await _uow.FollowRepository.GetAsync(followerId, followedUserId);
+            if (follow == null)
+            {
+                return NotFound(new ResponseBody<ApplicationUser>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = $"You are not following user",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
+            FollowEntity result = await _uow.FollowRepository.ChangeStatusReceiveNotifications(follow);
 
             string message = result.ReceiveNotifications ?
                 $"Notifications enabled for user: {followedUserId}" :
                 $"Notifications disabled for user: {followedUserId}";
 
-            return Ok(new Response(
-                "success",
-                message,
-                200,
-                result
-            ));
+            return Ok(new ResponseBody<FollowEntity>
+            {
+                Status = true,
+                Message = message,
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
     }
