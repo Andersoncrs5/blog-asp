@@ -33,13 +33,13 @@ namespace Blog.SetRepositories.Repositories
             return result.Entity;
         }
 
-        public async Task<PostMetricEntity> Get(PostEntity post)
+        public async Task<PostMetricEntity?> Get(PostEntity post)
         {
             PostMetricEntity? metric = await _context.PostMetricEntities.
                 AsNoTracking().FirstOrDefaultAsync(u => u.PostId == post.Id);
 
             if (metric == null)
-                throw new ResponseException("Metric not found", 404);
+                return null;
 
             return metric;
         }

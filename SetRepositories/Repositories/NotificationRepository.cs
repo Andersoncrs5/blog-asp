@@ -92,13 +92,13 @@ namespace blog.SetRepositories.Repositories
                 NotificationEntity noti = new NotificationEntity
                 {
                     ApplicationUserId = item.FollowerId, 
-                    Title = $"Novo post de {postAuthor.UserName}!",
+                    Title = $"New post of {postAuthor.UserName}!",
                     NotificationType = NotificationTypeEnum.NewPostFromFollowed,
                     RelatedEntityId = newPost.Id.ToString(),
                     LinkUrl = frontendPostBaseUrl,
                     IconCssClass = "fa-newspaper", 
                     SenderUserId = postAuthor.Id,
-                    Content = $"O usuário que você segue, {postAuthor.UserName}, publicou um novo post: \"{newPost.Title}\"", 
+                    Content = $"The user follow, {postAuthor.UserName}, publicou um novo post: \"{newPost.Title}\"", 
                     CreatedAt = DateTime.UtcNow,
                     IsRead = false
                 };

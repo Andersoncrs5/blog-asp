@@ -41,17 +41,12 @@ namespace blog.SetRepositories.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<PaginatedList<UserPreferenceEntity>> GetAllOfUserPaginatedAsync(ApplicationUser user, int pageNumber, int pageSize, bool includeRelations = true)
+        public IQueryable<UserPreferenceEntity> GetAllOfUserPaginatedAsync(ApplicationUser user)
         {
             IQueryable<UserPreferenceEntity> query = _context.UserPreferenceEntities.AsNoTracking()
                 .Where(u => u.ApplicationUserId == user.Id);
 
-            if (includeRelations)
-            {
-                query = query.Include(u => u.Category);
-            }
-
-            return await PaginatedList<UserPreferenceEntity>.CreateAsync(query, pageNumber, pageSize);
+            return query;
         }
 
         public async Task<bool> Exists(long CategoryId)

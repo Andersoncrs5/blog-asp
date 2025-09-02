@@ -59,11 +59,9 @@ namespace Blog.SetRepositories.Repositories
 
         public IQueryable<CommentEntity> GetAllOfUser(ApplicationUser user)
         {
-            IQueryable<CommentEntity> query = _context.CommentEntities
+            return _context.CommentEntities
                 .AsNoTracking()
                 .Where(c => c.ApplicationUserId == user.Id);
-
-            return query;
         }
 
         public IQueryable<CommentEntity> GetAllOfPost(PostEntity post)
@@ -89,7 +87,7 @@ namespace Blog.SetRepositories.Repositories
             return result.Entity;
         }
 
-        public async Task<PaginatedList<CommentEntity>> GetAllCommentOnCommentPaginatedList(CommentEntity comment, int pageNumber, int pageSize, bool includeRelated = false, bool includeMetric = false)
+        public IQueryable<CommentEntity> GetAllCommentOnCommentPaginatedList(CommentEntity comment, bool includeRelated = false, bool includeMetric = false)
         {
             IQueryable<CommentEntity> query = _context.CommentEntities
                 .AsNoTracking()
@@ -108,7 +106,7 @@ namespace Blog.SetRepositories.Repositories
                     .Include(c => c.CommentMetric);
             }
 
-            return await PaginatedList<CommentEntity>.CreateAsync(query, pageNumber, pageSize);
+            return query;
         }
 
         public async Task<CommentEntity> Update(CommentEntity comment, UpdateCommentDTO dto)

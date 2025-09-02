@@ -51,7 +51,6 @@ namespace blog.Controllers
             }
 
             PostEntity? post = await _uow.PostRepository.Get(postId);
-
             if (post == null)
             {
                 return NotFound(new ResponseBody<string>
