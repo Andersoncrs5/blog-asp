@@ -21,13 +21,14 @@ namespace Blog.SetRepositories.Repositories
             _context = context;
         }
 
+        public async Task<bool> ExistsByNameAndUserId(string userId, string Name)
+        {
+            return await _context.PlaylistEntities.AsNoTracking() 
+                .AnyAsync(p => p.ApplicationUserId == userId && p.Name == Name);
+        }
+
         public async Task<PlaylistEntity> Create(ApplicationUser user, CreatePlaylistDTO dto)
         {
-            int checkName = await _context.PlaylistEntities.AsNoTracking() 
-                .CountAsync(p => p.ApplicationUserId == user.Id && p.Name == dto.Name);
-
-            if (checkName > 0)
-                throw new ResponseException("Playlist with this name already exists for this user", 400);
 
             PlaylistEntity play = new PlaylistEntity
             {

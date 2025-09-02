@@ -13,6 +13,7 @@ namespace Blog.SetRepositories.IRepositories
     {
         Task<PlaylistEntity> Create(ApplicationUser user, CreatePlaylistDTO dto);
         Task<PlaylistEntity?> Get(ulong Id);
+        Task<bool> ExistsByNameAndUserId(string userId, string Name);
         Task<PlaylistEntity> Update(PlaylistEntity play, UpdatePlaylistDTO dto);
         Task Delete(PlaylistEntity play);
         Task<PaginatedList<PlaylistEntity>> GetAllOfUserPaginated(ApplicationUser user, int pageNumber, int pageSize, bool showPublic = false);
