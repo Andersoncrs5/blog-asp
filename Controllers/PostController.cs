@@ -59,7 +59,19 @@ namespace Blog.Controllers
                 });
             }
             
-            PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
+            PostMetricEntity? postMetric = await _uow.PostMetricRepository.Get(post);
+            if (postMetric == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Post metric not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             await _uow.PostMetricRepository.SumOrRedViewed(postMetric, Blog.utils.enums.SumOrRedEnum.SUM);
 
             return StatusCode(200, new ResponseBody<PostEntity>
@@ -439,7 +451,19 @@ namespace Blog.Controllers
 
             PostEntity result = await _uow.PostRepository.Update(post, dto, user);
 
-            PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
+            PostMetricEntity? postMetric = await _uow.PostMetricRepository.Get(post);
+            if (postMetric == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Post metric not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             await _uow.PostMetricRepository.SumOrRedEditedCount(postMetric, Blog.utils.enums.SumOrRedEnum.SUM);
 
             return Ok(new ResponseBody<PostEntity>
@@ -547,7 +571,18 @@ namespace Blog.Controllers
                 });
             }
             
-            PostMetricEntity metric = await _uow.PostMetricRepository.Get(post);
+            PostMetricEntity? metric = await _uow.PostMetricRepository.Get(post);
+            if (metric == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Post metric not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
             return Ok(new ResponseBody<PostMetricEntity>
             {

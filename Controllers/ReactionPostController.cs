@@ -157,7 +157,18 @@ namespace blog.Controllers
                 });
             }
 
-            PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
+            PostMetricEntity? postMetric = await _uow.PostMetricRepository.Get(post);
+            if (postMetric == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Post metric not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
             
             switch (reactionResult.ChangeType)
             {
@@ -271,9 +282,20 @@ namespace blog.Controllers
                 });
             }
             
-            PostMetricEntity metric = await _uow.PostMetricRepository.Get(post);
-            ReactionPostEntity reaction = await _uow.ReactionPostRepository.Remove(user, post);
+            PostMetricEntity? metric = await _uow.PostMetricRepository.Get(post);
+            if (metric == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Post metric not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
 
+            ReactionPostEntity reaction = await _uow.ReactionPostRepository.Remove(user, post);
             PostMetricEntity metricUpdate = await _uow.PostMetricRepository.SumOrRedLikeOrDislike(metric, SumOrRedEnum.REDUCE ,reaction.Reaction);
 
             await _uow.PostRepository.CalculateEngagementScore(post, metricUpdate);

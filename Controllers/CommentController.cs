@@ -31,9 +31,9 @@ namespace blog.Controllers
             _uow = uow;
         }
 
-        [HttpGet("{Id:required}/{includeRelated:bool?}/{includeMetric:bool?}")]
+        [HttpGet("{Id:required}")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> Get(ulong Id, bool includeRelated, bool includeMetric)
+        public async Task<IActionResult> Get(ulong Id, [FromQuery] bool includeRelated = false, [FromQuery] bool includeMetric = false)
         {
             CommentEntity? comment = await _uow.CommentRepository.Get(Id, includeRelated, includeMetric);
 
@@ -132,7 +132,19 @@ namespace blog.Controllers
 
             await _uow.UserMetricRepository.SumOrRedCommentsCount(metric, Blog.utils.enums.SumOrRedEnum.REDUCE);
 
-            PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
+            PostMetricEntity? postMetric = await _uow.PostMetricRepository.Get(post);
+            if (postMetric == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Post metric not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             await _uow.PostMetricRepository.SumOrRedCommentCount(postMetric, Blog.utils.enums.SumOrRedEnum.REDUCE);
 
             return Ok(new ResponseBody<string>
@@ -275,9 +287,9 @@ namespace blog.Controllers
             });
         }
 
-        [HttpGet("{commentId:required}/get-all-comment-on-comment/{includeRelated:bool?}/{includeMetric:bool?}")]
+        [HttpGet("{commentId:required}/get-all-comment-on-comment")]
         [EnableRateLimiting("DeleteItemPolicy")]
-        public async Task<IActionResult> GetAllCommentOnCommentPaginatedList(ulong commentId, [FromQuery] int pageNumber, [FromQuery] int pageSize, bool includeRelated = false, bool includeMetric = false)
+        public async Task<IActionResult> GetAllCommentOnCommentPaginatedList(ulong commentId, [FromQuery] CommentFilterDTO filter, [FromQuery] bool includeRelated = false, [FromQuery] bool includeMetric = false)
         {
             if (commentId <= 0)
             {
@@ -304,14 +316,16 @@ namespace blog.Controllers
                 });
             }
 
-            PaginatedList<CommentEntity> result = await _uow.CommentRepository.GetAllCommentOnCommentPaginatedList(comment, pageNumber, pageSize, includeRelated, includeMetric);
+            IQueryable<CommentEntity> result = _uow.CommentRepository.GetAllCommentOnCommentPaginatedList(comment, includeRelated, includeMetric);
+
+            PaginatedList<CommentEntity> page = await PaginatedList<CommentEntity>.CreateAsync(result, filter.PageNumber, filter.PageSize);
 
             return Ok(new ResponseBody<PaginatedList<CommentEntity>>
             {
                 Status = true,
-                Message = "Comments found",
+                Message = "All Comments",
                 Code = 200,
-                Body = result,
+                Body = page,
                 Datetime = DateTimeOffset.Now
             });
         }
@@ -328,7 +342,6 @@ namespace blog.Controllers
                 return BadRequest(ModelState);
 
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
-
             if (string.IsNullOrWhiteSpace(userId))
             {
                 return BadRequest(new ResponseBody<string>
@@ -342,7 +355,6 @@ namespace blog.Controllers
             }
 
             ApplicationUser? user = await _uow.UserRepository.Get(userId);
-
             if (user == null)
             {
                 return NotFound(new ResponseBody<string>
@@ -397,7 +409,19 @@ namespace blog.Controllers
 
             await _uow.UserMetricRepository.SumOrRedCommentsCount(metric, Blog.utils.enums.SumOrRedEnum.SUM);
 
-            PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
+            PostMetricEntity? postMetric = await _uow.PostMetricRepository.Get(post);
+            if (postMetric == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Post metric not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             await _uow.PostMetricRepository.SumOrRedCommentCount(postMetric, Blog.utils.enums.SumOrRedEnum.SUM);
 
             await _uow.CommentMetricRepository.Create(comment);

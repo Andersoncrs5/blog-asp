@@ -5,6 +5,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using blog.DTOs.Preference;
 using blog.entities;
+using blog.utils.Filters.FiltersDTO;
+using blog.utils.Filters.FiltersQuerys;
 using blog.utils.Responses;
 using Blog.entities;
 using Blog.SetUnitOfWork;
@@ -101,7 +103,7 @@ namespace blog.Controllers
 
         [HttpGet("get-all-user")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfUserPaginated([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllOfUserPaginated([FromQuery] PreferenceFilterDTO filter)
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             if (string.IsNullOrWhiteSpace(userId))
@@ -117,7 +119,6 @@ namespace blog.Controllers
             }
 
             ApplicationUser? user = await _uow.UserRepository.Get(userId);
-
             if (user == null)
             {
                 return NotFound(new ResponseBody<string>
@@ -130,21 +131,25 @@ namespace blog.Controllers
                 });
             }
 
-            PaginatedList<UserPreferenceEntity> result = await _uow.UserPreferenceRepository.GetAllOfUserPaginatedAsync(user, pageNumber, pageSize);
+            IQueryable<UserPreferenceEntity> result = _uow.UserPreferenceRepository.GetAllOfUserPaginatedAsync(user);
+
+            IQueryable<UserPreferenceEntity> resultFilter = PreferenceQueryFilter.ApplyFilters(result, filter);
+
+            PaginatedList<UserPreferenceEntity> page = await PaginatedList<UserPreferenceEntity>.CreateAsync(resultFilter, filter.PageNumber, filter.PageSize);
 
             return Ok(new ResponseBody<PaginatedList<UserPreferenceEntity>>
             {
                 Status = true,
                 Message = "All User Preference",
                 Code = 200,
-                Body = result,
+                Body = page,
                 Datetime = DateTimeOffset.Now
             });
         }
 
         [HttpGet("{userId:required}/get-all-user")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfUserPaginated(string userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllOfUserPaginated(string userId, [FromQuery] PreferenceFilterDTO filter)
         {
             if (string.IsNullOrWhiteSpace(userId))
             {
@@ -172,14 +177,18 @@ namespace blog.Controllers
                 });
             }
 
-            PaginatedList<UserPreferenceEntity> result = await _uow.UserPreferenceRepository.GetAllOfUserPaginatedAsync(user, pageNumber, pageSize);
+            IQueryable<UserPreferenceEntity> result = _uow.UserPreferenceRepository.GetAllOfUserPaginatedAsync(user);
+
+            IQueryable<UserPreferenceEntity> resultFilter = PreferenceQueryFilter.ApplyFilters(result, filter);
+
+            PaginatedList<UserPreferenceEntity> page = await PaginatedList<UserPreferenceEntity>.CreateAsync(resultFilter, filter.PageNumber, filter.PageSize);
 
             return Ok(new ResponseBody<PaginatedList<UserPreferenceEntity>>
             {
                 Status = true,
                 Message = "All User Preference",
                 Code = 200,
-                Body = result,
+                Body = page,
                 Datetime = DateTimeOffset.Now
             });
         }

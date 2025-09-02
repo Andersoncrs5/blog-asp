@@ -50,6 +50,19 @@ namespace blog.Controllers
                 });
             }
 
+            bool check = await _uow.PlaylistRepository.ExistsByNameAndUserId(userId, dto.Name);
+            if (check)
+            {
+                return StatusCode(409, new ResponseBody<PlaylistEntity>
+                {
+                    Body = null,
+                    Message = "Playlist with this name already exists for this user",
+                    Code = 409,
+                    Datetime = DateTimeOffset.Now,
+                    Status = false
+                });
+            }
+
             ApplicationUser? user = await _uow.UserRepository.Get(userId);
             if (user == null)
             {

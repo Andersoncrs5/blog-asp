@@ -86,7 +86,19 @@ namespace blog.Controllers
                 });
             }
 
-            PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
+            PostMetricEntity? postMetric = await _uow.PostMetricRepository.Get(post);
+            if (postMetric == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Post metric not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+            
             PostMetricEntity metricUpdate = await _uow.PostMetricRepository.SumOrRedMediaCount(postMetric, Blog.utils.enums.SumOrRedEnum.REDUCE);
 
             await _uow.PostRepository.CalculateEngagementScore(post, metricUpdate);
@@ -192,7 +204,19 @@ namespace blog.Controllers
             
             MediaPostEntity media = await _uow.MediaPostRepository.CreateAsync(post, dto);
 
-            PostMetricEntity postMetric = await _uow.PostMetricRepository.Get(post);
+            PostMetricEntity? postMetric = await _uow.PostMetricRepository.Get(post);
+            if (postMetric == null)
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "Post metric not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+
             PostMetricEntity metricUpdate = await _uow.PostMetricRepository.SumOrRedMediaCount(postMetric, Blog.utils.enums.SumOrRedEnum.SUM);
 
             await _uow.PostRepository.CalculateEngagementScore(post, metricUpdate);
