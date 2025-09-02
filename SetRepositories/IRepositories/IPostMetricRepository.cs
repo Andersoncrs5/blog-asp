@@ -10,7 +10,7 @@ namespace Blog.SetRepositories.IRepositories
 {
     public interface IPostMetricRepository
     {
-        Task<PostMetricEntity> Get(PostEntity post);
+        Task<PostMetricEntity?> Get(PostEntity post);
         Task<PostMetricEntity> Create(PostEntity post);
         Task<PostMetricEntity> SumOrRedLikeOrDislike(PostMetricEntity metric, SumOrRedEnum action, LikeOrDislike ld);
         Task<PostMetricEntity> SumOrRedShares(PostMetricEntity metric, SumOrRedEnum action);
