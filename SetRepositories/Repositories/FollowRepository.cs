@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace blog.SetRepositories.Repositories
 {
-    public class FollowRepository: IFollowRepository
+    public class FollowRepository : IFollowRepository
     {
         private readonly AppDbContext _context;
 
@@ -20,20 +20,14 @@ namespace blog.SetRepositories.Repositories
             _context = context;
         }
 
+        public async Task<bool> Exists(string followerId, string followedId)
+        {
+            return await _context.FollowsEntities.AsNoTracking()
+                .AnyAsync(f => f.FollowerId == followerId && f.FollowedId == followedId);
+        }
+
         public async Task<FollowEntity> FollowAsync(ApplicationUser follower, ApplicationUser followed)
         {
-            if (follower == null || followed == null || follower.Id == followed.Id)
-            {
-                throw new ResponseException("Invalid follower or followed user.", 400);
-            }
-
-            int check = await _context.FollowsEntities.AsNoTracking()
-                .CountAsync(f => f.FollowerId == follower.Id && f.FollowedId == followed.Id);
-
-            if (check > 0) {
-                throw new ResponseException($"You are already following user: {followed.UserName ?? followed.Id}.", 400); 
-            }
-
             FollowEntity follow = new FollowEntity
             {
                 FollowerId = follower.Id,
@@ -41,60 +35,56 @@ namespace blog.SetRepositories.Repositories
                 CreatedAt = DateTime.UtcNow
             };
 
-            var result = await _context.FollowsEntities.AddAsync(follow); 
+            var result = await _context.FollowsEntities.AddAsync(follow);
             await _context.SaveChangesAsync();
             return result.Entity;
         }
 
-        public async Task UnfollowAsync(ApplicationUser follower, ApplicationUser followed) 
+        public async Task<FollowEntity?> GetAsync(string followerId, string followedId)
         {
-            if (follower == null || followed == null)
-            {
-                throw new ResponseException("Invalid follower or followed user.", 400);
-            }
-            
             FollowEntity? follow = await _context.FollowsEntities
-                .FirstOrDefaultAsync(f => f.FollowerId == follower.Id && f.FollowedId == followed.Id);
+                .FirstOrDefaultAsync(f => f.FollowerId == followerId && f.FollowedId == followedId);
 
-            if (follow is null) {
-                throw new ResponseException($"You are not following user: {followed.UserName ?? followed.Id}.", 404); 
+            if (follow is null)
+            {
+                return null;
             }
 
-            _context.FollowsEntities.Remove(follow); 
+            return follow;
+        }
+
+        public async Task UnfollowAsync(FollowEntity follow)
+        { 
+            _context.FollowsEntities.Remove(follow);
             await _context.SaveChangesAsync();
         }
-        
-        public async Task<PaginatedList<FollowEntity>> GetFollowingAsync(ApplicationUser follower, int pageNumber, int pageSize, bool includeRelations = true) 
+
+        public async Task<PaginatedList<FollowEntity>> GetFollowingAsync(ApplicationUser follower, int pageNumber, int pageSize, bool includeRelations = true)
         {
             if (follower == null)
             {
                 throw new ResponseException("Follower user is required.", 400);
             }
 
-            IQueryable<FollowEntity> query = _context.FollowsEntities 
+            IQueryable<FollowEntity> query = _context.FollowsEntities
                 .AsNoTracking()
                 .Where(f => f.FollowerId == follower.Id)
-                .OrderBy(f => f.CreatedAt); 
+                .OrderBy(f => f.CreatedAt);
 
             if (includeRelations)
             {
-                query = query.Include(f => f.Followed);   
+                query = query.Include(f => f.Followed);
             }
 
             return await PaginatedList<FollowEntity>.CreateAsync(query, pageNumber, pageSize);
         }
 
-        public async Task<PaginatedList<FollowEntity>> GetFollowersAsync(ApplicationUser followed, int pageNumber, int pageSize, bool includeRelations = true) 
+        public async Task<PaginatedList<FollowEntity>> GetFollowersAsync(ApplicationUser followed, int pageNumber, int pageSize, bool includeRelations = true)
         {
-            if (followed == null)
-            {
-                throw new ResponseException("Followed user is required.", 400);
-            }
-
-            IQueryable<FollowEntity> query = _context.FollowsEntities 
+            IQueryable<FollowEntity> query = _context.FollowsEntities
                 .AsNoTracking()
                 .Where(f => f.FollowedId == followed.Id)
-                .OrderBy(f => f.CreatedAt); 
+                .OrderBy(f => f.CreatedAt);
 
             if (includeRelations)
             {
@@ -103,26 +93,15 @@ namespace blog.SetRepositories.Repositories
 
             return await PaginatedList<FollowEntity>.CreateAsync(query, pageNumber, pageSize);
         }
-        
-        public async Task<FollowEntity> ChangeStatusReceiveNotifications(string? followerId, string? followedId)
+
+        public async Task<FollowEntity> ChangeStatusReceiveNotifications(FollowEntity follow)
         {
-            if(string.IsNullOrEmpty(followerId) || string.IsNullOrEmpty(followedId)) 
-                throw new ResponseException("Ids are required", 400);
-
-            FollowEntity? follow = await _context.FollowsEntities.AsNoTracking()
-                .FirstOrDefaultAsync(f => f.FollowerId == followerId && f.FollowedId == followedId);
-
-            if (follow is null)
-                throw new ResponseException("Error the change status.", 404);
-
             follow.ReceiveNotifications = !follow.ReceiveNotifications;
 
             _context.Entry(follow).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return follow;
         }
-
-        
 
     }
 }
