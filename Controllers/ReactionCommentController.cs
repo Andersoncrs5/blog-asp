@@ -226,7 +226,6 @@ namespace blog.Controllers
             }
 
             ApplicationUser? user = await _uow.UserRepository.Get(userId);
-
             if (user == null)
             {
                 return NotFound(new ResponseBody<string>
@@ -240,7 +239,6 @@ namespace blog.Controllers
             }
 
             CommentEntity? comment = await _uow.CommentRepository.Get(commentId);
-
             if (comment == null)
             {
                 return NotFound(new ResponseBody<string>

@@ -5,6 +5,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using blog.DTOs.Notification;
 using blog.entities;
+using blog.utils.Filters.FiltersDTO;
+using blog.utils.Filters.FiltersQuerys;
 using blog.utils.Responses;
 using Blog.entities;
 using Blog.SetUnitOfWork;
@@ -191,7 +193,6 @@ namespace blog.Controllers
             }
 
             ApplicationUser? postAuthor = await _uow.UserRepository.Get(postAuthorId);
-
             if (postAuthor == null)
             {
                 return NotFound(new ResponseBody<string>
@@ -205,7 +206,6 @@ namespace blog.Controllers
             }
 
             PostEntity? newPost = await _uow.PostRepository.Get(postId);
-
             if (newPost == null)
             {
                 return NotFound(new ResponseBody<string>
@@ -244,7 +244,7 @@ namespace blog.Controllers
 
         [HttpGet("my-notifications")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetMyNotifications([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] bool? isRead = null)
+        public async Task<IActionResult> GetMyNotifications([FromQuery] NotificationFilter filter)
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             if (string.IsNullOrWhiteSpace(userId))
@@ -259,13 +259,16 @@ namespace blog.Controllers
                 });
             }
 
-            PaginatedList<NotificationEntity> result = await _uow.NotificationRepository.GetUserNotificationsPaginatedAsync(
-                userId, pageNumber, pageSize, isRead);
+            IQueryable<NotificationEntity> query = _uow.NotificationRepository.GetUserNotifications(userId);
+
+            IQueryable<NotificationEntity> queryWithFilter = NotificationQueryFilter.ApplyFilters(query, filter);
+
+            PaginatedList<NotificationEntity> result = await PaginatedList<NotificationEntity>.CreateAsync(queryWithFilter, filter.PageNumber, filter.PageSize);
 
             return Ok(new ResponseBody<PaginatedList<NotificationEntity>>
             {
                 Status = true,
-                Message = "Notifications found",
+                Message = "All Notifications",
                 Code = 200,
                 Body = result,
                 Datetime = DateTimeOffset.Now

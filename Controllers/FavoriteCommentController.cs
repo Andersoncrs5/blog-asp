@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using blog.utils.Filters.FiltersDTO;
+using blog.utils.Filters.FiltersQuerys;
 using blog.utils.Responses;
 using Blog.entities;
 using Blog.SetUnitOfWork;
@@ -186,7 +188,7 @@ namespace blog.Controllers
 
         [HttpGet("get-all-user")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfUserPaginated([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllOfUserPaginated([FromQuery] FavoriteCommentFilter filter)
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             if (string.IsNullOrWhiteSpace(userId))
@@ -214,12 +216,16 @@ namespace blog.Controllers
                 });
             }
 
-            PaginatedList<FavoriteCommentEntity> result = await _uow.FavoriteCommentRepository.GetAllOfUserPaginated(user, pageNumber, pageSize);
+            IQueryable<FavoriteCommentEntity> query = _uow.FavoriteCommentRepository.GetAllOfUser(user);
+
+            IQueryable<FavoriteCommentEntity> queryFiltered = FavoriteCommentQueryFilter.ApplyFilters(query, filter);
+
+            PaginatedList<FavoriteCommentEntity> result = await PaginatedList<FavoriteCommentEntity>.CreateAsync(queryFiltered, filter.PageNumber, filter.PageSize);
 
             return Ok(new ResponseBody<PaginatedList<FavoriteCommentEntity>>
             {
                 Status = true,
-                Message = "Favorite Comments found",
+                Message = "All Favorite Comments",
                 Code = 200,
                 Body = result,
                 Datetime = DateTimeOffset.Now
@@ -228,7 +234,7 @@ namespace blog.Controllers
 
         [HttpGet("{userId:required}/get-all-user")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfAnotherUserPaginated(string userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllOfAnotherUserPaginated(string userId, [FromQuery] FavoriteCommentFilter filter)
         {
             if (string.IsNullOrWhiteSpace(userId))
             {
@@ -243,7 +249,6 @@ namespace blog.Controllers
             }
 
             ApplicationUser? user = await _uow.UserRepository.Get(userId);
-
             if (user == null)
             {
                 return NotFound(new ResponseBody<string>
@@ -256,12 +261,16 @@ namespace blog.Controllers
                 });
             }
 
-            PaginatedList<FavoriteCommentEntity> result = await _uow.FavoriteCommentRepository.GetAllOfUserPaginated(user, pageNumber, pageSize);
+            IQueryable<FavoriteCommentEntity> query = _uow.FavoriteCommentRepository.GetAllOfUser(user);
+
+            IQueryable<FavoriteCommentEntity> queryFiltered = FavoriteCommentQueryFilter.ApplyFilters(query, filter);
+
+            PaginatedList<FavoriteCommentEntity> result = await PaginatedList<FavoriteCommentEntity>.CreateAsync(queryFiltered, filter.PageNumber, filter.PageSize);
 
             return Ok(new ResponseBody<PaginatedList<FavoriteCommentEntity>>
             {
                 Status = true,
-                Message = "Favorite Comments found",
+                Message = "All Favorite Comments",
                 Code = 200,
                 Body = result,
                 Datetime = DateTimeOffset.Now
@@ -270,10 +279,9 @@ namespace blog.Controllers
 
         [HttpGet("{Id:required}/get-all-comment")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfCommentPaginated(ulong Id, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllOfCommentPaginated(ulong Id, [FromQuery] FavoriteCommentFilter filter)
         {
             CommentEntity? comment = await _uow.CommentRepository.Get(Id);
-
             if (comment == null)
             {
                 return NotFound(new ResponseBody<string>
@@ -286,9 +294,20 @@ namespace blog.Controllers
                 });
             }
 
-            PaginatedList<FavoriteCommentEntity> result = await _uow.FavoriteCommentRepository.GetAllOfCommentPaginated(comment, pageNumber, pageSize);
+            IQueryable<FavoriteCommentEntity> query = _uow.FavoriteCommentRepository.GetAllOfComment(comment);
 
-            return Ok(result);
+            IQueryable<FavoriteCommentEntity> queryFiltered = FavoriteCommentQueryFilter.ApplyFilters(query, filter);
+
+            PaginatedList<FavoriteCommentEntity> result = await PaginatedList<FavoriteCommentEntity>.CreateAsync(queryFiltered, filter.PageNumber, filter.PageSize);
+
+            return Ok(new ResponseBody<PaginatedList<FavoriteCommentEntity>>
+            {
+                Status = true,
+                Message = "All Favorite Comments",
+                Code = 200,
+                Body = result,
+                Datetime = DateTimeOffset.Now
+            });
         }
 
         [HttpGet("{Id:required}/exists")]

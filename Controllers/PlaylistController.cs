@@ -324,7 +324,6 @@ namespace blog.Controllers
             }
 
             ApplicationUser? user = await _uow.UserRepository.Get(userId);
-
             if (user == null)
             {
                 return NotFound(new ResponseBody<string>

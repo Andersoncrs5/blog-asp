@@ -239,9 +239,9 @@ namespace Blog.Controllers
             });
         }
 
-        [HttpGet("get-all-user-paginated/{canFilter:bool}")] 
+        [HttpGet("get-all-user-paginated")] 
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfUserPaginated([FromQuery] PostFilterDTO filter, bool canFilter = false)
+        public async Task<IActionResult> GetAllOfUserPaginated([FromQuery] PostFilterDTO filter)
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             if (string.IsNullOrWhiteSpace(userId)) {
@@ -270,7 +270,7 @@ namespace Blog.Controllers
 
             IQueryable<PostEntity> query = _uow.PostRepository.GetAllOfUser(user, filter.IsActived);
 
-            if (canFilter == true){query = PostQueryFilter.ApplyFilters(query, filter);}
+            query = PostQueryFilter.ApplyFilters(query, filter);
 
             PaginatedList<PostEntity> result = await PaginatedList<PostEntity>.CreateAsync(query, filter.PageNumber, filter.PageSize);            
             
@@ -286,7 +286,7 @@ namespace Blog.Controllers
 
         [HttpGet("{userId:required}/get-all-user-paginated")] 
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfAnotherUserPaginated(string userId, [FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllOfAnotherUserPaginated(string userId, [FromQuery] PostFilterDTO filter)
         { 
             if (string.IsNullOrWhiteSpace(userId)) {
                 return Unauthorized(new ResponseBody<string>
@@ -312,8 +312,12 @@ namespace Blog.Controllers
                 });
             }
      
-            IQueryable<PostEntity> query = _uow.PostRepository.GetAllOfUser(user);
-            PaginatedList<PostEntity> result = await PaginatedList<PostEntity>.CreateAsync(query, pageNumber, pageSize);            
+            IQueryable<PostEntity> query = _uow.PostRepository.GetAllOfUser(user, filter.IsActived);
+
+            query = PostQueryFilter.ApplyFilters(query, filter);
+
+            PaginatedList<PostEntity> result = await PaginatedList<PostEntity>.CreateAsync(query, filter.PageNumber, filter.PageSize);            
+            
             
             return Ok(new ResponseBody<PaginatedList<PostEntity>>
             {
@@ -325,9 +329,9 @@ namespace Blog.Controllers
             });
         }
         
-        [HttpGet("get-all-to-me-paginated/{canFilter:bool?}")] 
+        [HttpGet("get-all-to-me-paginated")] 
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllToMePaginated([FromQuery] PostFilterDTO filter, bool canFilter = false)
+        public async Task<IActionResult> GetAllToMePaginated([FromQuery] PostFilterDTO filter)
         { 
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
             if (string.IsNullOrWhiteSpace(userId)) {
@@ -342,7 +346,6 @@ namespace Blog.Controllers
             }
 
             ApplicationUser? user = await _uow.UserRepository.Get(userId);
-
             if (user == null) 
             {
                 return NotFound(new ResponseBody<string>
@@ -357,7 +360,7 @@ namespace Blog.Controllers
 
             IQueryable<PostEntity> query = await _uow.PostRepository.GetAllToMe(user);
 
-            if (canFilter == true){query = PostQueryFilter.ApplyFilters(query, filter);}
+            query = PostQueryFilter.ApplyFilters(query, filter);
 
             PaginatedList<PostEntity> result = await PaginatedList<PostEntity>.CreateAsync(query, filter.PageNumber, filter.PageSize);   
             
@@ -481,25 +484,13 @@ namespace Blog.Controllers
         public async Task<IActionResult> ChangeStatusActive(long Id)
         {
             string? userId = User.FindFirst(ClaimTypes.Sid)?.Value;
-            if (string.IsNullOrWhiteSpace(userId)) {
+            if (string.IsNullOrWhiteSpace(userId)) 
+            {
                 return Unauthorized(new ResponseBody<string>
                 {
                     Body = null,
                     Code = 401,
                     Message = "You are not authorizetion",
-                    Status = false,
-                    Datetime = DateTimeOffset.Now
-                });
-            }
-
-            ApplicationUser? user = await _uow.UserRepository.Get(userId);
-            if (user == null) 
-            {
-                return NotFound(new ResponseBody<string>
-                {
-                    Body = null,
-                    Code = 404,
-                    Message = "User not found",
                     Status = false,
                     Datetime = DateTimeOffset.Now
                 });
@@ -517,6 +508,19 @@ namespace Blog.Controllers
                 });
             }
 
+            ApplicationUser? user = await _uow.UserRepository.Get(userId);
+            if (user == null) 
+            {
+                return NotFound(new ResponseBody<string>
+                {
+                    Body = null,
+                    Code = 404,
+                    Message = "User not found",
+                    Status = false,
+                    Datetime = DateTimeOffset.Now
+                });
+            }
+            
             PostEntity? post = await _uow.PostRepository.Get(Id);
             if (post == null) 
             {

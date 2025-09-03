@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using blog.utils.Filters.FiltersDTO;
+using blog.utils.Filters.FiltersQuerys;
 using blog.utils.Responses;
 using Blog.DTOs.PlaylistItem;
 using Blog.entities;
@@ -134,7 +136,7 @@ namespace blog.Controllers
 
         [HttpGet("{playId:required}")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfPlaylistPaginated(ulong playId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllOfPlaylistPaginated(ulong playId, [FromQuery] PlaylistItemFilter filter)
         {
             PlaylistEntity? play = await _uow.PlaylistRepository.Get(playId);
             if (play == null)
@@ -149,7 +151,11 @@ namespace blog.Controllers
                 });
             }
 
-            PaginatedList<PlaylistItemEntity> result = await _uow.PlaylistItemRepository.GetAllOfPlaylistPaginated(play, pageNumber, pageSize);
+            IQueryable<PlaylistItemEntity> query = _uow.PlaylistItemRepository.GetAllOfPlaylist(play);
+
+            query = PlaylistItemQueryFilter.ApplyFilters(query, filter);
+
+            PaginatedList<PlaylistItemEntity> result = await PaginatedList<PlaylistItemEntity>.CreateAsync(query, filter.PageNumber, filter.PageSize);
 
             return Ok(new ResponseBody<PaginatedList<PlaylistItemEntity>>
             {

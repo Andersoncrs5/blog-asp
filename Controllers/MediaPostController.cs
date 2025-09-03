@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using blog.utils.Filters.FiltersDTO;
+using blog.utils.Filters.FiltersQuerys;
 using blog.utils.Responses;
 using Blog.DTOs.Media;
 using Blog.entities;
@@ -115,7 +117,7 @@ namespace blog.Controllers
 
         [HttpGet("{postId:required}/get-all-post")]
         [EnableRateLimiting("SlidingWindowLimiterPolicy")]
-        public async Task<IActionResult> GetAllOfPost(long postId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllOfPost(long postId, [FromQuery] MediaPostFilter filter)
         {
             if (postId <= 0)
             {
@@ -130,7 +132,6 @@ namespace blog.Controllers
             }
 
             PostEntity? post = await _uow.PostRepository.Get(postId);
-
             if (post == null)
             {
                 return NotFound(new ResponseBody<string>
@@ -143,12 +144,16 @@ namespace blog.Controllers
                 });
             }
 
-            PaginatedList<MediaPostEntity> result = await _uow.MediaPostRepository.GetAllOfPostPaginatedListAsync(post, pageNumber, pageSize);
+            IQueryable<MediaPostEntity> query = _uow.MediaPostRepository.GetAllOfPost(post);
+
+            IQueryable<MediaPostEntity> queryWitFilters = MediaPostQueryFilter.ApplyFilters(query, filter);
+
+            PaginatedList<MediaPostEntity> result = await PaginatedList<MediaPostEntity>.CreateAsync(queryWitFilters, filter.PageNumber, filter.PageSize);
             
             return Ok(new ResponseBody<PaginatedList<MediaPostEntity>>
             {
                 Status = true,
-                Message = "Medias found",
+                Message = "All Medias",
                 Code = 200,
                 Body = result,
                 Datetime = DateTimeOffset.Now
@@ -174,8 +179,7 @@ namespace blog.Controllers
                 });
             }
 
-            int amount = await _uow.MediaPostRepository.CheckAmountMediaByPost(postId);
-            
+            int amount = await _uow.MediaPostRepository.CheckAmountMediaByPost(postId);      
             if (amount > 10) 
             {
                 return BadRequest(new ResponseBody<string>
@@ -189,7 +193,6 @@ namespace blog.Controllers
             }
             
             PostEntity? post = await _uow.PostRepository.Get(postId);
-
             if (post == null)
             {
                 return NotFound(new ResponseBody<string>
