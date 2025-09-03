@@ -115,12 +115,6 @@ namespace Blog.utils.Filters.FiltersQuerys
             return query;
         }
 
-        public static IQueryable<PostEntity> ApplyPagination(
-            this IQueryable<PostEntity> query, int pageNumber, int pageSize)
-        {
-            return query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-        }
-
         public static IQueryable<PostEntity> ApplySorting(
             this IQueryable<PostEntity> query, string? sortBy, bool ascending)
         {
