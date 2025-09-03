@@ -133,23 +133,14 @@ namespace blog.SetRepositories.Repositories
             return notificationsToUpdate.Count;
         }
 
-        public async Task<PaginatedList<NotificationEntity>> GetUserNotificationsPaginatedAsync(string? userId, int pageNumber, int pageSize, bool? isRead = null)
+        public IQueryable<NotificationEntity> GetUserNotifications(string? userId)
         {
             if (string.IsNullOrEmpty(userId))
                 throw new ArgumentNullException(nameof(userId));
 
-            IQueryable<NotificationEntity> query = _context.NotificationEntities
+            return _context.NotificationEntities
                 .AsNoTracking()
                 .Where(n => n.ApplicationUserId == userId);
-
-            if (isRead.HasValue)
-            {
-                query = query.Where(n => n.IsRead == isRead.Value);
-            }
-
-            query = query.OrderByDescending(n => n.CreatedAt);
-
-            return await PaginatedList<NotificationEntity>.CreateAsync(query, pageNumber, pageSize);
         }
 
         public async Task<int> GetUnreadNotificationsCountAsync(string? userId)

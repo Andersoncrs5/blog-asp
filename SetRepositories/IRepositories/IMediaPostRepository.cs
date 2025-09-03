@@ -13,7 +13,7 @@ namespace Blog.SetRepositories.IRepositories
         Task<MediaPostEntity?> GetAsync(ulong Id);
         Task<int> CheckAmountMediaByPost(long postId);
         Task DeleteAsync(MediaPostEntity media);
-        Task<PaginatedList<MediaPostEntity>> GetAllOfPostPaginatedListAsync(PostEntity post, int pageNumber, int pageSize);
+        IQueryable<MediaPostEntity> GetAllOfPost(PostEntity post);
         Task<MediaPostEntity> CreateAsync(PostEntity post, CreateMediaDTO dto);
         Task<MediaPostEntity> UpdateAsync(MediaPostEntity media, UpdateMediaDTO dto);
     }

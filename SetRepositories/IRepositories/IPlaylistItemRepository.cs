@@ -13,7 +13,7 @@ namespace Blog.SetRepositories.IRepositories
         Task RemovePostFromPlaylist(PlaylistItemEntity playlistItem);
         Task<bool> Exists(ulong playlistId, long postId);
         Task<PlaylistItemEntity?> Get(ulong Id);
-        Task<PaginatedList<PlaylistItemEntity>> GetAllOfPlaylistPaginated(PlaylistEntity playlist, int pageNumber, int pageSize);
+        IQueryable<PlaylistItemEntity> GetAllOfPlaylist(PlaylistEntity playlist);
         Task<PlaylistItemEntity> UpdateOrder(PlaylistItemEntity playlistItem, int newOrder);
     }
 }

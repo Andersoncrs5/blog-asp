@@ -30,24 +30,24 @@ namespace Blog.SetRepositories.Repositories
             return favorite;
         }
 
-        public async Task<PaginatedList<FavoriteCommentEntity>> GetAllOfUserPaginated(ApplicationUser user, int pageNumber, int pageSize)
+        public IQueryable<FavoriteCommentEntity> GetAllOfUser(ApplicationUser user)
         {
             IQueryable<FavoriteCommentEntity> query = _context.FavoriteCommentEntities
                 .Include(f => f.ApplicationUser)
                 .Include(f => f.Comment)
                 .AsNoTracking().Where(f => f.ApplicationUserId == user.Id);
 
-            return await PaginatedList<FavoriteCommentEntity>.CreateAsync(query, pageNumber, pageSize);
+            return query;
         }
 
-        public async Task<PaginatedList<FavoriteCommentEntity>> GetAllOfCommentPaginated(CommentEntity comment, int pageNumber, int pageSize)
+        public IQueryable<FavoriteCommentEntity> GetAllOfComment(CommentEntity comment)
         {
             IQueryable<FavoriteCommentEntity> query = _context.FavoriteCommentEntities
                 .Include(f => f.ApplicationUser)
                 .Include(f => f.Comment)
                 .AsNoTracking().Where(f => f.CommentId == comment.Id);
 
-            return await PaginatedList<FavoriteCommentEntity>.CreateAsync(query, pageNumber, pageSize);
+            return query;
         }
 
         public async Task<bool> CheckExistsCommentWithFavorite(string userId, ulong commentId)

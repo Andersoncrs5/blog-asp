@@ -62,7 +62,7 @@ namespace Blog.SetRepositories.Repositories
             return playlistItem;
         }
 
-        public async Task<PaginatedList<PlaylistItemEntity>> GetAllOfPlaylistPaginated(PlaylistEntity playlist, int pageNumber, int pageSize)
+        public IQueryable<PlaylistItemEntity> GetAllOfPlaylist(PlaylistEntity playlist)
         {
             IQueryable<PlaylistItemEntity> query = _context.PlaylistItemEntities.AsNoTracking()
                 .Include(pi => pi.Post) 
@@ -70,7 +70,7 @@ namespace Blog.SetRepositories.Repositories
                 .OrderBy(pi => pi.Order ?? long.MaxValue)
                 .ThenBy(pi => pi.CreatedAt);
 
-            return await PaginatedList<PlaylistItemEntity>.CreateAsync(query, pageNumber, pageSize);
+            return query;
         }
 
         public async Task<PlaylistItemEntity> UpdateOrder(PlaylistItemEntity playlistItem, int newOrder)
